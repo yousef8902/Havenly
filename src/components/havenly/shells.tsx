@@ -8,10 +8,16 @@ import { SiteFooter } from "./site-footer";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-export function GuestShell({ children }: { children: ReactNode }) {
+export function GuestShell({
+  children,
+  transparentHeader = false,
+}: {
+  children: ReactNode;
+  transparentHeader?: boolean;
+}) {
   return (
     <div className="flex min-h-screen flex-col">
-      <SiteHeader />
+      <SiteHeader transparent={transparentHeader} />
       <main className="flex-1 pb-20 md:pb-0">{children}</main>
       <SiteFooter />
       <MobileTabBar />

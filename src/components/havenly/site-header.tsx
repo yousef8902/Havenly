@@ -20,11 +20,17 @@ const guestLinks = [
   { to: "/favorites", label: "Favorites" },
 ] as const;
 
-export function SiteHeader() {
+export function SiteHeader({ transparent = false }: { transparent?: boolean }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
+    <header
+      className={
+        transparent
+          ? "absolute inset-x-0 top-0 z-40 text-primary-foreground"
+          : "sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur"
+      }
+    >
       <div className="container-page flex h-16 items-center justify-between gap-4">
         <Logo />
 
@@ -33,8 +39,12 @@ export function SiteHeader() {
             <Link
               key={l.to}
               to={l.to}
-              activeProps={{ className: "bg-secondary text-foreground" }}
-              className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              activeProps={{ className: transparent ? "opacity-100" : "bg-secondary text-foreground" }}
+              className={
+                transparent
+                  ? "rounded-full px-4 py-2 text-sm font-medium opacity-80 transition-opacity hover:opacity-100"
+                  : "rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              }
             >
               {l.label}
             </Link>
@@ -42,13 +52,28 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" className="hidden lg:inline-flex">
-            <Link to="/host">Become a host</Link>
+          <Button
+            asChild
+            variant="ghost"
+            className={
+              transparent
+                ? "hidden rounded-full text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground lg:inline-flex"
+                : "hidden rounded-full lg:inline-flex"
+            }
+          >
+            <Link to="/host">Become a Host</Link>
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="hidden h-11 gap-2 rounded-full pl-3 pr-2 md:inline-flex">
+              <Button
+                variant="outline"
+                className={
+                  transparent
+                    ? "hidden h-11 gap-2 rounded-full border-primary-foreground/40 bg-transparent pl-3 pr-2 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground md:inline-flex"
+                    : "hidden h-11 gap-2 rounded-full pl-3 pr-2 md:inline-flex"
+                }
+              >
                 <UserRound className="size-4" />
                 <Avatar className="size-7">
                   <AvatarFallback className="bg-primary text-xs text-primary-foreground">NR</AvatarFallback>
@@ -82,7 +107,16 @@ export function SiteHeader() {
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="size-11 md:hidden" aria-label="Open menu">
+              <Button
+                variant="outline"
+                size="icon"
+                className={
+                  transparent
+                    ? "size-11 border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground md:hidden"
+                    : "size-11 md:hidden"
+                }
+                aria-label="Open menu"
+              >
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>
