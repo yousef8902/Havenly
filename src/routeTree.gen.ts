@@ -15,6 +15,8 @@ import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminActivityRouteImport } from './routes/admin.activity'
 import { Route as HostIndexRouteImport } from './routes/host.index'
 import { Route as HostBookingsRouteImport } from './routes/host.bookings'
 import { Route as PropertyPropertyIdRouteImport } from './routes/property.$propertyId'
@@ -50,6 +52,16 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminActivityRoute = AdminActivityRouteImport.update({
+  id: '/admin/activity',
+  path: '/admin/activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HostIndexRoute = HostIndexRouteImport.update({
   id: '/host/',
   path: '/host/',
@@ -78,8 +90,10 @@ export interface FileRoutesByFullPath {
   '/favorites': typeof FavoritesRoute
   '/reviews': typeof ReviewsRoute
   '/search': typeof SearchRoute
+  '/admin/activity': typeof AdminActivityRoute
   '/host/bookings': typeof HostBookingsRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/host/': typeof HostIndexRoute
   '/host/properties/new': typeof HostPropertiesNewRoute
 }
@@ -90,8 +104,10 @@ export interface FileRoutesByTo {
   '/favorites': typeof FavoritesRoute
   '/reviews': typeof ReviewsRoute
   '/search': typeof SearchRoute
+  '/admin/activity': typeof AdminActivityRoute
   '/host/bookings': typeof HostBookingsRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
+  '/admin': typeof AdminIndexRoute
   '/host': typeof HostIndexRoute
   '/host/properties/new': typeof HostPropertiesNewRoute
 }
@@ -103,8 +119,10 @@ export interface FileRoutesById {
   '/favorites': typeof FavoritesRoute
   '/reviews': typeof ReviewsRoute
   '/search': typeof SearchRoute
+  '/admin/activity': typeof AdminActivityRoute
   '/host/bookings': typeof HostBookingsRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/host/': typeof HostIndexRoute
   '/host/properties/new': typeof HostPropertiesNewRoute
 }
@@ -117,8 +135,10 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/reviews'
     | '/search'
+    | '/admin/activity'
     | '/host/bookings'
     | '/property/$propertyId'
+    | '/admin/'
     | '/host/'
     | '/host/properties/new'
   fileRoutesByTo: FileRoutesByTo
@@ -129,8 +149,10 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/reviews'
     | '/search'
+    | '/admin/activity'
     | '/host/bookings'
     | '/property/$propertyId'
+    | '/admin'
     | '/host'
     | '/host/properties/new'
   id:
@@ -141,8 +163,10 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/reviews'
     | '/search'
+    | '/admin/activity'
     | '/host/bookings'
     | '/property/$propertyId'
+    | '/admin/'
     | '/host/'
     | '/host/properties/new'
   fileRoutesById: FileRoutesById
@@ -154,8 +178,10 @@ export interface RootRouteChildren {
   FavoritesRoute: typeof FavoritesRoute
   ReviewsRoute: typeof ReviewsRoute
   SearchRoute: typeof SearchRoute
+  AdminActivityRoute: typeof AdminActivityRoute
   HostBookingsRoute: typeof HostBookingsRoute
   PropertyPropertyIdRoute: typeof PropertyPropertyIdRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   HostIndexRoute: typeof HostIndexRoute
   HostPropertiesNewRoute: typeof HostPropertiesNewRoute
 }
@@ -204,6 +230,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/activity': {
+      id: '/admin/activity'
+      path: '/admin/activity'
+      fullPath: '/admin/activity'
+      preLoaderRoute: typeof AdminActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/host/': {
       id: '/host/'
       path: '/host'
@@ -242,8 +282,10 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritesRoute: FavoritesRoute,
   ReviewsRoute: ReviewsRoute,
   SearchRoute: SearchRoute,
+  AdminActivityRoute: AdminActivityRoute,
   HostBookingsRoute: HostBookingsRoute,
   PropertyPropertyIdRoute: PropertyPropertyIdRoute,
+  AdminIndexRoute: AdminIndexRoute,
   HostIndexRoute: HostIndexRoute,
   HostPropertiesNewRoute: HostPropertiesNewRoute,
 }

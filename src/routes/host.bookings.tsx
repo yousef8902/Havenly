@@ -33,7 +33,7 @@ const tabs: { key: string; label: string; match: BookingStatus[] }[] = [
   { key: "closed", label: "Cancelled", match: ["cancelled", "rejected"] },
 ];
 
-function BookingRow({ b, onAction }: { b: Booking; onAction?: (s: BookingStatus) => void }) {
+function BookingRow({ b, onAction }: { b: Booking; onAction?: ((s: BookingStatus) => void) | undefined }) {
   const property = getProperty(b.propertyId);
   return (
     <li className="rounded-2xl border border-border bg-card p-5">

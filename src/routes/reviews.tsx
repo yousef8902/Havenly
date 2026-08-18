@@ -36,8 +36,14 @@ function ReviewsPage() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!bookingId) return toast.error("Choose a stay to review.");
-    if (body.trim().length < 20) return toast.error("Please write at least 20 characters.");
+    if (!bookingId) {
+      toast.error("Choose a stay to review.");
+      return;
+    }
+    if (body.trim().length < 20) {
+      toast.error("Please write at least 20 characters.");
+      return;
+    }
     setWritten((w) => [...w, bookingId]);
     setBody("");
     toast.success("Review published — thank you!");
