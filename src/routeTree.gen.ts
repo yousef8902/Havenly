@@ -15,6 +15,8 @@ import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as HostIndexRouteImport } from './routes/host.index'
+import { Route as HostBookingsRouteImport } from './routes/host.bookings'
 import { Route as PropertyPropertyIdRouteImport } from './routes/property.$propertyId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +49,16 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HostIndexRoute = HostIndexRouteImport.update({
+  id: '/host/',
+  path: '/host/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HostBookingsRoute = HostBookingsRouteImport.update({
+  id: '/host/bookings',
+  path: '/host/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PropertyPropertyIdRoute = PropertyPropertyIdRouteImport.update({
   id: '/property/$propertyId',
   path: '/property/$propertyId',
@@ -60,7 +72,9 @@ export interface FileRoutesByFullPath {
   '/favorites': typeof FavoritesRoute
   '/reviews': typeof ReviewsRoute
   '/search': typeof SearchRoute
+  '/host/bookings': typeof HostBookingsRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
+  '/host/': typeof HostIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -69,7 +83,9 @@ export interface FileRoutesByTo {
   '/favorites': typeof FavoritesRoute
   '/reviews': typeof ReviewsRoute
   '/search': typeof SearchRoute
+  '/host/bookings': typeof HostBookingsRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
+  '/host': typeof HostIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -79,7 +95,9 @@ export interface FileRoutesById {
   '/favorites': typeof FavoritesRoute
   '/reviews': typeof ReviewsRoute
   '/search': typeof SearchRoute
+  '/host/bookings': typeof HostBookingsRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
+  '/host/': typeof HostIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -90,7 +108,9 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/reviews'
     | '/search'
+    | '/host/bookings'
     | '/property/$propertyId'
+    | '/host/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -99,7 +119,9 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/reviews'
     | '/search'
+    | '/host/bookings'
     | '/property/$propertyId'
+    | '/host'
   id:
     | '__root__'
     | '/'
@@ -108,7 +130,9 @@ export interface FileRouteTypes {
     | '/favorites'
     | '/reviews'
     | '/search'
+    | '/host/bookings'
     | '/property/$propertyId'
+    | '/host/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -118,7 +142,9 @@ export interface RootRouteChildren {
   FavoritesRoute: typeof FavoritesRoute
   ReviewsRoute: typeof ReviewsRoute
   SearchRoute: typeof SearchRoute
+  HostBookingsRoute: typeof HostBookingsRoute
   PropertyPropertyIdRoute: typeof PropertyPropertyIdRoute
+  HostIndexRoute: typeof HostIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -165,6 +191,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/host/': {
+      id: '/host/'
+      path: '/host'
+      fullPath: '/host/'
+      preLoaderRoute: typeof HostIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/host/bookings': {
+      id: '/host/bookings'
+      path: '/host/bookings'
+      fullPath: '/host/bookings'
+      preLoaderRoute: typeof HostBookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/property/$propertyId': {
       id: '/property/$propertyId'
       path: '/property/$propertyId'
@@ -182,7 +222,9 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritesRoute: FavoritesRoute,
   ReviewsRoute: ReviewsRoute,
   SearchRoute: SearchRoute,
+  HostBookingsRoute: HostBookingsRoute,
   PropertyPropertyIdRoute: PropertyPropertyIdRoute,
+  HostIndexRoute: HostIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
