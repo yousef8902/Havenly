@@ -18,6 +18,7 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as HostIndexRouteImport } from './routes/host.index'
 import { Route as HostBookingsRouteImport } from './routes/host.bookings'
 import { Route as PropertyPropertyIdRouteImport } from './routes/property.$propertyId'
+import { Route as HostPropertiesNewRouteImport } from './routes/host.properties.new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +65,11 @@ const PropertyPropertyIdRoute = PropertyPropertyIdRouteImport.update({
   path: '/property/$propertyId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HostPropertiesNewRoute = HostPropertiesNewRouteImport.update({
+  id: '/host/properties/new',
+  path: '/host/properties/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/host/bookings': typeof HostBookingsRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/host/': typeof HostIndexRoute
+  '/host/properties/new': typeof HostPropertiesNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/host/bookings': typeof HostBookingsRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/host': typeof HostIndexRoute
+  '/host/properties/new': typeof HostPropertiesNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/host/bookings': typeof HostBookingsRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
   '/host/': typeof HostIndexRoute
+  '/host/properties/new': typeof HostPropertiesNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/host/bookings'
     | '/property/$propertyId'
     | '/host/'
+    | '/host/properties/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/host/bookings'
     | '/property/$propertyId'
     | '/host'
+    | '/host/properties/new'
   id:
     | '__root__'
     | '/'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/host/bookings'
     | '/property/$propertyId'
     | '/host/'
+    | '/host/properties/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,6 +157,7 @@ export interface RootRouteChildren {
   HostBookingsRoute: typeof HostBookingsRoute
   PropertyPropertyIdRoute: typeof PropertyPropertyIdRoute
   HostIndexRoute: typeof HostIndexRoute
+  HostPropertiesNewRoute: typeof HostPropertiesNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -212,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PropertyPropertyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/host/properties/new': {
+      id: '/host/properties/new'
+      path: '/host/properties/new'
+      fullPath: '/host/properties/new'
+      preLoaderRoute: typeof HostPropertiesNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -225,6 +245,7 @@ const rootRouteChildren: RootRouteChildren = {
   HostBookingsRoute: HostBookingsRoute,
   PropertyPropertyIdRoute: PropertyPropertyIdRoute,
   HostIndexRoute: HostIndexRoute,
+  HostPropertiesNewRoute: HostPropertiesNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
