@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, type LinkProps } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { useState } from "react";
@@ -20,7 +20,7 @@ export function GuestShell({ children }: { children: ReactNode }) {
 }
 
 export type NavItem = {
-  to: string;
+  to: LinkProps["to"];
   label: string;
   Icon: ComponentType<{ className?: string }>;
   exact?: boolean;
@@ -33,7 +33,7 @@ function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => v
         <Link
           key={item.to}
           to={item.to}
-          activeOptions={{ exact: item.exact }}
+          activeOptions={{ exact: item.exact ?? false }}
           activeProps={{ className: "bg-sidebar-accent text-sidebar-accent-foreground font-semibold" }}
           onClick={onNavigate}
           className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
