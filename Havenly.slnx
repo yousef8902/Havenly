@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Havenly.BLL/Havenly.BLL.csproj" />
+  <Project Path="Havenly.DAL/Havenly.DAL.csproj" />
+  <Project Path="Havenly.PL/Havenly.PL.csproj" />
+</Solution>
