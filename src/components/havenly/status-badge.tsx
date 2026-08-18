@@ -16,7 +16,11 @@ const map: Record<string, Tone> = {
 
 export function StatusBadge({ status, className = "" }: { status: string; className?: string }) {
   const key = status.toLowerCase();
-  const tone = map[key] ?? map.pending;
+  const tone: Tone = map[key] ?? {
+    className: "bg-muted text-muted-foreground border-border",
+    Icon: Clock,
+    label: status,
+  };
   const Icon = tone.Icon;
   return (
     <span
