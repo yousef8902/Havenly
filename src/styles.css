@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-display: "Fraunces", Georgia, serif;
-  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-display: "DM Sans", system-ui, sans-serif;
+  --font-sans: "DM Sans", system-ui, sans-serif;
 }
 
 /*
@@ -70,24 +70,30 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-surface: var(--surface);
+  --color-primary-light: var(--primary-light);
+  --color-warm: var(--warm);
 }
 
 :root {
-  --radius: 0.875rem;
-  --background: oklch(0.988 0.005 85);
-  --foreground: oklch(0.21 0.012 70);
+  --radius: 0.75rem;
+  --background: oklch(0.985 0.003 106.4);
+  --foreground: oklch(0.217 0.004 106.7);
+  --surface: oklch(1 0 0);
+  --warm: oklch(0.957 0.012 79.8);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.012 70);
+  --card-foreground: oklch(0.217 0.004 106.7);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.012 70);
-  --primary: oklch(0.43 0.072 168);
-  --primary-foreground: oklch(0.985 0.008 95);
-  --secondary: oklch(0.955 0.012 85);
-  --secondary-foreground: oklch(0.29 0.02 70);
-  --muted: oklch(0.957 0.008 85);
-  --muted-foreground: oklch(0.49 0.015 70);
-  --accent: oklch(0.7 0.13 52);
-  --accent-foreground: oklch(0.2 0.02 60);
+  --popover-foreground: oklch(0.217 0.004 106.7);
+  --primary: oklch(0.476 0.078 162.2);
+  --primary-foreground: oklch(1 0 0);
+  --primary-light: oklch(0.952 0.013 159.9);
+  --secondary: oklch(0.951 0.004 106.5);
+  --secondary-foreground: oklch(0.29 0.006 106.7);
+  --muted: oklch(0.951 0.004 106.5);
+  --muted-foreground: oklch(0.625 0.009 106.7);
+  --accent: oklch(0.706 0.118 160.9);
+  --accent-foreground: oklch(0.217 0.004 106.7);
   --destructive: oklch(0.55 0.19 27);
   --destructive-foreground: oklch(0.985 0.005 95);
   --success: oklch(0.52 0.11 155);
@@ -96,24 +102,24 @@
   --warning-foreground: oklch(0.22 0.02 70);
   --info: oklch(0.55 0.09 240);
   --info-foreground: oklch(0.985 0.005 95);
-  --border: oklch(0.9 0.01 80);
-  --input: oklch(0.9 0.01 80);
-  --ring: oklch(0.43 0.072 168);
-  --shadow-soft: 0 1px 2px oklch(0.3 0.02 70 / 0.04), 0 8px 24px oklch(0.3 0.02 70 / 0.06);
-  --shadow-lift: 0 2px 4px oklch(0.3 0.02 70 / 0.05), 0 16px 40px oklch(0.3 0.02 70 / 0.1);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
+  --border: oklch(0.917 0.007 106.5);
+  --input: oklch(0.96 0.004 106.5);
+  --ring: oklch(0.476 0.078 162.2);
+  --shadow-soft: 0 1px 2px oklch(0.217 0.004 106.7 / 0.04), 0 8px 24px oklch(0.217 0.004 106.7 / 0.06);
+  --shadow-lift: 0 2px 4px oklch(0.217 0.004 106.7 / 0.05), 0 16px 40px oklch(0.217 0.004 106.7 / 0.1);
+  --chart-1: oklch(0.476 0.078 162.2);
+  --chart-2: oklch(0.706 0.118 160.9);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.975 0.008 85);
-  --sidebar-foreground: oklch(0.21 0.012 70);
-  --sidebar-primary: oklch(0.43 0.072 168);
-  --sidebar-primary-foreground: oklch(0.985 0.008 95);
-  --sidebar-accent: oklch(0.94 0.012 85);
-  --sidebar-accent-foreground: oklch(0.25 0.02 70);
-  --sidebar-border: oklch(0.9 0.01 80);
-  --sidebar-ring: oklch(0.43 0.072 168);
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.217 0.004 106.7);
+  --sidebar-primary: oklch(0.476 0.078 162.2);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.952 0.013 159.9);
+  --sidebar-accent-foreground: oklch(0.476 0.078 162.2);
+  --sidebar-border: oklch(0.917 0.007 106.5);
+  --sidebar-ring: oklch(0.476 0.078 162.2);
 }
 
 .dark {
@@ -167,8 +173,8 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-weight: 700;
+    letter-spacing: -0.025em;
   }
 
   :focus-visible {
@@ -188,7 +194,7 @@
 @utility container-page {
   margin-inline: auto;
   width: 100%;
-  max-width: 84rem;
+  max-width: 80rem;
   padding-inline: 1.25rem;
   @media (min-width: 1024px) {
     padding-inline: 2rem;

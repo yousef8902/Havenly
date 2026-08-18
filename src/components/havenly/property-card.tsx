@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, Users } from "lucide-react";
+import { Heart, MapPin, Users } from "lucide-react";
 import { Rating } from "./rating";
 import { StatusBadge } from "./status-badge";
 import { useAppState } from "@/lib/app-state";
@@ -8,15 +8,17 @@ import { formatMoney, type Property } from "@/lib/data";
 export function PropertyCard({
   property,
   showStatus = false,
+  badge,
 }: {
   property: Property;
   showStatus?: boolean;
+  badge?: string;
 }) {
   const { isFavorite, toggleFavorite } = useAppState();
   const saved = isFavorite(property.id);
 
   return (
-    <article className="group relative overflow-hidden rounded-2xl border border-border bg-card transition-shadow hover:shadow-lift">
+    <article className="group relative overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-lift">
       <div className="relative aspect-4/3 overflow-hidden bg-secondary">
         <img
           src={property.images[0]}
@@ -35,6 +37,11 @@ export function PropertyCard({
         >
           <Heart className={`size-5 ${saved ? "fill-destructive text-destructive" : ""}`} />
         </button>
+        {!showStatus && badge && (
+          <span className="absolute left-3 top-3 rounded-full bg-surface/95 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
+            {badge}
+          </span>
+        )}
         {showStatus && (
           <div className="absolute left-3 top-3">
             <StatusBadge status={property.status} className="bg-card/95 backdrop-blur" />
@@ -55,8 +62,9 @@ export function PropertyCard({
           </h3>
           <Rating value={property.rating} className="shrink-0 pt-0.5" />
         </div>
-        <p className="text-sm text-muted-foreground">
-          {property.neighbourhood}, {property.city} · {property.country}
+        <p className="flex items-center gap-1 text-sm text-muted-foreground">
+          <MapPin className="size-4 shrink-0" aria-hidden="true" />
+          {property.city}, {property.country}
         </p>
         <div className="flex items-center justify-between pt-1">
           <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
