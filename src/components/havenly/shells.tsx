@@ -20,7 +20,7 @@ export function GuestShell({ children }: { children: ReactNode }) {
 }
 
 export type NavItem = {
-  to: LinkProps["to"];
+  to: NonNullable<LinkProps["to"]>;
   label: string;
   Icon: ComponentType<{ className?: string }>;
   exact?: boolean;
