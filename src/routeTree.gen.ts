@@ -10,12 +10,30 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BookingConfirmedRouteImport } from './routes/booking-confirmed'
+import { Route as BookingsRouteImport } from './routes/bookings'
+import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as PropertyPropertyIdRouteImport } from './routes/property.$propertyId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookingConfirmedRoute = BookingConfirmedRouteImport.update({
+  id: '/booking-confirmed',
+  path: '/booking-confirmed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookingsRoute = BookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritesRoute = FavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -31,30 +49,61 @@ const PropertyPropertyIdRoute = PropertyPropertyIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/booking-confirmed': typeof BookingConfirmedRoute
+  '/bookings': typeof BookingsRoute
+  '/favorites': typeof FavoritesRoute
   '/search': typeof SearchRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/booking-confirmed': typeof BookingConfirmedRoute
+  '/bookings': typeof BookingsRoute
+  '/favorites': typeof FavoritesRoute
   '/search': typeof SearchRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/booking-confirmed': typeof BookingConfirmedRoute
+  '/bookings': typeof BookingsRoute
+  '/favorites': typeof FavoritesRoute
   '/search': typeof SearchRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/search' | '/property/$propertyId'
+  fullPaths:
+    | '/'
+    | '/booking-confirmed'
+    | '/bookings'
+    | '/favorites'
+    | '/search'
+    | '/property/$propertyId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/search' | '/property/$propertyId'
-  id: '__root__' | '/' | '/search' | '/property/$propertyId'
+  to:
+    | '/'
+    | '/booking-confirmed'
+    | '/bookings'
+    | '/favorites'
+    | '/search'
+    | '/property/$propertyId'
+  id:
+    | '__root__'
+    | '/'
+    | '/booking-confirmed'
+    | '/bookings'
+    | '/favorites'
+    | '/search'
+    | '/property/$propertyId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BookingConfirmedRoute: typeof BookingConfirmedRoute
+  BookingsRoute: typeof BookingsRoute
+  FavoritesRoute: typeof FavoritesRoute
   SearchRoute: typeof SearchRoute
   PropertyPropertyIdRoute: typeof PropertyPropertyIdRoute
 }
@@ -66,6 +115,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/booking-confirmed': {
+      id: '/booking-confirmed'
+      path: '/booking-confirmed'
+      fullPath: '/booking-confirmed'
+      preLoaderRoute: typeof BookingConfirmedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bookings': {
+      id: '/bookings'
+      path: '/bookings'
+      fullPath: '/bookings'
+      preLoaderRoute: typeof BookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favorites': {
+      id: '/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -87,6 +157,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BookingConfirmedRoute: BookingConfirmedRoute,
+  BookingsRoute: BookingsRoute,
+  FavoritesRoute: FavoritesRoute,
   SearchRoute: SearchRoute,
   PropertyPropertyIdRoute: PropertyPropertyIdRoute,
 }
