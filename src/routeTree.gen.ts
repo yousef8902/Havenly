@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as BookingConfirmedRouteImport } from './routes/booking-confirmed'
 import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as PropertyPropertyIdRouteImport } from './routes/property.$propertyId'
 
@@ -36,6 +37,11 @@ const FavoritesRoute = FavoritesRouteImport.update({
   path: '/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReviewsRoute = ReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/booking-confirmed': typeof BookingConfirmedRoute
   '/bookings': typeof BookingsRoute
   '/favorites': typeof FavoritesRoute
+  '/reviews': typeof ReviewsRoute
   '/search': typeof SearchRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/booking-confirmed': typeof BookingConfirmedRoute
   '/bookings': typeof BookingsRoute
   '/favorites': typeof FavoritesRoute
+  '/reviews': typeof ReviewsRoute
   '/search': typeof SearchRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/booking-confirmed': typeof BookingConfirmedRoute
   '/bookings': typeof BookingsRoute
   '/favorites': typeof FavoritesRoute
+  '/reviews': typeof ReviewsRoute
   '/search': typeof SearchRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
 }
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/booking-confirmed'
     | '/bookings'
     | '/favorites'
+    | '/reviews'
     | '/search'
     | '/property/$propertyId'
   fileRoutesByTo: FileRoutesByTo
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/booking-confirmed'
     | '/bookings'
     | '/favorites'
+    | '/reviews'
     | '/search'
     | '/property/$propertyId'
   id:
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/booking-confirmed'
     | '/bookings'
     | '/favorites'
+    | '/reviews'
     | '/search'
     | '/property/$propertyId'
   fileRoutesById: FileRoutesById
@@ -104,6 +116,7 @@ export interface RootRouteChildren {
   BookingConfirmedRoute: typeof BookingConfirmedRoute
   BookingsRoute: typeof BookingsRoute
   FavoritesRoute: typeof FavoritesRoute
+  ReviewsRoute: typeof ReviewsRoute
   SearchRoute: typeof SearchRoute
   PropertyPropertyIdRoute: typeof PropertyPropertyIdRoute
 }
@@ -138,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FavoritesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reviews': {
+      id: '/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof ReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/search': {
       id: '/search'
       path: '/search'
@@ -160,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   BookingConfirmedRoute: BookingConfirmedRoute,
   BookingsRoute: BookingsRoute,
   FavoritesRoute: FavoritesRoute,
+  ReviewsRoute: ReviewsRoute,
   SearchRoute: SearchRoute,
   PropertyPropertyIdRoute: PropertyPropertyIdRoute,
 }
