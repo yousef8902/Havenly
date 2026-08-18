@@ -10,12 +10,41 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BookingConfirmedRouteImport } from './routes/booking-confirmed'
+import { Route as BookingsRouteImport } from './routes/bookings'
+import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminActivityRouteImport } from './routes/admin.activity'
+import { Route as HostIndexRouteImport } from './routes/host.index'
+import { Route as HostBookingsRouteImport } from './routes/host.bookings'
 import { Route as PropertyPropertyIdRouteImport } from './routes/property.$propertyId'
+import { Route as HostPropertiesNewRouteImport } from './routes/host.properties.new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookingConfirmedRoute = BookingConfirmedRouteImport.update({
+  id: '/booking-confirmed',
+  path: '/booking-confirmed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookingsRoute = BookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritesRoute = FavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewsRoute = ReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -23,40 +52,138 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminActivityRoute = AdminActivityRouteImport.update({
+  id: '/admin/activity',
+  path: '/admin/activity',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HostIndexRoute = HostIndexRouteImport.update({
+  id: '/host/',
+  path: '/host/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HostBookingsRoute = HostBookingsRouteImport.update({
+  id: '/host/bookings',
+  path: '/host/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PropertyPropertyIdRoute = PropertyPropertyIdRouteImport.update({
   id: '/property/$propertyId',
   path: '/property/$propertyId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HostPropertiesNewRoute = HostPropertiesNewRouteImport.update({
+  id: '/host/properties/new',
+  path: '/host/properties/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/booking-confirmed': typeof BookingConfirmedRoute
+  '/bookings': typeof BookingsRoute
+  '/favorites': typeof FavoritesRoute
+  '/reviews': typeof ReviewsRoute
   '/search': typeof SearchRoute
+  '/admin/activity': typeof AdminActivityRoute
+  '/host/bookings': typeof HostBookingsRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/host/': typeof HostIndexRoute
+  '/host/properties/new': typeof HostPropertiesNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/booking-confirmed': typeof BookingConfirmedRoute
+  '/bookings': typeof BookingsRoute
+  '/favorites': typeof FavoritesRoute
+  '/reviews': typeof ReviewsRoute
   '/search': typeof SearchRoute
+  '/admin/activity': typeof AdminActivityRoute
+  '/host/bookings': typeof HostBookingsRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
+  '/admin': typeof AdminIndexRoute
+  '/host': typeof HostIndexRoute
+  '/host/properties/new': typeof HostPropertiesNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/booking-confirmed': typeof BookingConfirmedRoute
+  '/bookings': typeof BookingsRoute
+  '/favorites': typeof FavoritesRoute
+  '/reviews': typeof ReviewsRoute
   '/search': typeof SearchRoute
+  '/admin/activity': typeof AdminActivityRoute
+  '/host/bookings': typeof HostBookingsRoute
   '/property/$propertyId': typeof PropertyPropertyIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/host/': typeof HostIndexRoute
+  '/host/properties/new': typeof HostPropertiesNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/search' | '/property/$propertyId'
+  fullPaths:
+    | '/'
+    | '/booking-confirmed'
+    | '/bookings'
+    | '/favorites'
+    | '/reviews'
+    | '/search'
+    | '/admin/activity'
+    | '/host/bookings'
+    | '/property/$propertyId'
+    | '/admin/'
+    | '/host/'
+    | '/host/properties/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/search' | '/property/$propertyId'
-  id: '__root__' | '/' | '/search' | '/property/$propertyId'
+  to:
+    | '/'
+    | '/booking-confirmed'
+    | '/bookings'
+    | '/favorites'
+    | '/reviews'
+    | '/search'
+    | '/admin/activity'
+    | '/host/bookings'
+    | '/property/$propertyId'
+    | '/admin'
+    | '/host'
+    | '/host/properties/new'
+  id:
+    | '__root__'
+    | '/'
+    | '/booking-confirmed'
+    | '/bookings'
+    | '/favorites'
+    | '/reviews'
+    | '/search'
+    | '/admin/activity'
+    | '/host/bookings'
+    | '/property/$propertyId'
+    | '/admin/'
+    | '/host/'
+    | '/host/properties/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BookingConfirmedRoute: typeof BookingConfirmedRoute
+  BookingsRoute: typeof BookingsRoute
+  FavoritesRoute: typeof FavoritesRoute
+  ReviewsRoute: typeof ReviewsRoute
   SearchRoute: typeof SearchRoute
+  AdminActivityRoute: typeof AdminActivityRoute
+  HostBookingsRoute: typeof HostBookingsRoute
   PropertyPropertyIdRoute: typeof PropertyPropertyIdRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  HostIndexRoute: typeof HostIndexRoute
+  HostPropertiesNewRoute: typeof HostPropertiesNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,11 +195,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/booking-confirmed': {
+      id: '/booking-confirmed'
+      path: '/booking-confirmed'
+      fullPath: '/booking-confirmed'
+      preLoaderRoute: typeof BookingConfirmedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bookings': {
+      id: '/bookings'
+      path: '/bookings'
+      fullPath: '/bookings'
+      preLoaderRoute: typeof BookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favorites': {
+      id: '/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reviews': {
+      id: '/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof ReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/search': {
       id: '/search'
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/activity': {
+      id: '/admin/activity'
+      path: '/admin/activity'
+      fullPath: '/admin/activity'
+      preLoaderRoute: typeof AdminActivityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/host/': {
+      id: '/host/'
+      path: '/host'
+      fullPath: '/host/'
+      preLoaderRoute: typeof HostIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/host/bookings': {
+      id: '/host/bookings'
+      path: '/host/bookings'
+      fullPath: '/host/bookings'
+      preLoaderRoute: typeof HostBookingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/property/$propertyId': {
@@ -82,13 +265,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PropertyPropertyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/host/properties/new': {
+      id: '/host/properties/new'
+      path: '/host/properties/new'
+      fullPath: '/host/properties/new'
+      preLoaderRoute: typeof HostPropertiesNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BookingConfirmedRoute: BookingConfirmedRoute,
+  BookingsRoute: BookingsRoute,
+  FavoritesRoute: FavoritesRoute,
+  ReviewsRoute: ReviewsRoute,
   SearchRoute: SearchRoute,
+  AdminActivityRoute: AdminActivityRoute,
+  HostBookingsRoute: HostBookingsRoute,
   PropertyPropertyIdRoute: PropertyPropertyIdRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  HostIndexRoute: HostIndexRoute,
+  HostPropertiesNewRoute: HostPropertiesNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
