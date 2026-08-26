@@ -1,3 +1,8 @@
+using Havenly.BLL.Services.Abstractions;
+using Havenly.BLL.Services.Implementations;
+using Havenly.DAL.Repos.Abstractions;
+using Havenly.DAL.Repos.Implementations;
+
 namespace Havenly.PL
 {
     public class Program
@@ -8,7 +13,12 @@ namespace Havenly.PL
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            // Repositories & Unit of Work
+            builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            // Business Services
+            builder.Services.AddScoped<IBookingService, BookingService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
