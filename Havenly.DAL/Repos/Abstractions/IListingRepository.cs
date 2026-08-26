@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
 using Havenly.DAL.Entities;
+using Havenly.DAL.Enums;
+using System.Linq.Expressions;
 
 namespace Havenly.DAL.Repos.Abstractions
 {
@@ -16,5 +14,8 @@ namespace Havenly.DAL.Repos.Abstractions
         void Update(Listing entity);
         void Delete(Listing entity);
         Task<int> SaveChanges();
+        Task<bool> ApproveListing(long id);
+        Task<bool> DeclineListing(long id);
+        Task<IEnumerable<Listing>> GetByStatus(ListingStatus status);
     }
 }

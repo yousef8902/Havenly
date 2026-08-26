@@ -1,3 +1,5 @@
+using Havenly.BLL.Services.Abstractions;
+using Havenly.BLL.Services.Implementations;
 using Havenly.DAL.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,7 +30,7 @@ namespace Havenly.PL
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyImageRepository, Havenly.DAL.Repos.Implementations.PropertyImageRepository>();
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IAmenityRepository, Havenly.DAL.Repos.Implementations.AmenityRepository>();
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyAmenityRepository, Havenly.DAL.Repos.Implementations.PropertyAmenityRepository>();
- 
+            builder.Services.AddScoped<IListingServices, ListingServices>();
 
              var app = builder.Build();
 

@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
 using Havenly.DAL.Database;
 using Havenly.DAL.Entities;
+using Havenly.DAL.Enums;
 using Havenly.DAL.Repos.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Havenly.DAL.Repos.Implementations
 {
@@ -66,6 +63,54 @@ namespace Havenly.DAL.Repos.Implementations
         {
             try { return await context.SaveChangesAsync(); }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return 0; }
+        }
+
+        public async Task<bool> ApproveListing(long id)
+        {
+            try
+            {
+                var listing = await context.Listings.FindAsync(id);
+                if (listing is null)
+                {
+                    Console.WriteLine("Error: Listing not found");
+                    return false;
+                }
+                listing.Approve();
+                await context.SaveChangesAsync();
+                Console.WriteLine("info:Listing approved successfully");
+                return true;
+
+            }
+            catch (Exception ex) { Console.WriteLine("Error:" + ex.Message);return false; }
+        }
+
+        public async Task<bool> DeclineListing(long id)
+        {
+            try
+            {
+                var listing = await context.Listings.FindAsync(id);
+                if (listing is null)
+                {
+                    Console.WriteLine("Error: Listing not found");
+                    return false;
+                }
+                listing.Decline();
+                await context.SaveChangesAsync();
+                Console.WriteLine("info:Listing declined successfully");
+                return true;
+            }
+            catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return false; }
+        }
+
+        public async Task<IEnumerable<Listing>> GetByStatus(ListingStatus status)
+        {
+            try
+            {
+                var list = await context.Listings.Where(l => l.ListingStatus == status).ToListAsync();
+                Console.WriteLine("info:Listings fetched successfully");
+                return list;
+            }
+            catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return Enumerable.Empty<Listing>(); }
         }
     }
 }

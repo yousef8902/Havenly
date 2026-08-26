@@ -1,8 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Havenly.DAL.Enums;
 
 namespace Havenly.DAL.Entities;
 
@@ -25,6 +24,8 @@ public class Listing
 
     public bool IsValid { get; private set; }
 
+    public ListingStatus ListingStatus { get; private set; }
+
     public ICollection<Favorite> Favorites { get; private set; }
     public ICollection<Booking> Bookings { get; private set; }
 
@@ -34,6 +35,7 @@ public class Listing
         Description = description;
         Price = price;
         IsValid = isValid;
+        this.ListingStatus = ListingStatus.Pending;
     }
 
     public void Update(string description, decimal price)
@@ -45,5 +47,13 @@ public class Listing
     public void SetValidity(bool isValid)
     {
         IsValid = isValid;
+    }
+
+    public void Approve() { 
+    ListingStatus = ListingStatus.Approved;
+    }
+
+    public void Decline() { 
+    ListingStatus= ListingStatus.Declined;
     }
 }

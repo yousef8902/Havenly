@@ -1,6 +1,6 @@
 <Solution>
   <Project Path="Havenly.BLL/Havenly.BLL.csproj" />
+  <Project Path="Havenly.DAL.Tests/Havenly.DAL.Tests.csproj" />
   <Project Path="Havenly.DAL/Havenly.DAL.csproj" />
   <Project Path="Havenly.PL/Havenly.PL.csproj" />
-  <Project Path="TestHavenly/TestDALHavenly.csproj" Id="f88aee2f-71de-4b4a-8a05-75c7c4b443c7" />
 </Solution>
