@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+using Havenly.DAL.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -28,7 +27,7 @@ public class User
     [StringLength(50)]
     public string Role { get; private set; }
 
-    public bool IsDeleted { get; private set; }
+    public UserStatus Status { get; private set; }
 
     // Navigation Properties
     [InverseProperty("Owner")]
@@ -46,8 +45,7 @@ public class User
         PasswordHash = passwordHash;
         Email = email;
         Role = role;
-        IsDeleted = false;
-
+        Status = UserStatus.Active;
         Properties = new List<Property>();
         Bookings = new List<Booking>();
         Favorites = new List<Favorite>();
@@ -62,10 +60,19 @@ public class User
         Role = role;
     }
 
-    public void Delete()
+    public void Suspend()
     {
-        IsDeleted = true;
+        Status = UserStatus.Suspended;
     }
 
+    public void Reinstate()
+    {
+        Status = UserStatus.Active;
+    }
+
+    public void Delete()
+    {
+        Status = UserStatus.Deleted;
+    }
 
 }

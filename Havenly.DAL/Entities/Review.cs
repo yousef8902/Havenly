@@ -22,6 +22,8 @@ public class Review
 
     public string Comment { get; private set; }
 
+    public string HostResponse { get; private set; }
+
     public void Create(long reviewId, long userId, long bookingId, int rating, string comment = null)
     {
         ReviewID = reviewId;
@@ -35,5 +37,10 @@ public class Review
     {
         Rating = rating;
         Comment = comment;
+    }
+
+    public void RespondToReview(string response)
+    {
+        HostResponse = response;
     }
 }
