@@ -35,7 +35,10 @@ namespace Havenly.DAL.Repos.Implementations
 
         public async Task<IEnumerable<Property>> Find(Expression<Func<Property, bool>> predicate)
         {
-            try { var list = await context.Properties.Where(predicate).ToListAsync(); Console.WriteLine("info:Properties fetched successfully"); return list; }
+            try { 
+                var list = await context.Properties.Where(predicate).ToArrayAsync(); 
+                Console.WriteLine("info:Properties fetched successfully");
+                return list; }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return Enumerable.Empty<Property>(); }
         }
 
