@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Havenly.DAL.Database;
 
-public class HavenlyDbContext : IdentityDbContext
+public class HavenlyDbContext : IdentityDbContext<User>
 {
     public HavenlyDbContext(DbContextOptions<HavenlyDbContext> options) : base(options)
     {
     }
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    { }
+  
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         // Fix multiple cascade paths by restricting GuestUser relationship
         modelBuilder.Entity<Booking>()
             .HasOne(b => b.Guest)
