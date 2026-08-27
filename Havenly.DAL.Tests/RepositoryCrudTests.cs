@@ -31,7 +31,9 @@ namespace Havenly.DAL.Tests
 
             await repo.Add(user);
 
-            var id = user.UserID;
+            // IdentityUser uses a string Id.
+            var id = user.Id;
+
             var fetched = await repo.GetById(id);
             Assert.NotNull(fetched);
 
@@ -42,9 +44,11 @@ namespace Havenly.DAL.Tests
             Assert.Equal("Alice2", updated?.Name);
 
             repo.Delete(user);
+
             var deleted = await repo.GetById(id);
-            // User uses soft-delete: expect IsDeleted true
-            Assert.True(deleted?.IsDeleted == true);
+
+            // User uses Status instead of the old IsDeleted property.
+            Assert.Equal(Havenly.DAL.Enums.UserStatus.Deleted, deleted?.Status);
         }
 
         [Fact]
@@ -55,7 +59,14 @@ namespace Havenly.DAL.Tests
             var repo = new PropertyRepository(context);
 
             var property = new Property();
-            property.Create(ownerUserId: 1, addressId: 1, propertyName: "Prop1", description: "Desc", numberOfGuests: 2, capacity: 2, bathroomCount: 1);
+            property.Create(
+                ownerUserId: "1",
+                addressId: 1,
+                propertyName: "Prop1",
+                description: "Desc",
+                numberOfGuests: 2,
+                capacity: 2,
+                bathroomCount: 1);
 
             await repo.Add(property);
 
@@ -71,7 +82,6 @@ namespace Havenly.DAL.Tests
 
             repo.Delete(property);
             var deleted = await repo.GetById(id);
-            // Property uses soft-delete
             Assert.True(deleted?.IsDeleted == true);
         }
 
@@ -102,9 +112,6 @@ namespace Havenly.DAL.Tests
             Assert.Null(deleted);
         }
 
-        // Additional tests for Booking, Favorite, Review, Address, Payment, Bedroom, Bed, PropertyImage, Amenity, PropertyAmenity
-        // Each test follows the same pattern: create entity, Add, GetById, Update, Delete.
-
         [Fact]
         public async Task Favorite_CRUD_Works()
         {
@@ -113,9 +120,10 @@ namespace Havenly.DAL.Tests
             var repo = new FavoriteRepository(context);
 
             var fav = new Favorite();
-            fav.Create(userId: 1, listingId: 1);
+            fav.Create(userId: "1", listingId: 1);
 
             await repo.Add(fav);
+
             var id = fav.FavoriteID;
             var fetched = await repo.GetById(id);
             Assert.NotNull(fetched);
@@ -133,15 +141,22 @@ namespace Havenly.DAL.Tests
             var repo = new ReviewRepository(context);
 
             var review = new Review();
-            review.Create(reviewId: 0, userId: 1, bookingId: 1, rating: 5, comment: "good");
+            review.Create(
+                reviewId: 0,
+                userId: "1",
+                bookingId: 1,
+                rating: 5,
+                comment: "good");
 
             await repo.Add(review);
+
             var id = review.ReviewID;
             var fetched = await repo.GetById(id);
             Assert.NotNull(fetched);
 
             review.Update(4, "ok");
             repo.Update(review);
+
             var updated = await repo.GetById(id);
             Assert.Equal(4, updated?.Rating);
 
@@ -158,15 +173,23 @@ namespace Havenly.DAL.Tests
             var repo = new AddressRepository(context);
 
             var addr = new Address();
-            addr.Create(addressID: 0, country: "C", city: "City", street: "St", latitude: 0m, longitude: 0m);
+            addr.Create(
+                addressID: 0,
+                country: "C",
+                city: "City",
+                street: "St",
+                latitude: 0m,
+                longitude: 0m);
 
             await repo.Add(addr);
+
             var id = addr.AddressID;
             var fetched = await repo.GetById(id);
             Assert.NotNull(fetched);
 
             addr.Update("C2", "City2", "St2", 1m, 1m);
             repo.Update(addr);
+
             var updated = await repo.GetById(id);
             Assert.Equal("C2", updated?.Country);
 
@@ -183,15 +206,22 @@ namespace Havenly.DAL.Tests
             var repo = new PaymentRepository(context);
 
             var pay = new Payment();
-            pay.Create(paymentId: 0, bookingId: 1, gateway: "G", amount: 10m, transactionId: "T");
+            pay.Create(
+                paymentId: 0,
+                bookingId: 1,
+                gateway: "G",
+                amount: 10m,
+                transactionId: "T");
 
             await repo.Add(pay);
+
             var id = pay.PaymentID;
             var fetched = await repo.GetById(id);
             Assert.NotNull(fetched);
 
             pay.Update("G2", 12m, "T2");
             repo.Update(pay);
+
             var updated = await repo.GetById(id);
             Assert.Equal("G2", updated?.Gateway);
 
@@ -213,29 +243,50 @@ namespace Havenly.DAL.Tests
             var paRepo = new PropertyAmenityRepository(context);
 
             var bedroom = new Bedroom();
-            bedroom.Create(bedroomId: 0, propertyId: 1, roomNumber: 1, roomName: "R");
+            bedroom.Create(
+                bedroomId: 0,
+                propertyId: 1,
+                roomNumber: 1,
+                roomName: "R");
+
             await bedroomRepo.Add(bedroom);
             Assert.NotNull(await bedroomRepo.GetById(bedroom.BedroomID));
 
             var bed = new Bed();
-            bed.Create(bedId: 0, bedroomId: bedroom.BedroomID, bedType: Havenly.DAL.Enums.BedType.Single, quantity: 1);
+            bed.Create(
+                bedId: 0,
+                bedroomId: bedroom.BedroomID,
+                bedType: Havenly.DAL.Enums.BedType.Single,
+                quantity: 1);
+
             await bedRepo.Add(bed);
             Assert.NotNull(await bedRepo.GetById(bed.BedID));
 
             var img = new PropertyImage();
-            img.Create(imageId: 0, propertyId: 1, imagePath: "p.jpg");
+            img.Create(
+                imageId: 0,
+                propertyId: 1,
+                imagePath: "p.jpg");
+
             await imgRepo.Add(img);
             Assert.NotNull(await imgRepo.GetById(img.ImageID));
 
             var amen = new Amenity();
-            amen.Create(amenitiesId: 0, name: "A");
+            amen.Create(
+                amenitiesId: 0,
+                name: "A");
+
             await amenRepo.Add(amen);
             Assert.NotNull(await amenRepo.GetById(amen.AmenitiesID));
 
             var pa = new PropertyAmenity();
-            pa.Create(propertyId: 1, amenityId: amen.AmenitiesID);
+            pa.Create(
+                propertyId: 1,
+                amenityId: amen.AmenitiesID);
+
             await paRepo.Add(pa);
-            // composite key; cannot rely on single ID but GetAll should contain it
+
+            // Composite key; cannot rely on a single ID.
             var all = await paRepo.GetAll();
             Assert.NotEmpty(all);
         }

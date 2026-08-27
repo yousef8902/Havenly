@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
@@ -8,15 +9,21 @@ namespace Havenly.DAL.Entities;
 public class Favorite
 {
     [Key]
-    public long FavoriteID { get; set; }
+    public long FavoriteID { get; private set; }
 
-    public string UserID { get; set; }
+    public string UserID { get; private set; }
     [ForeignKey(nameof(UserID))]
-    public User User { get; set; }
+    public User User { get; private set; }
 
-    public long ListingID { get; set; }
+    public long ListingID { get; private set; }
     [ForeignKey(nameof(ListingID))]
-    public Listing Listing { get; set; }
+    public Listing Listing { get; private set; }
 
-    public DateTime CreatedAt { get; set; }   
+    public DateTime CreatedAt { get; private set; }
+    public void Create(string userId, long listingId)
+    {
+        UserID = userId;
+        ListingID = listingId;
+        CreatedAt = DateTime.UtcNow;
+    }
 }

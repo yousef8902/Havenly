@@ -73,7 +73,7 @@ namespace Havenly.DAL.Repos.Implementations
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return Enumerable.Empty<User>(); }
         }
 
-        public async Task<User?> GetById(long id)
+        public async Task<User?> GetById(string id)
         {
             try { 
                 var e = await context.Users.FindAsync(id);

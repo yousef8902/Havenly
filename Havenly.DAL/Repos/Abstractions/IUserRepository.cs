@@ -8,7 +8,7 @@ namespace Havenly.DAL.Repos.Abstractions
 {
     public interface IUserRepository
     {
-        Task<User?> GetById(long id);
+        Task<User?> GetById(string id);
         Task<User?> GetByEmail(string email);
         Task<IEnumerable<User>> GetAll();
 
