@@ -31,7 +31,7 @@ namespace Havenly.BLL.Mappers
                 // Guest information
                 .ForMember(dest => dest.Guest, opt => opt.MapFrom(src =>
                     src.Guest != null
-                        ? src.Guest.Name 
+                        ? src.Guest.Name
                         : "Unknown Guest"))
                 .ForMember(dest => dest.GuestEmail, opt => opt.MapFrom(src =>
                     src.Guest != null ? src.Guest.Email : ""))

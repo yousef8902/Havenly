@@ -21,6 +21,8 @@ public class Listing
 
     public bool IsValid { get; set; }
 
+  
+
     public ICollection<Favorite> Favorites { get; set; }
     public ICollection<Booking> Bookings { get; set; }
 }

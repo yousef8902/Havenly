@@ -25,26 +25,29 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectio
             builder.Services.AddAutoMapper(cfg =>
             {
                 cfg.AddProfile<BookingMappingProfile>();
+                cfg.AddProfile<PropertyMappingProfile>();
             });
 
             // Repositories & Unit of Work
             builder.Services.AddScoped<IBookingRepository, BookingRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
 
             // Business Services
             builder.Services.AddScoped<IBookingService, BookingService>();
+            builder.Services.AddScoped<IPropertyService, PropertyService>();
 
 
             var app = builder.Build();
-            using (var scope = app.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<HavenlyDbContext>();
+            //using (var scope = app.Services.CreateScope())
+            //{
+            //    var dbContext = scope.ServiceProvider.GetRequiredService<HavenlyDbContext>();
 
                
-                await dbContext.Database.EnsureCreatedAsync();
+            //    await dbContext.Database.EnsureCreatedAsync();
 
-                await DatabaseSeeder.SeedAsync(dbContext);
-            }
+            //    await DatabaseSeeder.SeedAsync(dbContext);
+            //}
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

@@ -15,7 +15,7 @@ namespace Havenly.DAL.Database.Seed
             // Seed in the correct order to respect foreign key constraints
             await SeedAddresses(context);
             await SeedUsers(context);
-            await SeedProperties(context);
+           // await SeedProperties(context);
             await SeedBedrooms(context);
             await SeedPropertyImages(context);
             await SeedListings(context);
@@ -137,112 +137,112 @@ namespace Havenly.DAL.Database.Seed
             await context.SaveChangesAsync(); 
         }
 
-        private static async Task SeedProperties(HavenlyDbContext context)
-        {
-            // Get the users and addresses that were just created
-            var users = await context.Users.ToListAsync();
-            var addresses = await context.Addresses.ToListAsync();
+        //private static async Task SeedProperties(HavenlyDbContext context)
+        //{
+        //    // Get the users and addresses that were just created
+        //    var users = await context.Users.ToListAsync();
+        //    var addresses = await context.Addresses.ToListAsync();
 
-            // Map users by name for easy lookup
-            var userMap = users.ToDictionary(u => u.Name);
-            var addressMap = addresses.ToDictionary(a => $"{a.City},{a.Country}");
+        //    // Map users by name for easy lookup
+        //    var userMap = users.ToDictionary(u => u.Name);
+        //    var addressMap = addresses.ToDictionary(a => $"{a.City},{a.Country}");
 
-            var properties = new List<Property>
-            {
-                // ✅ REMOVED PropertyID - let SQL Server auto-generate
-                new Property
-                {
-                    OwnerUserID = userMap["Elena Marinos"].UserID,
-                    AddressID = addressMap["Paros,Greece"].AddressID,
-                    PropertyName = "Olive Ridge — Cliffside Villa with Infinity Pool",
-                    Description = "Perched above Naoussa Bay, Olive Ridge pairs warm timber interiors with a 14-metre infinity pool that meets the horizon at sunset.",
-                    NumberOfGuests = 8,
-                    Capacity = 10,
-                    BathroomCount = 5,
-                    IsDeleted = false
-                },
-                new Property
-                {
-                    OwnerUserID = userMap["Mikkel Sørensen"].UserID,
-                    AddressID = addressMap["Copenhagen,Denmark"].AddressID,
-                    PropertyName = "North Loft — Bright Oak Apartment in the Old Town",
-                    Description = "A calm two-bedroom loft two streets from the harbour. Herringbone oak floors, tall windows and a proper desk.",
-                    NumberOfGuests = 4,
-                    Capacity = 5,
-                    BathroomCount = 2,
-                    IsDeleted = false
-                },
-                new Property
-                {
-                    OwnerUserID = userMap["Giulia Ferrari"].UserID,
-                    AddressID = addressMap["Val d'Orcia,Italy"].AddressID,
-                    PropertyName = "Casa Fiora — Restored Stone Farmhouse",
-                    Description = "Seventeenth-century stone, cypress avenue, and a kitchen built for long lunches.",
-                    NumberOfGuests = 6,
-                    Capacity = 8,
-                    BathroomCount = 4,
-                    IsDeleted = false
-                },
-                new Property
-                {
-                    OwnerUserID = userMap["Rui Almeida"].UserID,
-                    AddressID = addressMap["Åre,Sweden"].AddressID,
-                    PropertyName = "Pine Hollow — Glass Cabin in the Forest",
-                    Description = "Floor-to-ceiling glass facing a wall of pines, a wood stove that heats the whole cabin.",
-                    NumberOfGuests = 5,
-                    Capacity = 6,
-                    BathroomCount = 3,
-                    IsDeleted = false
-                },
-                new Property
-                {
-                    OwnerUserID = userMap["Rui Almeida"].UserID,
-                    AddressID = addressMap["Comporta,Portugal"].AddressID,
-                    PropertyName = "Salt House — Beachfront Home with Open Terrace",
-                    Description = "Two minutes of soft sand between the terrace and the Atlantic.",
-                    NumberOfGuests = 7,
-                    Capacity = 8,
-                    BathroomCount = 4,
-                    IsDeleted = false
-                },
-                new Property
-                {
-                    OwnerUserID = userMap["Omar Khalil"].UserID,
-                    AddressID = addressMap["Lisbon,Portugal"].AddressID,
-                    PropertyName = "Skyline Nine — Penthouse Terrace above the River",
-                    Description = "A ninth-floor apartment with a wraparound terrace, a fire bowl, and the whole city glittering below after dark.",
-                    NumberOfGuests = 4,
-                    Capacity = 5,
-                    BathroomCount = 2,
-                    IsDeleted = false
-                },
-                new Property
-                {
-                    OwnerUserID = userMap["Omar Khalil"].UserID,
-                    AddressID = addressMap["Cotswolds,United Kingdom"].AddressID,
-                    PropertyName = "Barn Eleven — Converted Hay Barn with Beams",
-                    Description = "Original oak trusses, exposed brick, and wool blankets on every bed.",
-                    NumberOfGuests = 6,
-                    Capacity = 7,
-                    BathroomCount = 3,
-                    IsDeleted = false
-                },
-                new Property
-                {
-                    OwnerUserID = userMap["Rui Almeida"].UserID,
-                    AddressID = addressMap["Menorca,Spain"].AddressID,
-                    PropertyName = "Cala Blanca — Village House with Blue Shutters",
-                    Description = "A whitewashed fisherman's house on a quiet lane, bougainvillea over the door.",
-                    NumberOfGuests = 4,
-                    Capacity = 5,
-                    BathroomCount = 3,
-                    IsDeleted = false
-                }
-            };
+            //var properties = new List<Property>
+            //{
+            //    // ✅ REMOVED PropertyID - let SQL Server auto-generate
+            //    new Property
+            //    {
+            //        OwnerUserID = userMap["Elena Marinos"].UserID,
+            //        AddressID = addressMap["Paros,Greece"].AddressID,
+            //        PropertyName = "Olive Ridge — Cliffside Villa with Infinity Pool",
+            //        Description = "Perched above Naoussa Bay, Olive Ridge pairs warm timber interiors with a 14-metre infinity pool that meets the horizon at sunset.",
+            //        NumberOfGuests = 8,
+            //        Capacity = 10,
+            //        BathroomCount = 5,
+            //        IsDeleted = false
+            //    },
+            //    new Property
+            //    {
+            //        OwnerUserID = userMap["Mikkel Sørensen"].UserID,
+            //        AddressID = addressMap["Copenhagen,Denmark"].AddressID,
+            //        PropertyName = "North Loft — Bright Oak Apartment in the Old Town",
+            //        Description = "A calm two-bedroom loft two streets from the harbour. Herringbone oak floors, tall windows and a proper desk.",
+            //        NumberOfGuests = 4,
+            //        Capacity = 5,
+            //        BathroomCount = 2,
+            //        IsDeleted = false
+            //    },
+            //    new Property
+            //    {
+            //        OwnerUserID = userMap["Giulia Ferrari"].UserID,
+            //        AddressID = addressMap["Val d'Orcia,Italy"].AddressID,
+            //        PropertyName = "Casa Fiora — Restored Stone Farmhouse",
+            //        Description = "Seventeenth-century stone, cypress avenue, and a kitchen built for long lunches.",
+            //        NumberOfGuests = 6,
+            //        Capacity = 8,
+            //        BathroomCount = 4,
+            //        IsDeleted = false
+            //    },
+            //    new Property
+            //    {
+            //        OwnerUserID = userMap["Rui Almeida"].UserID,
+            //        AddressID = addressMap["Åre,Sweden"].AddressID,
+            //        PropertyName = "Pine Hollow — Glass Cabin in the Forest",
+            //        Description = "Floor-to-ceiling glass facing a wall of pines, a wood stove that heats the whole cabin.",
+            //        NumberOfGuests = 5,
+            //        Capacity = 6,
+            //        BathroomCount = 3,
+            //        IsDeleted = false
+            //    },
+            //    new Property
+            //    {
+            //        OwnerUserID = userMap["Rui Almeida"].UserID,
+            //        AddressID = addressMap["Comporta,Portugal"].AddressID,
+            //        PropertyName = "Salt House — Beachfront Home with Open Terrace",
+            //        Description = "Two minutes of soft sand between the terrace and the Atlantic.",
+            //        NumberOfGuests = 7,
+            //        Capacity = 8,
+            //        BathroomCount = 4,
+            //        IsDeleted = false
+            //    },
+            //    new Property
+            //    {
+            //        OwnerUserID = userMap["Omar Khalil"].UserID,
+            //        AddressID = addressMap["Lisbon,Portugal"].AddressID,
+            //        PropertyName = "Skyline Nine — Penthouse Terrace above the River",
+            //        Description = "A ninth-floor apartment with a wraparound terrace, a fire bowl, and the whole city glittering below after dark.",
+            //        NumberOfGuests = 4,
+            //        Capacity = 5,
+            //        BathroomCount = 2,
+            //        IsDeleted = false
+            //    },
+            //    new Property
+            //    {
+            //        OwnerUserID = userMap["Omar Khalil"].UserID,
+            //        AddressID = addressMap["Cotswolds,United Kingdom"].AddressID,
+            //        PropertyName = "Barn Eleven — Converted Hay Barn with Beams",
+            //        Description = "Original oak trusses, exposed brick, and wool blankets on every bed.",
+            //        NumberOfGuests = 6,
+            //        Capacity = 7,
+            //        BathroomCount = 3,
+            //        IsDeleted = false
+            //    },
+            //    new Property
+            //    {
+            //        OwnerUserID = userMap["Rui Almeida"].UserID,
+            //        AddressID = addressMap["Menorca,Spain"].AddressID,
+            //        PropertyName = "Cala Blanca — Village House with Blue Shutters",
+            //        Description = "A whitewashed fisherman's house on a quiet lane, bougainvillea over the door.",
+            //        NumberOfGuests = 4,
+            //        Capacity = 5,
+            //        BathroomCount = 3,
+            //        IsDeleted = false
+            //    }
+            //};
 
-            await context.Properties.AddRangeAsync(properties);
-            await context.SaveChangesAsync(); 
-        }
+        //    await context.Properties.AddRangeAsync(properties);
+        //    await context.SaveChangesAsync(); 
+        //}
 
         private static async Task SeedBedrooms(HavenlyDbContext context)
         {

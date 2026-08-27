@@ -222,7 +222,7 @@ public static class DemoCatalog
             Amenities = amenities,
             Description = description,
             Images = images,
-            Host = new HostInfoVM { Name = host, Since = since, Superhost = superhost, ResponseRate = response },
+            Host = new HostVM { Name = host, Since = since, Superhost = superhost, ResponseRate = response },
             Rules = [.. rules],
             Status = status,
             Submitted = submitted,
