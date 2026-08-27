@@ -1,7 +1,9 @@
 using Havenly.BLL.Services.Abstractions;
 using Havenly.BLL.Services.Implementations;
+using Havenly.DAL.Database;
 using Havenly.DAL.Repos.Abstractions;
 using Havenly.DAL.Repos.Implementations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Havenly.PL
 {
@@ -13,6 +15,8 @@ namespace Havenly.PL
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+                builder.Services.AddDbContext<HavenlyDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             // Repositories & Unit of Work
             builder.Services.AddScoped<IBookingRepository, BookingRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

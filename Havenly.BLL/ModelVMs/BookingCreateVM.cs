@@ -4,14 +4,13 @@ using System.Text;
 
 namespace Havenly.BLL.ModelVMs
 {
-    public class BookingCreateVM
+    public partial class BookingCreateVM
     {
-      
-            public long GuestUserID { get; set; }
-            public long ListingID { get; set; }
-            public DateTime CheckIn { get; set; }
-            public DateTime CheckOut { get; set; }
-            public decimal PricePerNight { get; set; }
-        
+
+        public long GuestUserID { get; set; }
+        public long ListingID { get; set; }
+        public DateTime CheckIn { get; set; }
+        public DateTime CheckOut { get; set; }
+        public decimal PricePerNight { get; set; }
     }
 }

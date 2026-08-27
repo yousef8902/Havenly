@@ -1,7 +1,98 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Find a place that feels like home";
+
+    // 1. Convert React static arrays into C# anonymous objects or tuples for easy looping
+    var categories = new[] {
+        new { Label = "City lofts", Icon = "building-2" },
+        new { Label = "Countryside", Icon = "tree-pine" },
+        new { Label = "Beachfront", Icon = "waves" },
+        new { Label = "Cabins", Icon = "mountain" },
+        new { Label = "Design homes", Icon = "gem" },
+        new { Label = "Luxury", Icon = "crown" }
+    };
+
+    var steps = new[] {
+        new { Num = "01", Title = "Search your destination", Body = "Filter by dates, guests, price and the amenities you actually use.", Icon = "search" },
+        new { Num = "02", Title = "Choose your dates", Body = "Availability is checked live, so you never request a booked night.", Icon = "calendar-check" },
+        new { Num = "03", Title = "Book securely", Body = "You're only charged once the host approves your request.", Icon = "credit-card" },
+        new { Num = "04", Title = "Enjoy your stay", Body = "Message your host any time and get 24/7 support during the trip.", Icon = "sparkles" }
+    };
 }
 
+<!-- Hero Section -->
+<section class="relative flex min-h-[700px] flex-col">
+    <div class="absolute inset-0 -z-10">
+        <!-- Make sure to place a hero image in wwwroot/images/hero.jpg -->
+        <img src="~/images/hero.jpg" alt="Havenly Hero" class="h-full w-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-black/60"></div>
+    </div>
+
+    <div class="flex flex-1 flex-col items-center justify-center px-5 pb-16 pt-32 text-center lg:px-8">
+        <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/20 px-4 py-1.5 backdrop-blur-sm">
+            <span class="h-2 w-2 rounded-full bg-rose-500"></span>
+            <span class="text-sm font-medium text-white">Over 50,000 unique properties worldwide</span>
+        </div>
+
+        <h1 class="max-w-3xl text-4xl leading-tight text-white md:text-6xl">
+            Find a place that feels <span class="font-light italic">like home.</span>
+        </h1>
+
+        <p class="mt-5 max-w-xl text-lg text-white/80 md:text-xl">
+            Discover handpicked stays for every style, budget, and destination.
+        </p>
+
+        <!-- Search Bar Form (Submits to PropertyController Index action) -->
+        <div class="mt-10 w-full max-w-[880px] bg-white rounded-full p-2 shadow-lg flex items-center">
+            <form asp-controller="Property" asp-action="Index" method="get" class="flex w-full items-center">
+                <input type="text" name="City" placeholder="Where to?" class="flex-1 border-none focus:ring-0 px-6 py-3 rounded-l-full outline-none text-gray-700" />
+                <button type="submit" class="bg-rose-600 text-white rounded-full px-8 py-3 font-semibold hover:bg-rose-700 transition">
+                    Search
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+<!-- Categories / Pills -->
+<section class="max-w-7xl mx-auto px-4 pb-8 pt-12">
+    <div class="flex gap-3 overflow-x-auto pb-2">
+        @foreach (var category in categories)
+        {
+            <a asp-controller="Property" asp-action="Index" asp-route-City="" class="flex shrink-0 flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-gray-500 transition-colors hover:border-rose-600 hover:bg-rose-50 hover:text-rose-600">
+                <i data-lucide="@category.Icon" class="w-6 h-6"></i>
+                <span class="whitespace-nowrap text-xs font-medium">@category.Label</span>
+            </a>
+        }
+    </div>
+</section>
+<!-- How Havenly Works -->
+<section class="max-w-7xl mx-auto px-4 py-20">
+    <div class="mb-12 text-center">
+        <p class="mb-3 text-sm font-semibold uppercase tracking-wide text-rose-600">Simple process</p>
+        <h2 class="text-3xl font-bold">How Havenly works</h2>
+        <p class="mx-auto mt-4 max-w-lg text-lg text-gray-500">Book your dream stay in just a few steps.</p>
+    </div>
+
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        @foreach (var step in steps)
+        {
+            <div class="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+                <p class="mb-6 text-xs font-bold tracking-widest text-gray-400">@step.Num</p>
+                <span class="mb-5 grid h-12 w-12 place-items-center rounded-xl bg-rose-50 text-rose-600">
+                    <i data-lucide="@step.Icon" class="w-5 h-5"></i>
+                </span>
+                <h3 class="text-lg font-semibold">@step.Title</h3>
+                <p class="mt-2 text-sm text-gray-500">@step.Body</p>
+            </div>
+        }
+    </div>
+</section>
+@section Scripts {
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Renders all the icons on the page
+        lucide.createIcons();
+    </script>
+}
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>

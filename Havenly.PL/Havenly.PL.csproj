@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="C:\Users\Habib\Downloads\Havenly-UI\Havenly-UI\Havenly.Mvc\wwwroot\css\source.css" Link="wwwroot\css\source.css" />
+    <Content Include="C:\Users\Habib\Downloads\Havenly-UI\Havenly-UI\Havenly.Mvc\wwwroot\css\ui.css" Link="wwwroot\css\ui.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Havenly.BLL\Havenly.BLL.csproj" />
     <ProjectReference Include="..\Havenly.DAL\Havenly.DAL.csproj" />
   </ItemGroup>

@@ -77,5 +77,25 @@ namespace Havenly.BLL.Services.Implementations
                 BookingID = booking.BookingID
             };
         }
+
+        public async Task<IEnumerable<BookingDetailsVM>> GetBookingsByUserAsync(long userId)
+        {
+            var bookings = await _unitOfWork.Bookings.GetAll()
+                .Include(b => b.Listing)
+                .Where(b => b.GuestUserID == userId)
+                .OrderByDescending(b => b.CheckIn)
+                .ToListAsync();
+
+            // Map Booking entities to BookingDetailsVM
+            return bookings.Select(b => new BookingDetailsVM
+            {
+                BookingID = b.BookingID,
+                PropertyName = b.Listing?.Property.PropertyName ?? "Property", 
+                CheckIn = b.CheckIn,
+                CheckOut = b.CheckOut,
+                TotalPrice = b.TotalPrice,
+                Status = b.Status.ToString()
+            }).ToList();
+        }
     }
 }

@@ -1,50 +1,98 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Meta tags extracted from __root.tsx -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Havenly.PL</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Havenly.PL.styles.css" asp-append-version="true" />
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Havenly.PL</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    <title>@ViewData["Title"] - Havenly</title>
+    <meta name="description" content="Airbnb Clone Application - Havenly" />
+    <meta name="author" content="Havenly Team" />
+    <meta property="og:title" content="Havenly" />
+    <meta property="og:description" content="Find and book short-term property rentals." />
+    <meta property="og:type" content="website" />
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Havenly.PL - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- Google Fonts: DM Sans (Extracted from __root.tsx) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&display=swap">
+
+    <!-- Tailwind CSS Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Global Stylesheet (From Lovable styles.css) -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="font-sans bg-background text-foreground antialiased min-h-screen flex flex-col">
+
+    <!-- Global Header / Navbar -->
+    <header class="border-b bg-white sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+
+            <!-- Brand Logo -->
+            <a asp-controller="Property" asp-action="Index" class="flex items-center gap-2 font-bold text-xl text-rose-600 tracking-tight">
+                <span>Havenly</span>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                <a asp-controller="Property" asp-action="Index" class="text-gray-700 hover:text-rose-600 transition-colors">
+                    Explore
+                </a>
+                <a asp-controller="Booking" asp-action="MyBookings" class="text-gray-700 hover:text-rose-600 transition-colors">
+                    My Bookings
+                </a>
+            </nav>
+
+            <!-- Account Actions -->
+            <div class="flex items-center gap-3">
+                <a asp-controller="Account" asp-action="Login" class="bg-rose-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-rose-700 transition-colors">
+                    Sign In
+                </a>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Global Notification Alerts (TempData) -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="max-w-7xl mx-auto w-full mt-4 px-4">
+            <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-md flex justify-between items-center text-sm font-medium">
+                <span>@TempData["SuccessMessage"]</span>
+                <button type="button" onclick="this.parentElement.remove()" class="text-emerald-600 font-bold">&times;</button>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="max-w-7xl mx-auto w-full mt-4 px-4">
+            <div class="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-md flex justify-between items-center text-sm font-medium">
+                <span>@TempData["ErrorMessage"]</span>
+                <button type="button" onclick="this.parentElement.remove()" class="text-rose-600 font-bold">&times;</button>
+            </div>
+        </div>
+    }
+
+    <!-- Main Content Injection (Replaces React <Outlet />) -->
+    <main role="main" class="flex-1">
+        @RenderBody()
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="border-t bg-white mt-12 py-6 text-center text-sm text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p>&copy; @DateTime.Now.Year Havenly, Inc. All rights reserved.</p>
+            <div class="flex space-x-4 text-xs">
+                <a href="#" class="hover:underline">Privacy</a>
+                <a href="#" class="hover:underline">Terms</a>
+                <a href="#" class="hover:underline">Sitemap</a>
+            </div>
         </div>
     </footer>
+
+    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
