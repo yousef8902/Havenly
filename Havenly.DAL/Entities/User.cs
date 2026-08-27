@@ -1,12 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace Havenly.DAL.Entities;
 
-public class User
+public class User : IdentityUser
 {
-    [Key]
-    public long UserID { get; set; }
+    
 
     [Required]
     [StringLength(100)]

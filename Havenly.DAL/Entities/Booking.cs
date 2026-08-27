@@ -9,7 +9,7 @@ public class Booking
     [Key]
     public long BookingID { get; set; }
 
-    public long GuestUserID { get; set; }
+    public string GuestUserID { get; set; }
     [ForeignKey(nameof(GuestUserID))]
     public User Guest { get; set; }
 

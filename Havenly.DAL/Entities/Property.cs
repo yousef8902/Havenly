@@ -8,7 +8,7 @@ public class Property
     [Key]
     public long PropertyID { get; set; }
 
-    public long OwnerUserID { get; set; }
+    public string OwnerUserID { get; set; }
     [ForeignKey(nameof(OwnerUserID))]
     [InverseProperty("Properties")]
     public User Owner { get; set; }

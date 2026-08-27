@@ -1,3 +1,10 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using Havenly.DAL.Database;
+using Havenly.DAL.Entities;
+
+using Microsoft.EntityFrameworkCore;
+
 namespace Havenly.PL
 {
     public class Program
@@ -9,6 +16,19 @@ namespace Havenly.PL
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
+                    options =>
+                    {
+                        options.LoginPath = new PathString("/Account/Login");
+                        options.AccessDeniedPath = new PathString("/Account/Login");
+                    });
+            builder.Services.AddIdentityCore<User>(identityOptions =>
+                    identityOptions.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<HavenlyDbContext>()
+                .AddTokenProvider<DataProtectorTokenProvider<User>>(
+                    TokenOptions.DefaultProvider);
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -21,7 +41,7 @@ namespace Havenly.PL
 
             app.UseHttpsRedirection();
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();

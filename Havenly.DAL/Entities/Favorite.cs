@@ -10,7 +10,7 @@ public class Favorite
     [Key]
     public long FavoriteID { get; set; }
 
-    public long UserID { get; set; }
+    public string UserID { get; set; }
     [ForeignKey(nameof(UserID))]
     public User User { get; set; }
 

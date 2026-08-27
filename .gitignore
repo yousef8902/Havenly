@@ -44,6 +44,8 @@ ScaffoldingReadMe.txt
 # dotenv environment variables file
 .env
 
+# Node
+node_modules/
 # Others
 ~$*
 *~

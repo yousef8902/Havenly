@@ -1,9 +1,10 @@
 using Havenly.DAL.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Havenly.DAL.Database;
 
-public class HavenlyDbContext : DbContext
+public class HavenlyDbContext : IdentityDbContext
 {
     public HavenlyDbContext(DbContextOptions<HavenlyDbContext> options) : base(options)
     {
