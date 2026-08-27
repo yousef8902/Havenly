@@ -62,3 +62,6 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+/TestHavenly
+/Havenly.DAL/Migrations
+Havenly.BLL.Tests
