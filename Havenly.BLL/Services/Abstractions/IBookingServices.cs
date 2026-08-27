@@ -11,5 +11,7 @@ namespace Havenly.BLL.Services.Abstractions
         Task<bool> IsPropertyAvailableAsync(long listingId, DateTime checkIn, DateTime checkOut);
         Task<BookingResultVM> CreateBookingAsync(BookingCreateVM dto);
         Task<IEnumerable<BookingDetailsVM>> GetBookingsByUserAsync(long userId);
+       
+        Task<bool> CancelBookingAsync(long bookingId, long guestUserId);
     }
 }

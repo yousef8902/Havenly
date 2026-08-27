@@ -3,6 +3,7 @@ using Havenly.DAL.Entities;
 using Havenly.DAL.Enums;
 using Havenly.DAL.Repos.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 
 namespace Havenly.DAL.Repos.Implementations
@@ -38,6 +39,21 @@ namespace Havenly.DAL.Repos.Implementations
         public IQueryable<Booking> GetAll()
         {
             return _context.Bookings.AsQueryable();
+        }
+
+        public async Task<IEnumerable<Booking>> Find(Expression<Func<Booking, bool>> predicate)
+        {
+            try
+            {
+                return await _context.Bookings
+                    .Where(predicate)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                return Enumerable.Empty<Booking>();
+            }
         }
     }
 }

@@ -7,15 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="C:\Users\Habib\Downloads\Havenly-UI\Havenly-UI\Havenly.Mvc\ViewModels\BookingRequestFormVM.cs" Link="ModelVMs\BookingRequestFormVM.cs" />
-    <Compile Include="C:\Users\Habib\Downloads\Havenly-UI\Havenly-UI\Havenly.Mvc\ViewModels\CatalogVMs.cs" Link="ModelVMs\CatalogVMs.cs" />
-    <Compile Include="C:\Users\Habib\Downloads\Havenly-UI\Havenly-UI\Havenly.Mvc\ViewModels\PropertyCreateVM.cs" Link="ModelVMs\PropertyCreateVM.cs" />
-    <Compile Include="C:\Users\Habib\Downloads\Havenly-UI\Havenly-UI\Havenly.Mvc\ViewModels\ReviewCreateVM.cs" Link="ModelVMs\ReviewCreateVM.cs" />
-    <Compile Include="C:\Users\Habib\Downloads\Havenly-UI\Havenly-UI\Havenly.Mvc\ViewModels\SearchFilterVM.cs" Link="ModelVMs\SearchFilterVM.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.11">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

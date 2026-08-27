@@ -1,10 +1,11 @@
-﻿using Havenly.BLL.Services.Abstractions;
-using Havenly.DAL.Repos.Abstractions;
-using Havenly.DAL.Enums;
-using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
 using Havenly.BLL.ModelVMs;
+using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Entities;
-using AutoMapper;
+using Havenly.DAL.Enums;
+using Havenly.DAL.Repos.Abstractions;
+using Havenly.DAL.Repos.Implementations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Havenly.BLL.Services.Implementations
 {
@@ -42,7 +43,23 @@ namespace Havenly.BLL.Services.Implementations
 
         public async Task<BookingResultVM> CreateBookingAsync(BookingCreateVM dto)
         {
+            if (dto.CheckIn.Date < DateTime.Today)
+            {
+                return new BookingResultVM
+                {
+                    Success = false,
+                    Message = "Check-in date cannot be in the past."
+                };
+            }
 
+            if (dto.CheckOut.Date <= dto.CheckIn.Date)
+            {
+                return new BookingResultVM
+                {
+                    Success = false,
+                    Message = "Check-out date must be at least one day after check-in."
+                };
+            }
             bool isAvailable = await IsPropertyAvailableAsync(dto.ListingID, dto.CheckIn, dto.CheckOut);
             if (!isAvailable)
             {
@@ -55,7 +72,9 @@ namespace Havenly.BLL.Services.Implementations
 
             // calc total nights and total price
             int totalNights = (dto.CheckOut.Date - dto.CheckIn.Date).Days;
-            decimal totalPrice = totalNights * dto.PricePerNight;
+            decimal subtotal = totalNights * dto.PricePerNight;
+            decimal serviceFee = Math.Round(subtotal * 0.09m, 2);
+            decimal totalPrice = subtotal + serviceFee;
 
             // Mapping
             var booking = new Booking
@@ -96,6 +115,26 @@ namespace Havenly.BLL.Services.Implementations
        .ToListAsync();
 
             return _mapper.Map<IEnumerable<BookingDetailsVM>>(bookings);
+        }
+
+        public async Task<bool> CancelBookingAsync(long bookingId, long guestUserId)
+        {
+            var bookingList = await _unitOfWork.Bookings.Find(b => b.BookingID == bookingId && b.GuestUserID == guestUserId);
+            var booking = bookingList.FirstOrDefault();
+
+            
+            if (booking == null || booking.Status == BookingStatus.Cancelled)
+            {
+                return false;
+            }
+
+            
+            booking.Status=BookingStatus.Cancelled;
+
+            
+            await _unitOfWork.SaveChangesAsync();
+
+            return true;
         }
     }
 }

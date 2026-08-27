@@ -91,4 +91,22 @@ public class BookingController : Controller
 
         return View(viewModel);
     }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CancelBooking(long id)
+    {
+        long currentUserId = 4;
+        bool cancelled = await _bookingService.CancelBookingAsync(id, currentUserId);
+
+        if (cancelled)
+        {
+            TempData["SuccessMessage"] = $"Booking #{id} has been cancelled.";
+        }
+        else
+        {
+            TempData["ErrorMessage"] = "Unable to cancel this booking.";
+        }
+
+        return RedirectToAction(nameof(MyBookings));
+    }
 }

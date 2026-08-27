@@ -91,8 +91,9 @@
                                 <div class="flex gap-2">
                                     @if (booking.Status == "Approved" || booking.Status == "Pending")
                                     {
-                                        <form asp-controller="Bookings" asp-action="CancelBooking" method="post" class="inline" 
+                                        <form asp-controller="Booking" asp-action="CancelBooking" method="post" class="inline" 
                                               onsubmit="return confirm('Cancel this booking?');">
+                                            @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@booking.BookingId" />
                                             <button type="submit" class="rounded-lg border border-border px-3 py-1 text-sm hover:bg-destructive/10 hover:text-destructive">
                                                 Cancel
