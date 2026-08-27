@@ -1,99 +1,166 @@
-﻿@{
-    ViewData["Title"] = "Find a place that feels like home";
+@model Havenly.BLL.ModelVMs.HomeIndexVM
 
-    // 1. Convert React static arrays into C# anonymous objects or tuples for easy looping
-    var categories = new[] {
-        new { Label = "City lofts", Icon = "building-2" },
-        new { Label = "Countryside", Icon = "tree-pine" },
-        new { Label = "Beachfront", Icon = "waves" },
-        new { Label = "Cabins", Icon = "mountain" },
-        new { Label = "Design homes", Icon = "gem" },
-        new { Label = "Luxury", Icon = "crown" }
-    };
-
-    var steps = new[] {
-        new { Num = "01", Title = "Search your destination", Body = "Filter by dates, guests, price and the amenities you actually use.", Icon = "search" },
-        new { Num = "02", Title = "Choose your dates", Body = "Availability is checked live, so you never request a booked night.", Icon = "calendar-check" },
-        new { Num = "03", Title = "Book securely", Body = "You're only charged once the host approves your request.", Icon = "credit-card" },
-        new { Num = "04", Title = "Enjoy your stay", Body = "Message your host any time and get 24/7 support during the trip.", Icon = "sparkles" }
-    };
+@{
+    ViewData["Title"] = "Havenly — Find a place that feels like home";
+    ViewData["Description"] = "Havenly is a short-term rental marketplace for considered homes.";
+    ViewData["TransparentHeader"] = true;
 }
 
 <!-- Hero Section -->
-<section class="relative flex min-h-[700px] flex-col">
-    <div class="absolute inset-0 -z-10">
-        <!-- Make sure to place a hero image in wwwroot/images/hero.jpg -->
-        <img src="~/images/hero.jpg" alt="Havenly Hero" class="h-full w-full object-cover" />
-        <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-black/60"></div>
-    </div>
-
-    <div class="flex flex-1 flex-col items-center justify-center px-5 pb-16 pt-32 text-center lg:px-8">
-        <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/20 px-4 py-1.5 backdrop-blur-sm">
-            <span class="h-2 w-2 rounded-full bg-rose-500"></span>
-            <span class="text-sm font-medium text-white">Over 50,000 unique properties worldwide</span>
+<section class="relative h-screen overflow-hidden bg-gradient-to-b from-primary/20 to-background">
+    <div class="absolute inset-0 bg-cover bg-center opacity-40" style="background-image: url('https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1600&h=900&fit=crop');"></div>
+    <div class="relative container-page flex h-full flex-col items-start justify-center gap-8">
+        <div class="max-w-2xl space-y-4">
+            <h1 class="text-5xl md:text-6xl font-bold tracking-tight text-primary-foreground">
+                Find a place that feels like home
+            </h1>
+            <p class="text-xl text-primary-foreground/80">
+                Havenly is a short-term rental marketplace for considered homes. Search cliffside villas, forest cabins and city lofts, then book with confidence.
+            </p>
         </div>
 
-        <h1 class="max-w-3xl text-4xl leading-tight text-white md:text-6xl">
-            Find a place that feels <span class="font-light italic">like home.</span>
-        </h1>
-
-        <p class="mt-5 max-w-xl text-lg text-white/80 md:text-xl">
-            Discover handpicked stays for every style, budget, and destination.
-        </p>
-
-        <!-- Search Bar Form (Submits to PropertyController Index action) -->
-        <div class="mt-10 w-full max-w-[880px] bg-white rounded-full p-2 shadow-lg flex items-center">
-            <form asp-controller="Property" asp-action="Index" method="get" class="flex w-full items-center">
-                <input type="text" name="City" placeholder="Where to?" class="flex-1 border-none focus:ring-0 px-6 py-3 rounded-l-full outline-none text-gray-700" />
-                <button type="submit" class="bg-rose-600 text-white rounded-full px-8 py-3 font-semibold hover:bg-rose-700 transition">
+        <!-- Search Bar -->
+        <form asp-controller="Search" asp-action="Index" method="get" class="w-full max-w-2xl">
+            <div class="grid gap-4 rounded-2xl bg-background/95 border border-border p-6 shadow-lg sm:grid-cols-2">
+                <div class="flex flex-col gap-2">
+                    <label for="city" class="text-sm font-semibold">Where</label>
+                    <input type="text" name="city" id="city" class="rounded-lg border border-border bg-background px-4 py-2" placeholder="City or destination" value="@Model.Search.City" />
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="guests" class="text-sm font-semibold">Guests</label>
+                    <select name="guests" id="guests" class="rounded-lg border border-border bg-background px-4 py-2">
+                        <option value="1">1 guest</option>
+                        <option value="2" selected>2 guests</option>
+                        <option value="3">3 guests</option>
+                        <option value="4">4+ guests</option>
+                    </select>
+                </div>
+                <button type="submit" class="sm:col-span-2 rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground hover:bg-primary/90">
                     Search
                 </button>
-            </form>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Category Pills -->
+<section class="container-page py-12">
+    <div class="flex flex-wrap gap-3">
+        <a asp-controller="Search" asp-action="Index" asp-route-category="City lofts" class="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary">
+            🏢 City lofts
+        </a>
+        <a asp-controller="Search" asp-action="Index" asp-route-category="Countryside" class="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary">
+            🌲 Countryside
+        </a>
+        <a asp-controller="Search" asp-action="Index" asp-route-category="Beach houses" class="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary">
+            🏖️ Beach houses
+        </a>
+        <a asp-controller="Search" asp-action="Index" asp-route-category="Mountains" class="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary">
+            ⛰️ Mountains
+        </a>
+        <a asp-controller="Search" asp-action="Index" asp-route-category="Unique" class="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary">
+            ✨ Unique
+        </a>
+    </div>
+</section>
+
+<!-- Destinations Section -->
+@if (Model.Destinations.Any())
+{
+    <section class="container-page space-y-6 py-12">
+        <div>
+            <h2 class="text-3xl font-bold">Explore destinations</h2>
+            <p class="text-muted-foreground">Popular places to visit</p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach (var destination in Model.Destinations)
+            {
+                <a asp-controller="Search" asp-action="Index" asp-route-city="@destination.City" class="group overflow-hidden rounded-2xl border border-border hover:border-primary">
+                    <div class="relative h-48 overflow-hidden bg-muted">
+                        <img src="@destination.ImageUrl" alt="@destination.City" class="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold">@destination.City</h3>
+                        <p class="text-sm text-muted-foreground">@destination.Country</p>
+                    </div>
+                </a>
+            }
+        </div>
+    </section>
+}
+
+<!-- Featured Properties Section -->
+@if (Model.Featured.Any())
+{
+    <section class="container-page space-y-6 py-12">
+        <div>
+            <h2 class="text-3xl font-bold">Guest favourites</h2>
+            <p class="text-muted-foreground">Stays recommended for you</p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach (var property in Model.Featured)
+            {
+                <partial name="_PropertyCard" model="property" />
+            }
+        </div>
+    </section>
+}
+
+<!-- Recommended Properties Section -->
+@if (Model.Recommended.Any())
+{
+    <section class="container-page space-y-6 py-12">
+        <div>
+            <h2 class="text-3xl font-bold">Up and coming</h2>
+            <p class="text-muted-foreground">New stays now available</p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach (var property in Model.Recommended)
+            {
+                <partial name="_PropertyCard" model="property" />
+            }
+        </div>
+    </section>
+}
+
+<!-- Benefits Section -->
+<section class="border-t border-border bg-secondary/30 py-16">
+    <div class="container-page space-y-8">
+        <div class="text-center">
+            <h2 class="text-3xl font-bold">Why choose Havenly?</h2>
+        </div>
+        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="space-y-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                    <svg class="size-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="font-semibold">Trusted hosts</h3>
+                <p class="text-sm text-muted-foreground">All our hosts are verified and rated by guests</p>
+            </div>
+            <div class="space-y-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                    <svg class="size-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="font-semibold">Secure payments</h3>
+                <p class="text-sm text-muted-foreground">Your payment is secure, and refunds are guaranteed</p>
+            </div>
+            <div class="space-y-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                    <svg class="size-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="font-semibold">24/7 support</h3>
+                <p class="text-sm text-muted-foreground">Round-the-clock assistance for all your questions</p>
+            </div>
         </div>
     </div>
 </section>
-<!-- Categories / Pills -->
-<section class="max-w-7xl mx-auto px-4 pb-8 pt-12">
-    <div class="flex gap-3 overflow-x-auto pb-2">
-        @foreach (var category in categories)
-        {
-            <a asp-controller="Property" asp-action="Index" asp-route-City="" class="flex shrink-0 flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-gray-500 transition-colors hover:border-rose-600 hover:bg-rose-50 hover:text-rose-600">
-                <i data-lucide="@category.Icon" class="w-6 h-6"></i>
-                <span class="whitespace-nowrap text-xs font-medium">@category.Label</span>
-            </a>
-        }
-    </div>
-</section>
-<!-- How Havenly Works -->
-<section class="max-w-7xl mx-auto px-4 py-20">
-    <div class="mb-12 text-center">
-        <p class="mb-3 text-sm font-semibold uppercase tracking-wide text-rose-600">Simple process</p>
-        <h2 class="text-3xl font-bold">How Havenly works</h2>
-        <p class="mx-auto mt-4 max-w-lg text-lg text-gray-500">Book your dream stay in just a few steps.</p>
-    </div>
 
-    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        @foreach (var step in steps)
-        {
-            <div class="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
-                <p class="mb-6 text-xs font-bold tracking-widest text-gray-400">@step.Num</p>
-                <span class="mb-5 grid h-12 w-12 place-items-center rounded-xl bg-rose-50 text-rose-600">
-                    <i data-lucide="@step.Icon" class="w-5 h-5"></i>
-                </span>
-                <h3 class="text-lg font-semibold">@step.Title</h3>
-                <p class="mt-2 text-sm text-gray-500">@step.Body</p>
-            </div>
-        }
-    </div>
-</section>
 @section Scripts {
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        // Renders all the icons on the page
-        lucide.createIcons();
-    </script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 }
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>

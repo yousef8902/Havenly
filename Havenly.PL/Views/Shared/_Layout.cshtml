@@ -1,98 +1,151 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Meta tags extracted from __root.tsx -->
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Havenly</title>
-    <meta name="description" content="Airbnb Clone Application - Havenly" />
-    <meta name="author" content="Havenly Team" />
-    <meta property="og:title" content="Havenly" />
-    <meta property="og:description" content="Find and book short-term property rentals." />
-    <meta property="og:type" content="website" />
-
-    <!-- Google Fonts: DM Sans (Extracted from __root.tsx) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(ViewData["Title"] ?? "Havenly")</title>
+    <meta name="description" content="@(ViewData["Description"] ?? "Havenly — considered homes for short stays.")" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+   
+   
+    @* <link rel="stylesheet" href="~/css/source.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/ui.css" asp-append-version="true" /> *@
+    <link rel="icon" href="~/favicon.ico" type="image/x-icon" />
+    <!-- Google Font: DM Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&display=swap">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS Engine -->
+    <!-- Tailwind CSS v3 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Global Stylesheet (From Lovable styles.css) -->
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            display: ['"DM Sans"', 'system-ui', 'sans-serif'],
+                            sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+                        },
+                        colors: {
+                            background: 'oklch(0.985 0.003 106.4)',
+                            foreground: 'oklch(0.217 0.004 106.7)',
+                            surface: 'oklch(1 0 0)',
+                            warm: 'oklch(0.957 0.012 79.8)',
+                            card: {
+                                DEFAULT: 'oklch(1 0 0)',
+                                foreground: 'oklch(0.217 0.004 106.7)',
+                            },
+                            primary: {
+                                DEFAULT: 'oklch(0.476 0.078 162.2)',
+                                foreground: 'oklch(1 0 0)',
+                                light: 'oklch(0.952 0.013 159.9)',
+                            },
+                            secondary: {
+                                DEFAULT: 'oklch(0.951 0.004 106.5)',
+                                foreground: 'oklch(0.29 0.006 106.7)',
+                            },
+                            muted: {
+                                DEFAULT: 'oklch(0.951 0.004 106.5)',
+                                foreground: 'oklch(0.625 0.009 106.7)',
+                            },
+                            accent: {
+                                DEFAULT: 'oklch(0.706 0.118 160.9)',
+                                foreground: 'oklch(0.217 0.004 106.7)',
+                            },
+                            destructive: 'oklch(0.55 0.19 27)',
+                            border: 'oklch(0.917 0.007 106.5)',
+                            input: 'oklch(0.96 0.004 106.5)',
+                            ring: 'oklch(0.476 0.078 162.2)',
+                        },
+                        borderRadius: {
+                            'sm': 'calc(0.75rem - 4px)',
+                            'md': 'calc(0.75rem - 2px)',
+                            'lg': '0.75rem',
+                            'xl': 'calc(0.75rem + 4px)',
+                            '2xl': 'calc(0.75rem + 8px)',
+                        },
+                        boxShadow: {
+                            'soft': '0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)',
+                            'lift': '0 2px 4px rgba(0,0,0,0.05), 0 16px 40px rgba(0,0,0,0.1)',
+                        },
+                    },
+                },
+            };
+    </script>
+
+    <style>
+            * {
+                border-color: #e5e0d8;
+            }
+
+            body {
+                background-color: #faf9f7;
+                background-color: oklch(0.985 0.003 106.4);
+                color: oklch(0.217 0.004 106.7);
+                font-family: 'DM Sans', system-ui, sans-serif;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            h1, h2, h3 {
+                font-weight: 700;
+                letter-spacing: -0.025em;
+            }
+
+            .container-page {
+                margin-inline: auto;
+                width: 100%;
+                max-width: 80rem;
+                padding-inline: 1.25rem;
+            }
+
+            @@media (min-width: 1024px) {
+                .container-page {
+                    padding-inline: 2rem;
+                }
+            }
+
+            .shadow-soft {
+                box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
+            }
+
+            .shadow-lift {
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 16px 40px rgba(0,0,0,0.1);
+            }
+
+            .bg-primary {
+                background-color: #0d9488;
+                background-color: oklch(0.476 0.078 162.2);
+            }
+
+            .bg-card {
+                background-color: #ffffff;
+                background-color: oklch(1 0 0);
+            }
+
+            .bg-warm {
+                background-color: #f5f0e6;
+                background-color: oklch(0.957 0.012 79.8);
+            }
+
+            .text-muted-foreground {
+                color: #8a8578;
+                color: oklch(0.625 0.009 106.7);
+            }
+    </style>
 </head>
-<body class="font-sans bg-background text-foreground antialiased min-h-screen flex flex-col">
-
-    <!-- Global Header / Navbar -->
-    <header class="border-b bg-white sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-
-            <!-- Brand Logo -->
-            <a asp-controller="Property" asp-action="Index" class="flex items-center gap-2 font-bold text-xl text-rose-600 tracking-tight">
-                <span>Havenly</span>
-            </a>
-
-            <!-- Navigation Links -->
-            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium">
-                <a asp-controller="Property" asp-action="Index" class="text-gray-700 hover:text-rose-600 transition-colors">
-                    Explore
-                </a>
-                <a asp-controller="Booking" asp-action="MyBookings" class="text-gray-700 hover:text-rose-600 transition-colors">
-                    My Bookings
-                </a>
-            </nav>
-
-            <!-- Account Actions -->
-            <div class="flex items-center gap-3">
-                <a asp-controller="Account" asp-action="Login" class="bg-rose-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-rose-700 transition-colors">
-                    Sign In
-                </a>
-            </div>
-
-        </div>
-    </header>
-
-    <!-- Global Notification Alerts (TempData) -->
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="max-w-7xl mx-auto w-full mt-4 px-4">
-            <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-md flex justify-between items-center text-sm font-medium">
-                <span>@TempData["SuccessMessage"]</span>
-                <button type="button" onclick="this.parentElement.remove()" class="text-emerald-600 font-bold">&times;</button>
-            </div>
-        </div>
-    }
-
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="max-w-7xl mx-auto w-full mt-4 px-4">
-            <div class="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-md flex justify-between items-center text-sm font-medium">
-                <span>@TempData["ErrorMessage"]</span>
-                <button type="button" onclick="this.parentElement.remove()" class="text-rose-600 font-bold">&times;</button>
-            </div>
-        </div>
-    }
-
-    <!-- Main Content Injection (Replaces React <Outlet />) -->
-    <main role="main" class="flex-1">
-        @RenderBody()
-    </main>
-
-    <!-- Global Footer -->
-    <footer class="border-t bg-white mt-12 py-6 text-center text-sm text-gray-500">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p>&copy; @DateTime.Now.Year Havenly, Inc. All rights reserved.</p>
-            <div class="flex space-x-4 text-xs">
-                <a href="#" class="hover:underline">Privacy</a>
-                <a href="#" class="hover:underline">Terms</a>
-                <a href="#" class="hover:underline">Sitemap</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Scripts -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+<body>
+    <div class="flex min-h-screen flex-col">
+        <partial name="_SiteHeader" />
+        <main class="flex-1 pb-20 md:pb-0">
+            @RenderBody()
+        </main>
+        <partial name="_SiteFooter" />
+        <partial name="_MobileTabBar" />
+    </div>
+    <partial name="_Toasts" />
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

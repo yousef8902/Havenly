@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="C:\Users\Habib\Downloads\Havenly-UI\Havenly-UI\Havenly.Mvc\ViewModels\BookingRequestFormVM.cs" Link="ModelVMs\BookingRequestFormVM.cs" />
+    <Compile Include="C:\Users\Habib\Downloads\Havenly-UI\Havenly-UI\Havenly.Mvc\ViewModels\CatalogVMs.cs" Link="ModelVMs\CatalogVMs.cs" />
+    <Compile Include="C:\Users\Habib\Downloads\Havenly-UI\Havenly-UI\Havenly.Mvc\ViewModels\PropertyCreateVM.cs" Link="ModelVMs\PropertyCreateVM.cs" />
+    <Compile Include="C:\Users\Habib\Downloads\Havenly-UI\Havenly-UI\Havenly.Mvc\ViewModels\ReviewCreateVM.cs" Link="ModelVMs\ReviewCreateVM.cs" />
+    <Compile Include="C:\Users\Habib\Downloads\Havenly-UI\Havenly-UI\Havenly.Mvc\ViewModels\SearchFilterVM.cs" Link="ModelVMs\SearchFilterVM.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Havenly.DAL\Havenly.DAL.csproj" />
   </ItemGroup>
 
