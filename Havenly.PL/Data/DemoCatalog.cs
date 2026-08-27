@@ -36,7 +36,7 @@ public static class DemoCatalog
         new() { City = "Comporta", Country = "Portugal", ImageUrl = "/images/p4.jpg" }
     ];
 
-    public static List<BookingRowVM> Bookings { get; } =
+    public static List<BookingDetailsVM> Bookings { get; } =
     [
         Row("HV-4821", "olive-ridge", "Nadia Rahman", "nadia.rahman@mail.com", "2026-09-04", "2026-09-10", 6, 2196, "approved"),
         Row("HV-4832", "pine-hollow", "Tom Bergman", "t.bergman@mail.com", "2026-08-20", "2026-08-23", 4, 897, "pending"),
@@ -106,7 +106,7 @@ public static class DemoCatalog
             Price = p.Price,
             Rating = p.Rating,
             Reviews = p.Reviews,
-            Guests = p.Guests,
+            MaxGuests = p.Guests,
             Bedrooms = p.Bedrooms,
             ImageUrl = p.Images.FirstOrDefault() ?? "/images/p1.jpg",
             Badge = badge,
@@ -125,12 +125,12 @@ public static class DemoCatalog
         return diff > 0 ? (int)Math.Round(diff) : 0;
     }
 
-    private static BookingRowVM Row(string id, string propertyId, string guest, string email, string cin, string cout, int guests, decimal total, string status)
+    private static BookingDetailsVM Row(string id, string propertyId, string guest, string email, string cin, string cout, int guests, decimal total, string status)
     {
         var p = Get(propertyId);
-        return new BookingRowVM
+        return new BookingDetailsVM
         {
-            Id = id,
+            BookingId = int.Parse(id),
             PropertyId = propertyId,
             Title = p?.Title ?? propertyId,
             City = p?.City ?? "",
@@ -141,7 +141,7 @@ public static class DemoCatalog
             CheckIn = DateTime.Parse(cin),
             CheckOut = DateTime.Parse(cout),
             Guests = guests,
-            Total = total,
+            TotalPrice = total,
             Status = status
         };
     }
@@ -205,27 +205,27 @@ public static class DemoCatalog
         string category, List<string> amenities, string description, List<string> images,
         string host, string since, bool superhost, int response, IReadOnlyList<string> rules,
         string status, string submitted, List<string> booked) => new()
-    {
-        Id = id,
-        Title = title,
-        City = city,
-        Country = country,
-        Neighbourhood = neighbourhood,
-        Price = price,
-        Rating = rating,
-        Reviews = reviews,
-        Guests = guests,
-        Bedrooms = bedrooms,
-        Beds = beds,
-        Baths = baths,
-        Category = category,
-        Amenities = amenities,
-        Description = description,
-        Images = images,
-        Host = new HostInfoVM { Name = host, Since = since, Superhost = superhost, ResponseRate = response },
-        Rules = [.. rules],
-        Status = status,
-        Submitted = submitted,
-        BookedDates = booked
-    };
+        {
+            Id = id,
+            Title = title,
+            City = city,
+            Country = country,
+            Neighbourhood = neighbourhood,
+            Price = price,
+            Rating = rating,
+            Reviews = reviews,
+            Guests = guests,
+            Bedrooms = bedrooms,
+            Beds = beds,
+            Baths = baths,
+            Category = category,
+            Amenities = amenities,
+            Description = description,
+            Images = images,
+            Host = new HostInfoVM { Name = host, Since = since, Superhost = superhost, ResponseRate = response },
+            Rules = [.. rules],
+            Status = status,
+            Submitted = submitted,
+            BookedDates = booked
+        };
 }

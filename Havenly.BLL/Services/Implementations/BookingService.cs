@@ -4,16 +4,19 @@ using Havenly.DAL.Enums;
 using Microsoft.EntityFrameworkCore;
 using Havenly.BLL.ModelVMs;
 using Havenly.DAL.Entities;
+using AutoMapper;
 
 namespace Havenly.BLL.Services.Implementations
 {
     public class BookingService : IBookingService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public BookingService(IUnitOfWork unitOfWork)
+        public BookingService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         // Checks date overlap 
@@ -81,21 +84,18 @@ namespace Havenly.BLL.Services.Implementations
         public async Task<IEnumerable<BookingDetailsVM>> GetBookingsByUserAsync(long userId)
         {
             var bookings = await _unitOfWork.Bookings.GetAll()
-                .Include(b => b.Listing)
-                .Where(b => b.GuestUserID == userId)
-                .OrderByDescending(b => b.CheckIn)
-                .ToListAsync();
+       .Include(b => b.Guest)                    // For guest name/email
+       .Include(b => b.Listing)                  // For listing info
+           .ThenInclude(l => l.Property)         // For property details
+               .ThenInclude(p => p.Address)      // For city/country
+       .Include(b => b.Listing)                  // For property images
+           .ThenInclude(l => l.Property)
+               .ThenInclude(p => p.Images)
+       .Where(b => b.GuestUserID == userId)
+       .OrderByDescending(b => b.CheckIn)
+       .ToListAsync();
 
-            // Map Booking entities to BookingDetailsVM
-            return bookings.Select(b => new BookingDetailsVM
-            {
-                BookingID = b.BookingID,
-                PropertyName = b.Listing?.Property.PropertyName ?? "Property", 
-                CheckIn = b.CheckIn,
-                CheckOut = b.CheckOut,
-                TotalPrice = b.TotalPrice,
-                Status = b.Status.ToString()
-            }).ToList();
+            return _mapper.Map<IEnumerable<BookingDetailsVM>>(bookings);
         }
     }
 }

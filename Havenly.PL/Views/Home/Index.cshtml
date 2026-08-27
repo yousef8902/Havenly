@@ -2,165 +2,314 @@
 
 @{
     ViewData["Title"] = "Havenly — Find a place that feels like home";
-    ViewData["Description"] = "Havenly is a short-term rental marketplace for considered homes.";
     ViewData["TransparentHeader"] = true;
+
+    var pills = new[] {
+        new { Label = "City lofts", Category = "City lofts", Icon = "building-2" },
+        new { Label = "Countryside", Category = "Countryside", Icon = "tree-pine" },
+        new { Label = "Beachfront", Category = "Beachfront", Icon = "waves" },
+        new { Label = "Cabins", Category = "Cabins", Icon = "mountain" },
+        new { Label = "Islands", Category = "Islands", Icon = "party-popper" },
+        new { Label = "Design homes", Category = "Design homes", Icon = "gem" },
+        new { Label = "Eco stays", Category = "Countryside", Icon = "leaf" },
+        new { Label = "Luxury", Category = "Islands", Icon = "crown" }
+    };
+
+    var steps = new[] {
+        new { Num = "01", Title = "Search your destination", Body = "Filter by dates, guests, price and the amenities you actually use.", Icon = "search" },
+        new { Num = "02", Title = "Choose your dates", Body = "Availability is checked live, so you never request a booked night.", Icon = "calendar-check" },
+        new { Num = "03", Title = "Book securely", Body = "You're only charged once the host approves your request.", Icon = "credit-card" },
+        new { Num = "04", Title = "Enjoy your stay", Body = "Message your host any time and get 24/7 support during the trip.", Icon = "sparkles" }
+    };
+
+    var confidence = new[] {
+        new { Title = "Verified Properties", Body = "Every host completes ID and property verification before publishing.", Icon = "shield-check" },
+        new { Title = "Secure Payments", Body = "Payments are held until check-in and refunded per the listing's policy.", Icon = "credit-card" },
+        new { Title = "24/7 Support", Body = "Real people, day or night, for anything that comes up before or during a stay.", Icon = "headphones" }
+    };
 }
 
 <!-- Hero Section -->
-<section class="relative h-screen overflow-hidden bg-gradient-to-b from-primary/20 to-background">
-    <div class="absolute inset-0 bg-cover bg-center opacity-40" style="background-image: url('https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1600&h=900&fit=crop');"></div>
-    <div class="relative container-page flex h-full flex-col items-start justify-center gap-8">
-        <div class="max-w-2xl space-y-4">
-            <h1 class="text-5xl md:text-6xl font-bold tracking-tight text-primary-foreground">
-                Find a place that feels like home
-            </h1>
-            <p class="text-xl text-primary-foreground/80">
-                Havenly is a short-term rental marketplace for considered homes. Search cliffside villas, forest cabins and city lofts, then book with confidence.
+<section class="relative flex min-h-[700px] flex-col">
+    <div class="absolute inset-0 -z-10">
+        <img src="~/images/hero.jpg" alt="Villa terrace" class="size-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-b from-foreground/50 via-foreground/25 to-foreground/60"></div>
+    </div>
+
+    <div class="flex flex-1 flex-col items-center justify-center px-5 pb-16 pt-32 text-center lg:px-8">
+        <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-background/30 bg-background/20 px-4 py-1.5 backdrop-blur-sm">
+            <span class="size-2 rounded-full bg-accent"></span>
+            <span class="text-sm font-medium text-primary-foreground">Over 50,000 unique properties worldwide</span>
+        </div>
+
+        <h1 class="max-w-3xl text-4xl leading-tight text-primary-foreground md:text-6xl font-bold tracking-tight">
+            Find a place that feels <span class="font-light italic">like home.</span>
+        </h1>
+
+        <p class="mt-5 max-w-xl text-lg text-primary-foreground/80 md:text-xl">
+            Discover handpicked stays for every style, budget, and destination.
+        </p>
+
+        <!-- Floating SearchBar Component (Translated from search-bar.tsx) -->
+        <div class="mt-10 w-full max-w-[880px]">
+            <form asp-controller="Property" asp-action="Index" method="get" class="rounded-2xl border border-border bg-card p-3 shadow-lift text-left">
+                <div class="grid gap-2.5 md:grid-cols-[1.4fr_1fr_1fr_1fr_auto] md:items-end">
+
+                    <!-- Destination Field -->
+                    <div class="rounded-xl px-3 py-2 transition-colors hover:bg-secondary">
+                        <label for="dest" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground block">Destination</label>
+                        <input id="dest" name="City" type="text" placeholder="Where to? e.g. Paros"
+                               class="h-11 border-0 bg-transparent px-0 shadow-none focus:ring-0 text-sm w-full outline-none" />
+                    </div>
+
+                    <!-- Check-In Field -->
+                    <div class="rounded-xl px-3 py-2 transition-colors hover:bg-secondary">
+                        <label for="in" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground block">Check-in</label>
+                        <input id="in" name="CheckIn" type="date"
+                               class="h-11 border-0 bg-transparent px-0 shadow-none focus:ring-0 text-sm w-full outline-none" />
+                    </div>
+
+                    <!-- Check-Out Field -->
+                    <div class="rounded-xl px-3 py-2 transition-colors hover:bg-secondary">
+                        <label for="out" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground block">Check-out</label>
+                        <input id="out" name="CheckOut" type="date"
+                               class="h-11 border-0 bg-transparent px-0 shadow-none focus:ring-0 text-sm w-full outline-none" />
+                    </div>
+
+                    <!-- Guests Selection -->
+                    <div class="rounded-xl px-3 py-2 transition-colors hover:bg-secondary">
+                        <label for="gs" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground block">Guests</label>
+                        <select id="gs" name="Guests" class="h-11 border-0 bg-transparent px-0 shadow-none focus:ring-0 text-sm w-full outline-none">
+                            <option value="1">1 guest</option>
+                            <option value="2" selected>2 guests</option>
+                            <option value="3">3 guests</option>
+                            <option value="4">4+ guests</option>
+                        </select>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="h-14 gap-2 rounded-xl px-6 bg-primary text-primary-foreground font-semibold flex items-center justify-center hover:bg-primary/90 transition">
+                        <i data-lucide="search" class="size-4"></i>
+                        <span>Search</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Category Pills Section -->
+<section class="container-page pb-8 pt-12">
+    <div class="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2 lg:mx-0 lg:px-0">
+        @foreach (var p in pills)
+        {
+            <a asp-controller="Property" asp-action="Index" asp-route-category="@p.Category"
+               class="flex shrink-0 flex-col items-center gap-2 rounded-xl border border-border bg-surface px-5 py-3 text-muted-foreground transition-colors hover:border-primary hover:bg-primary-light hover:text-primary">
+                <i data-lucide="@p.Icon" class="size-[22px]"></i>
+                <span class="whitespace-nowrap text-xs font-medium">@p.Label</span>
+            </a>
+        }
+    </div>
+</section>
+
+<!-- Featured Stays Section -->
+<section class="mt-20 bg-muted/40 py-16">
+    <div class="container-page">
+        <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <div>
+                <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-primary">Featured stays</p>
+                <h2 class="text-3xl font-bold">Handpicked by our team</h2>
+            </div>
+            <a asp-controller="Property" asp-action="Index" class="flex items-center gap-1 text-base font-semibold text-primary hover:underline">
+                View all <i data-lucide="arrow-right" class="size-4"></i>
+            </a>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            @if (Model.Featured != null && Model.Featured.Any())
+            {
+                int index = 0;
+                @foreach (var item in Model.Featured)
+                {
+                    string badge = index == 0 ? "Guest Favourite" : (index == 3 ? "New" : null);
+                    ViewData["Badge"] = badge;
+                    <partial name="_PropertyCard" model="item" view-data="ViewData" />
+                    index++;
+                }
+            }
+        </div>
+    </div>
+</section>
+<!-- 1. Recommended Properties ("Stays you might love") -->
+<section class="container-page pb-4">
+    <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-primary">Recommended for you</p>
+            <h2 class="text-3xl font-bold">Stays you might love</h2>
+        </div>
+        <a asp-controller="Property" asp-action="Index" class="flex items-center gap-1 text-base font-semibold text-primary hover:underline">
+            Explore more <i data-lucide="arrow-right" class="size-4"></i>
+        </a>
+    </div>
+
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        @if (Model.Recommended != null && Model.Recommended.Any())
+        {
+            int index = 0;
+            @foreach (var item in Model.Recommended)
+            {
+                string badge = index == 1 ? "Top Rated" : null;
+                ViewData["Badge"] = badge;
+                <partial name="_PropertyCard" model="item" view-data="ViewData" />
+                index++;
+            }
+        }
+    </div>
+</section>
+
+<!-- How Havenly Works -->
+<section class="container-page py-20">
+    <div class="mb-12 text-center">
+        <p class="mb-3 text-sm font-semibold uppercase tracking-wide text-primary">Simple process</p>
+        <h2 class="text-3xl font-bold">How Havenly works</h2>
+        <p class="mx-auto mt-4 max-w-lg text-lg text-muted-foreground">Book your dream stay in just a few steps.</p>
+    </div>
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        @foreach (var s in steps)
+        {
+            <div class="rounded-2xl border border-border bg-surface p-8">
+                <p class="mb-6 text-xs font-bold tracking-widest text-muted-foreground">@s.Num</p>
+                <span class="mb-5 grid size-12 place-items-center rounded-xl bg-primary-light text-primary">
+                    <i data-lucide="@s.Icon" class="size-5"></i>
+                </span>
+                <h3 class="text-lg font-semibold">@s.Title</h3>
+                <p class="mt-2 text-sm text-muted-foreground">@s.Body</p>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Why Havenly -->
+<section class="container-page py-20">
+    <div class="mb-12 text-center">
+        <p class="mb-3 text-sm font-semibold uppercase tracking-wide text-primary">Why Havenly</p>
+        <h2 class="text-3xl font-bold">Travel with confidence</h2>
+    </div>
+    <div class="grid gap-6 md:grid-cols-3">
+        @foreach (var c in confidence)
+        {
+            <div class="flex gap-5 rounded-2xl border border-border bg-surface p-8">
+                <span class="grid size-12 shrink-0 place-items-center rounded-xl bg-primary-light text-primary">
+                    <i data-lucide="@c.Icon" class="size-5"></i>
+                </span>
+                <div>
+                    <h3 class="text-lg font-semibold">@c.Title</h3>
+                    <p class="mt-2 text-sm text-muted-foreground">@c.Body</p>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+
+<!-- 2. Guest Stories ("Loved by travellers worldwide") -->
+<section class="container-page py-20">
+    <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-primary">Guest stories</p>
+            <h2 class="text-3xl font-bold">Loved by travellers worldwide</h2>
+        </div>
+        <div class="flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-primary-foreground">
+            <i data-lucide="star" class="size-4 fill-accent text-accent"></i>
+            <span class="font-semibold">4.96</span>
+            <span class="text-sm text-primary-foreground/60">from 12,400+ reviews</span>
+        </div>
+    </div>
+
+    <div class="grid gap-5 md:grid-cols-3">
+        <!-- Sophie Laurent -->
+        <figure class="rounded-xl border border-border bg-surface p-6">
+            <div class="flex items-center gap-3">
+                <span class="grid size-10 place-items-center rounded-full bg-primary-light font-semibold text-primary">S</span>
+                <div>
+                    <figcaption class="font-semibold text-foreground">Sophie Laurent</figcaption>
+                    <p class="text-sm text-muted-foreground">Paris, France</p>
+                </div>
+                <span class="ml-auto flex items-center gap-1 text-sm font-semibold text-foreground">
+                    <i data-lucide="star" class="size-4 fill-accent text-accent"></i> 5.0
+                </span>
+            </div>
+            <blockquote class="mt-4 text-sm leading-relaxed text-muted-foreground">
+                “Booked a Tuscan farmhouse in ten minutes. The host called ahead about our late arrival — the whole thing felt personal.”
+            </blockquote>
+        </figure>
+
+        <!-- Daniel Osei -->
+        <figure class="rounded-xl border border-border bg-surface p-6">
+            <div class="flex items-center gap-3">
+                <span class="grid size-10 place-items-center rounded-full bg-primary-light font-semibold text-primary">D</span>
+                <div>
+                    <figcaption class="font-semibold text-foreground">Daniel Osei</figcaption>
+                    <p class="text-sm text-muted-foreground">Singapore</p>
+                </div>
+                <span class="ml-auto flex items-center gap-1 text-sm font-semibold text-foreground">
+                    <i data-lucide="star" class="size-4 fill-accent text-accent"></i> 5.0
+                </span>
+            </div>
+            <blockquote class="mt-4 text-sm leading-relaxed text-muted-foreground">
+                “The listings are honest. What we saw in the photos was exactly the space we walked into, down to the coffee grinder.”
+            </blockquote>
+        </figure>
+
+        <!-- Marta Ruiz -->
+        <figure class="rounded-xl border border-border bg-surface p-6">
+            <div class="flex items-center gap-3">
+                <span class="grid size-10 place-items-center rounded-full bg-primary-light font-semibold text-primary">M</span>
+                <div>
+                    <figcaption class="font-semibold text-foreground">Marta Ruiz</figcaption>
+                    <p class="text-sm text-muted-foreground">Valencia, Spain</p>
+                </div>
+                <span class="ml-auto flex items-center gap-1 text-sm font-semibold text-foreground">
+                    <i data-lucide="star" class="size-4 fill-accent text-accent"></i> 5.0
+                </span>
+            </div>
+            <blockquote class="mt-4 text-sm leading-relaxed text-muted-foreground">
+                “Cancellation terms were clear up front and support answered in under two minutes when our plans changed.”
+            </blockquote>
+        </figure>
+    </div>
+</section>
+
+<!-- 3. Host Banner ("Turn your space into income") -->
+<section class="container-page py-20">
+    <div class="relative overflow-hidden rounded-3xl">
+        <img src="~/images/p2.jpg" alt="Tuscan farmhouse" loading="lazy" class="absolute inset-0 size-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-r from-foreground/85 to-foreground/40"></div>
+        <div class="relative px-8 py-16 lg:px-14 lg:py-20">
+            <span class="inline-flex items-center rounded-full border border-background/30 bg-background/20 px-3 py-1 text-sm font-medium text-primary-foreground backdrop-blur-sm">
+                For hosts
+            </span>
+            <h2 class="mt-4 max-w-xl text-3xl font-bold leading-tight text-primary-foreground md:text-4xl">
+                Turn your space into income
+            </h2>
+            <p class="mt-4 max-w-lg text-lg text-primary-foreground/80">
+                Join thousands of hosts earning extra income on Havenly. It's free to get started.
             </p>
-        </div>
-
-        <!-- Search Bar -->
-        <form asp-controller="Search" asp-action="Index" method="get" class="w-full max-w-2xl">
-            <div class="grid gap-4 rounded-2xl bg-background/95 border border-border p-6 shadow-lg sm:grid-cols-2">
-                <div class="flex flex-col gap-2">
-                    <label for="city" class="text-sm font-semibold">Where</label>
-                    <input type="text" name="city" id="city" class="rounded-lg border border-border bg-background px-4 py-2" placeholder="City or destination" value="@Model.Search.City" />
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label for="guests" class="text-sm font-semibold">Guests</label>
-                    <select name="guests" id="guests" class="rounded-lg border border-border bg-background px-4 py-2">
-                        <option value="1">1 guest</option>
-                        <option value="2" selected>2 guests</option>
-                        <option value="3">3 guests</option>
-                        <option value="4">4+ guests</option>
-                    </select>
-                </div>
-                <button type="submit" class="sm:col-span-2 rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground hover:bg-primary/90">
-                    Search
-                </button>
-            </div>
-        </form>
-    </div>
-</section>
-
-<!-- Category Pills -->
-<section class="container-page py-12">
-    <div class="flex flex-wrap gap-3">
-        <a asp-controller="Search" asp-action="Index" asp-route-category="City lofts" class="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary">
-            🏢 City lofts
-        </a>
-        <a asp-controller="Search" asp-action="Index" asp-route-category="Countryside" class="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary">
-            🌲 Countryside
-        </a>
-        <a asp-controller="Search" asp-action="Index" asp-route-category="Beach houses" class="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary">
-            🏖️ Beach houses
-        </a>
-        <a asp-controller="Search" asp-action="Index" asp-route-category="Mountains" class="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary">
-            ⛰️ Mountains
-        </a>
-        <a asp-controller="Search" asp-action="Index" asp-route-category="Unique" class="rounded-full border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary">
-            ✨ Unique
-        </a>
-    </div>
-</section>
-
-<!-- Destinations Section -->
-@if (Model.Destinations.Any())
-{
-    <section class="container-page space-y-6 py-12">
-        <div>
-            <h2 class="text-3xl font-bold">Explore destinations</h2>
-            <p class="text-muted-foreground">Popular places to visit</p>
-        </div>
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            @foreach (var destination in Model.Destinations)
-            {
-                <a asp-controller="Search" asp-action="Index" asp-route-city="@destination.City" class="group overflow-hidden rounded-2xl border border-border hover:border-primary">
-                    <div class="relative h-48 overflow-hidden bg-muted">
-                        <img src="@destination.ImageUrl" alt="@destination.City" class="h-full w-full object-cover transition-transform group-hover:scale-105" />
-                    </div>
-                    <div class="p-4">
-                        <h3 class="font-semibold">@destination.City</h3>
-                        <p class="text-sm text-muted-foreground">@destination.Country</p>
-                    </div>
+            <div class="mt-8 flex flex-wrap gap-3">
+                <a asp-controller="Host" asp-action="Index" class="inline-flex h-11 items-center justify-center rounded-xl bg-secondary px-6 font-semibold text-secondary-foreground hover:bg-secondary/80 transition">
+                    Start hosting
                 </a>
-            }
-        </div>
-    </section>
-}
-
-<!-- Featured Properties Section -->
-@if (Model.Featured.Any())
-{
-    <section class="container-page space-y-6 py-12">
-        <div>
-            <h2 class="text-3xl font-bold">Guest favourites</h2>
-            <p class="text-muted-foreground">Stays recommended for you</p>
-        </div>
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            @foreach (var property in Model.Featured)
-            {
-                <partial name="_PropertyCard" model="property" />
-            }
-        </div>
-    </section>
-}
-
-<!-- Recommended Properties Section -->
-@if (Model.Recommended.Any())
-{
-    <section class="container-page space-y-6 py-12">
-        <div>
-            <h2 class="text-3xl font-bold">Up and coming</h2>
-            <p class="text-muted-foreground">New stays now available</p>
-        </div>
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            @foreach (var property in Model.Recommended)
-            {
-                <partial name="_PropertyCard" model="property" />
-            }
-        </div>
-    </section>
-}
-
-<!-- Benefits Section -->
-<section class="border-t border-border bg-secondary/30 py-16">
-    <div class="container-page space-y-8">
-        <div class="text-center">
-            <h2 class="text-3xl font-bold">Why choose Havenly?</h2>
-        </div>
-        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            <div class="space-y-3">
-                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                    <svg class="size-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <h3 class="font-semibold">Trusted hosts</h3>
-                <p class="text-sm text-muted-foreground">All our hosts are verified and rated by guests</p>
-            </div>
-            <div class="space-y-3">
-                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                    <svg class="size-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                </div>
-                <h3 class="font-semibold">Secure payments</h3>
-                <p class="text-sm text-muted-foreground">Your payment is secure, and refunds are guaranteed</p>
-            </div>
-            <div class="space-y-3">
-                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                    <svg class="size-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                    </svg>
-                </div>
-                <h3 class="font-semibold">24/7 support</h3>
-                <p class="text-sm text-muted-foreground">Round-the-clock assistance for all your questions</p>
+                <a asp-controller="Host" asp-action="Index" class="inline-flex h-11 items-center justify-center rounded-xl border border-background/40 bg-transparent px-6 font-semibold text-primary-foreground hover:bg-background/15 transition">
+                    Learn more
+                </a>
             </div>
         </div>
     </div>
 </section>
 
 @section Scripts {
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
 }

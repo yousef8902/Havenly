@@ -11,7 +11,7 @@ public class BookingController : Controller
     // TODO [Identity Integration]: Declare UserManager field to query logged-in user details
     // private readonly UserManager<ApplicationUser> _userManager;
 
-    
+
     // TODO [Identity Integration]: Update constructor to inject UserManager<ApplicationUser>
     // public BookingController(IBookingService bookingService, UserManager<ApplicationUser> userManager)
     public BookingController(IBookingService bookingService)
@@ -23,7 +23,7 @@ public class BookingController : Controller
     [HttpGet]
     public IActionResult Create(long listingId, string propertyName, decimal pricePerNight, int maxGuests)
     {
-        
+
         var viewModel = new BookingRequestVM
         {
             ListingID = listingId,
@@ -33,7 +33,7 @@ public class BookingController : Controller
             CheckOut = DateTime.Today.AddDays(3)
         };
 
-       
+
         ViewBag.MaxGuests = maxGuests > 0 ? maxGuests : 5;
 
         return View(viewModel);
@@ -52,17 +52,17 @@ public class BookingController : Controller
         // string currentUserIdString = _userManager.GetUserId(User);
         // long resolvedUserId = long.Parse(currentUserIdString); // or keep as string if your IDs use Guids/strings
 
-      
+
         var createVm = new BookingCreateVM
         {
             ListingID = model.ListingID,
             CheckIn = model.CheckIn,
             CheckOut = model.CheckOut,
             PricePerNight = model.PricePerNight,
-            GuestUserID = 1 // TODO [Identity Integration]: Replace placeholder '1' with resolvedUserId
+            GuestUserID = 4 // TODO [Identity Integration]: Replace placeholder '1' with resolvedUserId
         };
 
-        
+
         BookingResultVM result = await _bookingService.CreateBookingAsync(createVm);
 
         if (!result.Success)
@@ -83,8 +83,12 @@ public class BookingController : Controller
         // long resolvedUserId = long.Parse(currentUserIdString);
         // var bookings = await _bookingService.GetBookingsByUserAsync(resolvedUserId);
 
-        var bookings = await _bookingService.GetBookingsByUserAsync(1);
+        var bookings = await _bookingService.GetBookingsByUserAsync(4);
+        var viewModel = new BookingsPageVM
+        {
+            Bookings = bookings.ToList() 
+        };
 
-        return View(bookings);
+        return View(viewModel);
     }
 }

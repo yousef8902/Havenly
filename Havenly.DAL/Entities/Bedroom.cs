@@ -18,4 +18,6 @@ public class Bedroom
     public string RoomName { get; set; }
 
     public ICollection<Bed> Beds { get; set; }
+     
+    public int BedCount { get; set; }// mariam
 }

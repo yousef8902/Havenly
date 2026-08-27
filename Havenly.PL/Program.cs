@@ -1,29 +1,50 @@
+using AutoMapper;
+using Havenly.BLL.Mappers;
 using Havenly.BLL.Services.Abstractions;
 using Havenly.BLL.Services.Implementations;
 using Havenly.DAL.Database;
+using Havenly.DAL.Database.Seed;
 using Havenly.DAL.Repos.Abstractions;
 using Havenly.DAL.Repos.Implementations;
 using Microsoft.EntityFrameworkCore;
-
 namespace Havenly.PL
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-                builder.Services.AddDbContext<HavenlyDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddDbContext<HavenlyDbContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+            //Mapper
+            builder.Services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<BookingMappingProfile>();
+            });
+
             // Repositories & Unit of Work
             builder.Services.AddScoped<IBookingRepository, BookingRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             // Business Services
             builder.Services.AddScoped<IBookingService, BookingService>();
+
+
             var app = builder.Build();
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<HavenlyDbContext>();
+
+               
+                await dbContext.Database.EnsureCreatedAsync();
+
+                await DatabaseSeeder.SeedAsync(dbContext);
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -41,7 +62,7 @@ namespace Havenly.PL
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
+                pattern: "{controller=Booking}/{action=MyBookings}/{id?}")
                 .WithStaticAssets();
 
             app.Run();

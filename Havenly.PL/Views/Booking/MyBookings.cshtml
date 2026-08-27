@@ -1,7 +1,6 @@
-@model Havenly.BLL.ModelVMs.BookingsPageVM
+﻿@model Havenly.BLL.ModelVMs.BookingsPageVM
 
-@{
-    ViewData["Title"] = "My bookings — Havenly";
+@{ViewData["Title"] = "My bookings — Havenly";
     ViewData["Description"] = "Track upcoming, pending, completed and cancelled Havenly stays.";
 }
 
@@ -16,22 +15,27 @@
     <!-- Tabs -->
     <div class="space-y-6">
         <div class="flex gap-2 border-b border-border overflow-x-auto">
-            <a href="?status=approved" class="px-4 py-2 font-medium border-b-2 border-transparent hover:border-primary text-muted-foreground hover:text-foreground whitespace-nowrap">
-                Upcoming <span class="ml-1.5 text-xs text-muted-foreground">@Model.Bookings.Count(b => b.Status == "approved")</span>
+            <a href="?status=Approved" class="px-4 py-2 font-medium border-b-2 border-transparent hover:border-primary text-muted-foreground hover:text-foreground whitespace-nowrap">
+                Upcoming <span class="ml-1.5 text-xs text-muted-foreground">@Model.Bookings.Count(b => b.Status == "Approved")</span>
             </a>
-            <a href="?status=pending" class="px-4 py-2 font-medium border-b-2 border-transparent hover:border-primary text-muted-foreground hover:text-foreground whitespace-nowrap">
-                Pending <span class="ml-1.5 text-xs text-muted-foreground">@Model.Bookings.Count(b => b.Status == "pending")</span>
+            <a href="?status=Pending" class="px-4 py-2 font-medium border-b-2 border-transparent hover:border-primary text-muted-foreground hover:text-foreground whitespace-nowrap">
+                Pending <span class="ml-1.5 text-xs text-muted-foreground">@Model.Bookings.Count(b => b.Status == "Pending")</span>
             </a>
-            <a href="?status=completed" class="px-4 py-2 font-medium border-b-2 border-transparent hover:border-primary text-muted-foreground hover:text-foreground whitespace-nowrap">
-                Completed <span class="ml-1.5 text-xs text-muted-foreground">@Model.Bookings.Count(b => b.Status == "completed")</span>
+            <a href="?status=Completed" class="px-4 py-2 font-medium border-b-2 border-transparent hover:border-primary text-muted-foreground hover:text-foreground whitespace-nowrap">
+                Completed <span class="ml-1.5 text-xs text-muted-foreground">@Model.Bookings.Count(b => b.Status == "Completed")</span>
             </a>
-            <a href="?status=cancelled" class="px-4 py-2 font-medium border-b-2 border-transparent hover:border-primary text-muted-foreground hover:text-foreground whitespace-nowrap">
-                Cancelled <span class="ml-1.5 text-xs text-muted-foreground">@Model.Bookings.Count(b => b.Status == "cancelled")</span>
+            <a href="?status=Cancelled" class="px-4 py-2 font-medium border-b-2 border-transparent hover:border-primary text-muted-foreground hover:text-foreground whitespace-nowrap">
+                Cancelled <span class="ml-1.5 text-xs text-muted-foreground">@Model.Bookings.Count(b => b.Status == "Cancelled")</span>
+            </a>
+            <a href="?status=Rejected" class="px-4 py-2 font-medium border-b-2 border-transparent hover:border-primary text-muted-foreground hover:text-foreground whitespace-nowrap">
+                Rejected <span class="ml-1.5 text-xs text-muted-foreground">@Model.Bookings.Count(b => b.Status == "Rejected")</span>
             </a>
         </div>
 
         @{
-            var status = Context.Request.Query["status"].ToString() ?? "approved";
+            var status = Context.Request.Query["status"].ToString() ?? "Approved";
+           // var bookings = Model.Bookings.ToList();
+
             var bookings = Model.Bookings.Where(b => b.Status == status).ToList();
         }
 
@@ -79,25 +83,25 @@
                                     </div>
                                     <div class="text-right">
                                         <p class="text-sm text-muted-foreground">Total</p>
-                                        <p class="font-semibold">$@booking.Total</p>
+                                        <p class="font-semibold">$@booking.TotalPrice</p>
                                     </div>
                                 </div>
 
                                 <!-- Actions -->
                                 <div class="flex gap-2">
-                                    @if (booking.Status == "approved" || booking.Status == "pending")
+                                    @if (booking.Status == "Approved" || booking.Status == "Pending")
                                     {
                                         <form asp-controller="Bookings" asp-action="CancelBooking" method="post" class="inline" 
                                               onsubmit="return confirm('Cancel this booking?');">
-                                            <input type="hidden" name="id" value="@booking.Id" />
+                                            <input type="hidden" name="id" value="@booking.BookingId" />
                                             <button type="submit" class="rounded-lg border border-border px-3 py-1 text-sm hover:bg-destructive/10 hover:text-destructive">
                                                 Cancel
                                             </button>
                                         </form>
                                     }
-                                    @if (booking.Status == "completed")
+                                    @if (booking.Status == "Completed")
                                     {
-                                        <a asp-controller="Reviews" asp-action="Create" asp-route-propertyId="@booking.PropertyId" asp-route-bookingId="@booking.Id"
+                                        <a asp-controller="Reviews" asp-action="Create" asp-route-propertyId="@booking.PropertyId" asp-route-bookingId="@booking.BookingId"
                                            class="rounded-lg bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/90">
                                             Review
                                         </a>
@@ -133,10 +137,11 @@
     {
         return status switch
         {
-            "approved" => "Upcoming",
-            "pending" => "Pending",
-            "completed" => "Completed",
-            "cancelled" => "Cancelled",
+            "Approved" => "Upcoming",
+            "Pending" => "Pending",
+            "Completed" => "Completed",
+            "Cancelled" => "Cancelled",
+            "Rejected" => "Rejected",
             _ => status
         };
     }
@@ -145,10 +150,11 @@
     {
         return status switch
         {
-            "approved" => "hsl(var(--primary) / 0.1)",
-            "pending" => "hsl(200 100% 60% / 0.1)",
-            "completed" => "hsl(120 100% 50% / 0.1)",
-            "cancelled" => "hsl(0 100% 50% / 0.1)",
+            "Approved" => "hsl(var(--primary) / 0.1)",
+            "Pending" => "hsl(200 100% 60% / 0.1)",
+            "Completed" => "hsl(120 100% 50% / 0.1)",
+            "Cancelled" => "hsl(0 100% 50% / 0.1)",
+            "Rejected" => "hsl(0 0% 50% / 0.1)",
             _ => "hsl(var(--secondary))"
         };
     }
@@ -157,11 +163,13 @@
     {
         return status switch
         {
-            "approved" => "hsl(var(--primary))",
-            "pending" => "hsl(200 100% 40%)",
-            "completed" => "hsl(120 100% 35%)",
-            "cancelled" => "hsl(0 100% 40%)",
+            "Approved" => "hsl(var(--primary))",
+            "Pending" => "hsl(200 100% 40%)",
+            "Completed" => "hsl(120 100% 35%)",
+            "Cancelled" => "hsl(0 100% 40%)",
+            "Rejected" => "hsl(0 0% 40%)",
             _ => "hsl(var(--foreground))"
         };
     }
 }
+

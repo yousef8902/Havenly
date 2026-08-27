@@ -21,8 +21,8 @@ public class Address
     public string Street { get; set; }
 
     [Column(TypeName = "decimal(9,6)")]
-    public decimal Latitude { get; set; }
+    public decimal? Latitude { get; set; }
 
     [Column(TypeName = "decimal(9,6)")]
-    public decimal Longitude { get; set; }
+    public decimal? Longitude { get; set; }
 }

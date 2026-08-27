@@ -9,9 +9,12 @@ public class PropertyImage
     public long ImageID { get; set; }
 
     public long PropertyID { get; set; }
+
     [ForeignKey(nameof(PropertyID))]
     public Property Property { get; set; }
 
     [Required]
     public string ImagePath { get; set; }
+
+    public bool? IsPrimary { get; set; }// mariam -- for UI
 }

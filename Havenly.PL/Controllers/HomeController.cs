@@ -2,7 +2,6 @@ using Havenly.BLL.ModelVMs;
 using Havenly.PL.Data;
 
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
 namespace Havenly.PL.Controllers;
 
