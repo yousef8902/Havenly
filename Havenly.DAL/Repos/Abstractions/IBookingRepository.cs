@@ -12,4 +12,5 @@ namespace Havenly.DAL.Repos.Abstractions
 
         public IQueryable<Booking> GetAll();
     }
+    
 }

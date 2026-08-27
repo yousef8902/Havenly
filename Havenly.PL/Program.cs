@@ -62,7 +62,7 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectio
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Booking}/{action=MyBookings}/{id?}")
+                pattern: "{controller=Property}/{action=Details}/{id?}")
                 .WithStaticAssets();
 
             app.Run();
