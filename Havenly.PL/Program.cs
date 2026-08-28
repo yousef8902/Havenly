@@ -39,7 +39,6 @@ namespace Havenly.PL
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IAmenityRepository, Havenly.DAL.Repos.Implementations.AmenityRepository>();
             builder.Services.AddScoped<IListingServices, ListingServices>();
 
-
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
                     options =>
@@ -53,10 +52,6 @@ namespace Havenly.PL
                 .AddTokenProvider<DataProtectorTokenProvider<User>>(
                     TokenOptions.DefaultProvider);
             
-
-            builder.Services.AddScoped<IReportService, ReportService>();
-            builder.Services.AddScoped<IReviewServices, ReviewServices>();
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
