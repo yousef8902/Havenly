@@ -10,6 +10,8 @@ namespace Havenly.DAL.Repos.Abstractions
     {
         Task<Property?> GetById(long id);
         Task<IEnumerable<Property>> GetAll();
+        Task<IEnumerable<Property>> GetByOwner(string ownerUserId);
+        Task<Property?> GetPropertyDetails(long id);
         Task<IEnumerable<Property>> Find(Expression<Func<Property, bool>> predicate);
         Task<Property?> Get(Func<Property, bool> predicate);
         Task Add(Property entity);

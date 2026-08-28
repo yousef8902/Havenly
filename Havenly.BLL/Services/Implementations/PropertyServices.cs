@@ -1,0 +1,354 @@
+using Havenly.BLL.Services.Abstractions;
+using Havenly.DAL.Entities;
+using Havenly.DAL.Repos.Abstractions;
+
+namespace Havenly.BLL.Services.Implementations
+{
+    public class PropertyServices : IPropertyServices
+    {
+        private readonly IPropertyRepository propertyRepository;
+        private readonly IAddressRepository addressRepository;
+        private readonly IListingRepository listingRepository;
+        private readonly IPropertyImageRepository propertyImageRepository;
+        private readonly IAmenityRepository amenityRepository;
+        private readonly IPropertyAmenityRepository propertyAmenityRepository;
+        private readonly IBedroomRepository bedroomRepository;
+        private readonly IBedRepository bedRepository;
+
+        public PropertyServices(
+            IPropertyRepository propertyRepository,
+            IAddressRepository addressRepository,
+            IListingRepository listingRepository,
+            IPropertyImageRepository propertyImageRepository,
+            IAmenityRepository amenityRepository,
+            IPropertyAmenityRepository propertyAmenityRepository,
+            IBedroomRepository bedroomRepository,
+            IBedRepository bedRepository)
+        {
+            this.propertyRepository = propertyRepository;
+            this.addressRepository = addressRepository;
+            this.listingRepository = listingRepository;
+            this.propertyImageRepository = propertyImageRepository;
+            this.amenityRepository = amenityRepository;
+            this.propertyAmenityRepository = propertyAmenityRepository;
+            this.bedroomRepository = bedroomRepository;
+            this.bedRepository = bedRepository;
+        }
+
+        public async Task<IEnumerable<Property>> GetPropertiesByOwner(string ownerUserId)
+        {
+            if (string.IsNullOrWhiteSpace(ownerUserId))
+            {
+                return Enumerable.Empty<Property>();
+            }
+
+            return await propertyRepository.GetByOwner(ownerUserId);
+        }
+
+        public async Task<Property?> GetPropertyDetails(long propertyId, string ownerUserId)
+        {
+            var property = await propertyRepository.GetPropertyDetails(propertyId);
+
+            // A host must never be able to read another host's management details.
+            if (property is null || property.IsDeleted || property.OwnerUserID != ownerUserId)
+            {
+                return null;
+            }
+
+            return property;
+        }
+
+        public async Task<bool> CreateProperty(
+            Property property,
+            Address address,
+            Listing listing,
+            IEnumerable<PropertyAmenity> propertyAmenities,
+            IEnumerable<Bedroom> bedrooms,
+            IEnumerable<PropertyImage> images)
+        {
+            var amenities = propertyAmenities?.ToList() ?? [];
+            var roomList = bedrooms?.ToList() ?? [];
+            var imageList = images?.ToList() ?? [];
+
+            if (!IsValidProperty(property) || !IsValidAddress(address) || !IsValidListing(listing) ||
+                !AreValidBedrooms(roomList) || !AreValidImages(imageList) ||
+                !await AreValidAmenities(amenities))
+            {
+                return false;
+            }
+
+            try
+            {
+                // Address is saved first because Property uses AddressID as its foreign key.
+                await addressRepository.Add(address);
+
+                property.Create(
+                    property.OwnerUserID,
+                    address.AddressID,
+                    property.PropertyName,
+                    property.Description,
+                    property.NumberOfGuests,
+                    property.Capacity,
+                    property.BathroomCount);
+                await propertyRepository.Add(property);
+
+                // Every newly submitted host listing starts pending for the admin workflow.
+                listing.Create(property.PropertyID, listing.Description, listing.Price);
+                await listingRepository.Add(listing);
+
+                await AddAmenities(property.PropertyID, amenities);
+                await AddBedroomsAndBeds(property.PropertyID, roomList);
+                await AddImages(property.PropertyID, imageList);
+
+                return property.PropertyID > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateProperty(
+            long propertyId,
+            string ownerUserId,
+            Property property,
+            Address address,
+            Listing listing,
+            IEnumerable<PropertyAmenity> propertyAmenities,
+            IEnumerable<Bedroom> bedrooms)
+        {
+            var amenities = propertyAmenities?.ToList() ?? [];
+            var roomList = bedrooms?.ToList() ?? [];
+
+            if (!IsValidProperty(property) || !IsValidAddress(address) || !IsValidListing(listing) ||
+                !AreValidBedrooms(roomList) || !await AreValidAmenities(amenities))
+            {
+                return false;
+            }
+
+            var existingProperty = await GetPropertyDetails(propertyId, ownerUserId);
+            if (existingProperty is null || existingProperty.Address is null || existingProperty.Listing is null)
+            {
+                return false;
+            }
+
+            try
+            {
+                existingProperty.Update(
+                    property.PropertyName,
+                    property.Description,
+                    property.NumberOfGuests,
+                    property.Capacity,
+                    property.BathroomCount);
+                propertyRepository.Update(existingProperty);
+
+                existingProperty.Address.Update(
+                    address.Country,
+                    address.City,
+                    address.Street,
+                    address.Latitude,
+                    address.Longitude);
+                addressRepository.Update(existingProperty.Address);
+
+                existingProperty.Listing.Update(listing.Description, listing.Price);
+                listingRepository.Update(existingProperty.Listing);
+
+                await SynchronizeAmenities(existingProperty, amenities);
+                await ReplaceBedroomsAndBeds(existingProperty, roomList);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteProperty(long propertyId, string ownerUserId)
+        {
+            var property = await GetPropertyDetails(propertyId, ownerUserId);
+            if (property is null)
+            {
+                return false;
+            }
+
+            // PropertyRepository.Delete performs a soft delete through Property.Delete().
+            propertyRepository.Delete(property);
+            return property.IsDeleted;
+        }
+
+        public async Task<bool> AddPropertyImages(long propertyId, string ownerUserId, IEnumerable<PropertyImage> images)
+        {
+            var imageList = images?.ToList() ?? [];
+            if (!AreValidImages(imageList) || await GetPropertyDetails(propertyId, ownerUserId) is null)
+            {
+                return false;
+            }
+
+            try
+            {
+                await AddImages(propertyId, imageList);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> RemovePropertyImage(long propertyId, long imageId, string ownerUserId)
+        {
+            var property = await GetPropertyDetails(propertyId, ownerUserId);
+            var image = property?.Images.FirstOrDefault(currentImage => currentImage.ImageID == imageId);
+            if (image is null)
+            {
+                return false;
+            }
+
+            propertyImageRepository.Delete(image);
+            return true;
+        }
+
+        private async Task<bool> AreValidAmenities(IEnumerable<PropertyAmenity> amenities)
+        {
+            var amenityIds = amenities.Select(propertyAmenity => propertyAmenity.AmenitiesID).ToList();
+            if (amenityIds.Count != amenityIds.Distinct().Count() || amenityIds.Any(id => id <= 0))
+            {
+                return false;
+            }
+
+            foreach (var amenityId in amenityIds)
+            {
+                if (await amenityRepository.GetById(amenityId) is null)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsValidProperty(Property property)
+        {
+            return property is not null &&
+                   !string.IsNullOrWhiteSpace(property.OwnerUserID) &&
+                   !string.IsNullOrWhiteSpace(property.PropertyName) &&
+                   !string.IsNullOrWhiteSpace(property.Description) &&
+                   property.NumberOfGuests > 0 &&
+                   property.Capacity > 0 &&
+                   property.BathroomCount > 0;
+        }
+
+        private static bool IsValidAddress(Address address)
+        {
+            return address is not null &&
+                   !string.IsNullOrWhiteSpace(address.Country) &&
+                   !string.IsNullOrWhiteSpace(address.City) &&
+                   !string.IsNullOrWhiteSpace(address.Street);
+        }
+
+        private static bool IsValidListing(Listing listing)
+        {
+            return listing is not null &&
+                   !string.IsNullOrWhiteSpace(listing.Description) &&
+                   listing.Price > 0;
+        }
+
+        private static bool AreValidBedrooms(IEnumerable<Bedroom> bedrooms)
+        {
+            foreach (var bedroom in bedrooms)
+            {
+                if (bedroom.RoomNumber <= 0 || bedroom.Beds is null)
+                {
+                    return false;
+                }
+
+                if (bedroom.Beds.Any(bed => bed.Quantity <= 0))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool AreValidImages(IEnumerable<PropertyImage> images)
+        {
+            var paths = images.Select(image => image.ImagePath).ToList();
+            return paths.All(path => !string.IsNullOrWhiteSpace(path)) &&
+                   paths.Count == paths.Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        }
+
+        private async Task AddAmenities(long propertyId, IEnumerable<PropertyAmenity> amenities)
+        {
+            foreach (var selectedAmenity in amenities)
+            {
+                var propertyAmenity = new PropertyAmenity();
+                propertyAmenity.Create(propertyId, selectedAmenity.AmenitiesID);
+                await propertyAmenityRepository.Add(propertyAmenity);
+            }
+        }
+
+        private async Task SynchronizeAmenities(Property property, IEnumerable<PropertyAmenity> selectedAmenities)
+        {
+            var selectedAmenityIds = selectedAmenities
+                .Select(propertyAmenity => propertyAmenity.AmenitiesID)
+                .ToHashSet();
+            var currentAmenities = property.PropertyAmenities.ToList();
+
+            foreach (var currentAmenity in currentAmenities.Where(currentAmenity => !selectedAmenityIds.Contains(currentAmenity.AmenitiesID)))
+            {
+                propertyAmenityRepository.Delete(currentAmenity);
+            }
+
+            foreach (var amenityId in selectedAmenityIds.Where(amenityId => currentAmenities.All(currentAmenity => currentAmenity.AmenitiesID != amenityId)))
+            {
+                var propertyAmenity = new PropertyAmenity();
+                propertyAmenity.Create(property.PropertyID, amenityId);
+                await propertyAmenityRepository.Add(propertyAmenity);
+            }
+        }
+
+        private async Task AddBedroomsAndBeds(long propertyId, IEnumerable<Bedroom> bedrooms)
+        {
+            foreach (var bedroom in bedrooms)
+            {
+                // Keep the submitted beds before Create resets the entity collection.
+                var beds = bedroom.Beds.ToList();
+                bedroom.Create(0, propertyId, bedroom.RoomNumber, bedroom.RoomName);
+                await bedroomRepository.Add(bedroom);
+
+                foreach (var bed in beds)
+                {
+                    bed.Create(0, bedroom.BedroomID, bed.BedType, bed.Quantity);
+                    await bedRepository.Add(bed);
+                }
+            }
+        }
+
+        private async Task ReplaceBedroomsAndBeds(Property property, IEnumerable<Bedroom> bedrooms)
+        {
+            // The current data model has no stable form IDs for rooms, so replace the room collection as one unit.
+            foreach (var existingBedroom in property.Bedrooms.ToList())
+            {
+                foreach (var existingBed in existingBedroom.Beds.ToList())
+                {
+                    bedRepository.Delete(existingBed);
+                }
+
+                bedroomRepository.Delete(existingBedroom);
+            }
+
+            await AddBedroomsAndBeds(property.PropertyID, bedrooms);
+        }
+
+        private async Task AddImages(long propertyId, IEnumerable<PropertyImage> images)
+        {
+            foreach (var image in images)
+            {
+                image.Create(0, propertyId, image.ImagePath);
+                await propertyImageRepository.Add(image);
+            }
+        }
+    }
+}

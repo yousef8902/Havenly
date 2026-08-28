@@ -54,6 +54,49 @@ namespace Havenly.DAL.Repos.Implementations
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return Enumerable.Empty<Property>(); }
         }
 
+        public async Task<IEnumerable<Property>> GetByOwner(string ownerUserId)
+        {
+            try
+            {
+                var list = await context.Properties
+                    .Where(property => property.OwnerUserID == ownerUserId && !property.IsDeleted)
+                    .Include(property => property.Address)
+                    .Include(property => property.Listing)
+                    .Include(property => property.Images)
+                    .ToListAsync();
+
+                Console.WriteLine("info:Host properties fetched successfully");
+                return list;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error:" + ex.Message);
+                return Enumerable.Empty<Property>();
+            }
+        }
+
+        public async Task<Property?> GetPropertyDetails(long id)
+        {
+            try
+            {
+                // Property management needs the complete graph for details and updates.
+                return await context.Properties
+                    .Include(property => property.Address)
+                    .Include(property => property.Listing)
+                    .Include(property => property.Images)
+                    .Include(property => property.PropertyAmenities)
+                        .ThenInclude(propertyAmenity => propertyAmenity.Amenity)
+                    .Include(property => property.Bedrooms)
+                        .ThenInclude(bedroom => bedroom.Beds)
+                    .FirstOrDefaultAsync(property => property.PropertyID == id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error:" + ex.Message);
+                return null;
+            }
+        }
+
         public async Task<Property?> GetById(long id)
         {
             try { var e = await context.Properties.FindAsync(id); Console.WriteLine("info:Property fetched successfully"); return e; }
