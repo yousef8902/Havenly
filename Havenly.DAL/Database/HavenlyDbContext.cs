@@ -54,6 +54,14 @@ public class HavenlyDbContext : IdentityDbContext<User>
     public DbSet<Amenity> Amenities { get; set; }
     public DbSet<PropertyAmenity> PropertyAmenities { get; set; }
 
-    
-    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(HavenlyDbContext).Assembly);
+
+        
+    }
+
 }

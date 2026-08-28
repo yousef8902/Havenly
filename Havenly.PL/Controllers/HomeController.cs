@@ -1,25 +1,43 @@
-using Havenly.PL.Models;
+using Havenly.BLL.ModelVMs;
+using Havenly.PL.Data;
+
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
-namespace Havenly.PL.Controllers
+namespace Havenly.PL.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    [HttpGet]
+    public IActionResult Index()
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        ViewData["Title"] = "Havenly — Find a place that feels like home";
+        ViewData["Description"] = "Havenly is a short-term rental marketplace for considered homes.";
+        ViewData["TransparentHeader"] = true;
 
-        public IActionResult Privacy()
+        var approved = DemoCatalog.Properties.Where(p => p.Status == "approved").ToList();
+        var vm = new HomeIndexVM
         {
-            return View();
-        }
+            Search = new SearchFilterVM { Guests = 2 },
+            Destinations = DemoCatalog.Destinations,
+            Featured = approved.Take(4).Select((p, i) => DemoCatalog.ToCard(p, i == 0 ? "Guest Favourite" : i == 3 ? "New" : null)).ToList(),
+            Recommended = approved.Skip(4).Take(4).Select((p, i) => DemoCatalog.ToCard(p, i == 1 ? "Top Rated" : null)).ToList()
+        };
+        return View(vm);
+    }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+    [HttpGet]
+    public IActionResult Error()
+    {
+        ViewData["Title"] = "This page didn't load";
+        return View();
+    }
+
+    [HttpGet]
+    public IActionResult NotFoundPage()
+    {
+        Response.StatusCode = 404;
+        ViewData["Title"] = "Page not found";
+        return View("NotFound");
     }
 }
+

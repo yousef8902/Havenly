@@ -18,14 +18,16 @@ public class Bedroom
     [StringLength(50)]
     public string RoomName { get; private set; }
 
+    public int BedCount { get; set; }// mariam
     public ICollection<Bed> Beds { get; private set; }
 
-    public void Create(long bedroomId, long propertyId, int roomNumber, string roomName = null)
+    public void Create(long bedroomId, long propertyId, int roomNumber,int bedcnt, string roomName = null)
     {
         BedroomID = bedroomId;
         PropertyID = propertyId;
         RoomNumber = roomNumber;
         RoomName = roomName;
+       BedCount=bedcnt;
         Beds = new List<Bed>();
     }
 
@@ -35,3 +37,8 @@ public class Bedroom
         RoomName = roomName;
     }
 }
+
+     
+  
+}
+

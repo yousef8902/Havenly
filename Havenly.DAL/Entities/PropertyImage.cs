@@ -11,11 +11,13 @@ public class PropertyImage
     [Key]
     public long ImageID { get; private set; }
 
-    public long PropertyID { get; private set; }
+    public long PropertyID { get; set; }
+
     [ForeignKey(nameof(PropertyID))]
     public Property Property { get; private set; }
 
     [Required]
+    public bool? IsPrimary { get; set; }// mariam -- for UI
     public string ImagePath { get; private set; }
 
     public void Create(long imageId, long propertyId, string imagePath)
@@ -29,4 +31,8 @@ public class PropertyImage
     {
         ImagePath = imagePath;
     }
+
+
+    
+
 }

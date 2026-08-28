@@ -1,0 +1,191 @@
+@* @* @model List<Havenly.PL.Data.PropertyData>
+   
+
+@{
+    ViewData["Title"] = "Admin console — Havenly";
+    ViewData["Description"] = "Platform management and moderation tools.";
+    Layout = "~/Views/Shared/_WorkspaceLayout.cshtml";
+    ViewData["Workspace"] = "Admin console";
+    ViewData["WorkspaceRole"] = "Omar Khalil · Administrator";
+    ViewData["WorkspaceNav"] = "admin";
+}
+
+<!-- Page Heading -->
+<div class="space-y-2 mb-8">
+    <h1 class="text-3xl font-bold">Overview</h1>
+    <p class="text-muted-foreground">Platform health, moderation queue and member management.</p>
+</div>
+
+<!-- Stat Cards Grid -->
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
+    <!-- Members Card -->
+    <div class="rounded-2xl border border-border bg-card p-6">
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-muted-foreground">Members</p>
+            <p class="text-3xl font-bold">1,234</p>
+            <p class="text-xs text-muted-foreground">Guests, hosts and staff</p>
+        </div>
+    </div>
+
+    <!-- Listings Card -->
+    <div class="rounded-2xl border border-border bg-card p-6">
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-muted-foreground">Listings</p>
+            <p class="text-3xl font-bold">@Model.Count</p>
+            <p class="text-xs text-muted-foreground">Live and in review</p>
+        </div>
+    </div>
+
+    <!-- Gross Bookings Card -->
+    <div class="rounded-2xl border border-border bg-card p-6">
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-muted-foreground">Gross bookings</p>
+            <p class="text-3xl font-bold">$456.8K</p>
+            <p class="text-xs text-muted-foreground">Excludes cancellations</p>
+        </div>
+    </div>
+
+    <!-- Pending Review Card -->
+    <div class="rounded-2xl border border-border bg-card p-6">
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-muted-foreground">Pending review</p>
+            <p class="text-3xl font-bold">@Model.Count(p => p.Status == "pending")</p>
+            <p class="text-xs text-muted-foreground">Awaiting moderation</p>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="rounded-2xl border border-border bg-card">
+    <div class="border-b border-border">
+        <div class="flex gap-2 px-6">
+            <a href="?tab=moderation" class="px-4 py-4 font-medium border-b-2 border-transparent hover:border-primary text-muted-foreground hover:text-foreground whitespace-nowrap">
+                Moderation Queue
+            </a>
+            <a href="?tab=members" class="px-4 py-4 font-medium border-b-2 border-transparent hover:border-primary text-muted-foreground hover:text-foreground whitespace-nowrap">
+                Members
+            </a>
+        </div>
+    </div>
+
+    <div class="p-6">
+        @{
+            var tab = Context.Request.Query["tab"].ToString() ?? "moderation";
+        }
+
+        @if (tab == "moderation")
+        {
+            <!-- Moderation Queue Tab -->
+            <div class="space-y-4">
+                <!-- Search -->
+                <div class="mb-6">
+                    <input type="text" placeholder="Search listings..." class="w-full rounded-lg border border-border bg-background px-4 py-2" />
+                </div>
+
+                <!-- Listings Table -->
+                @if (Model.Any())
+                {
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="border-b border-border">
+                                <tr>
+                                    <th class="text-left px-4 py-3 font-semibold text-sm text-muted-foreground">Property</th>
+                                    <th class="text-left px-4 py-3 font-semibold text-sm text-muted-foreground">Status</th>
+                                    <th class="text-left px-4 py-3 font-semibold text-sm text-muted-foreground">Submitted</th>
+                                    <th class="text-right px-4 py-3 font-semibold text-sm text-muted-foreground">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border">
+                                @foreach (var property in Model.Where(p => p.Status == "pending").Take(10))
+                                {
+                                    <tr class="hover:bg-secondary/50">
+                                        <td class="px-4 py-3">
+                                            <div class="font-medium">@property.Title</div>
+                                            <div class="text-sm text-muted-foreground">@property.City, @property.Country</div>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
+                                                Pending
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-muted-foreground">
+                                            @property.Submitted.ToShortDateString()
+                                        </td>
+                                        <td class="px-4 py-3 text-right space-x-2">
+                                            <form asp-controller="Admin" asp-action="ApproveProperty" method="post" class="inline"
+                                                  onsubmit="return confirm('Approve this listing?');">
+                                                <input type="hidden" name="propertyId" value="@property.Id" />
+                                                <button type="submit" class="text-xs font-semibold text-primary hover:underline">
+                                                    Approve
+                                                </button>
+                                            </form>
+                                            <form asp-controller="Admin" asp-action="RejectProperty" method="post" class="inline"
+                                                  onsubmit="return confirm('Reject this listing?');">
+                                                <input type="hidden" name="propertyId" value="@property.Id" />
+                                                <button type="submit" class="text-xs font-semibold text-destructive hover:underline">
+                                                    Reject
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-8 text-muted-foreground">
+                        No listings pending review.
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Members Tab -->
+            <div class="space-y-4">
+                <!-- Search -->
+                <div class="mb-6">
+                    <input type="text" placeholder="Search members..." class="w-full rounded-lg border border-border bg-background px-4 py-2" />
+                </div>
+
+                <!-- Members Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="border-b border-border">
+                            <tr>
+                                <th class="text-left px-4 py-3 font-semibold text-sm text-muted-foreground">Member</th>
+                                <th class="text-left px-4 py-3 font-semibold text-sm text-muted-foreground">Role</th>
+                                <th class="text-left px-4 py-3 font-semibold text-sm text-muted-foreground">Status</th>
+                                <th class="text-right px-4 py-3 font-semibold text-sm text-muted-foreground">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border">
+                            <tr class="hover:bg-secondary/50">
+                                <td class="px-4 py-3">
+                                    <div class="font-medium">Nadia Rahman</div>
+                                    <div class="text-sm text-muted-foreground">nadia@example.com</div>
+                                </td>
+                                <td class="px-4 py-3 text-sm">Guest</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                                        Active
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-right space-x-2">
+                                    <a href="#" class="text-xs font-semibold text-primary hover:underline">View</a>
+                                    <a href="#" class="text-xs font-semibold text-destructive hover:underline">Suspend</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/site.js" asp-append-version="true"></script>
+}  *@ 
