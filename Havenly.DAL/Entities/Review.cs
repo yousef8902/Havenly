@@ -24,7 +24,11 @@ public class Review
 
     public string HostResponse { get; private set; }
 
+<<<<<<< HEAD
     public void Create(long reviewId, string userId, long bookingId, int rating, string comment = null)
+=======
+    public void Create(long reviewId, long userId, long bookingId, int rating, string comment = null)
+>>>>>>> DAL
     {
         ReviewID = reviewId;
         UserID = userId;

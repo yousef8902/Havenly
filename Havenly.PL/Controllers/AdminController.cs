@@ -1,4 +1,5 @@
-﻿using Havenly.BLL.Services.Abstractions;
+﻿using Havenly.BLL.ModelVMs;
+using Havenly.BLL.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Havenly.PL.Controllers
@@ -13,15 +14,22 @@ namespace Havenly.PL.Controllers
     {
 
         private readonly IListingServices listingService;
+        private readonly IReportService reportService;
 
-        public AdminController(IListingServices listingService)
+
+        public AdminController(IListingServices listingService, IReportService reportService)
         {
             this.listingService = listingService;
+            this.reportService = reportService;
         }
         public async Task<IActionResult> DashBoard()
         {
-            var pendingListings = await listingService.GetPendingListings();
-            return View(pendingListings);
+            var vm = new AdminDashboardVM
+            {
+                Stats = await reportService.GetPlatformStats(),
+                PendingListings = await listingService.GetPendingListings()
+            };
+            return View(vm);
         }
 
         [HttpPost]

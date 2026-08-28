@@ -75,5 +75,23 @@ namespace Havenly.DAL.Repos.Implementations
             try { return await context.SaveChangesAsync(); }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return 0; }
         }
+        public async Task<bool> RespondToReview(long id, string response)
+        {
+            try
+            {
+                var review = await context.Reviews.FindAsync(id);
+                if (review is null)
+                {
+                    Console.WriteLine("Error: Review not found");
+                    return false;
+                }
+                review.RespondToReview(response);
+                await context.SaveChangesAsync();
+                Console.WriteLine("info:Review response saved successfully");
+                return true;
+            }
+            catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return false; }
+        }
     }
+
 }

@@ -1,3 +1,6 @@
+
+using Havenly.DAL.Enums;
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Havenly.DAL.Enums;
@@ -69,6 +72,7 @@ public class User : IdentityUser
     {
         Status = UserStatus.Active;
     }
+
 
     public void Delete()
     {

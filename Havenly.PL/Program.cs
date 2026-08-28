@@ -24,6 +24,7 @@ namespace Havenly.PL
             builder.Services.AddDbContext<HavenlyDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             // Register repository implementations
+            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyAmenityRepository, Havenly.DAL.Repos.Implementations.PropertyAmenityRepository>();
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IUserRepository, Havenly.DAL.Repos.Implementations.UserRepository>();
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyRepository, Havenly.DAL.Repos.Implementations.PropertyRepository>();
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IBookingRepository, Havenly.DAL.Repos.Implementations.BookingRepository>();
@@ -36,8 +37,8 @@ namespace Havenly.PL
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IBedRepository, Havenly.DAL.Repos.Implementations.BedRepository>();
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyImageRepository, Havenly.DAL.Repos.Implementations.PropertyImageRepository>();
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IAmenityRepository, Havenly.DAL.Repos.Implementations.AmenityRepository>();
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyAmenityRepository, Havenly.DAL.Repos.Implementations.PropertyAmenityRepository>();
             builder.Services.AddScoped<IListingServices, ListingServices>();
+
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
@@ -52,6 +53,10 @@ namespace Havenly.PL
                 .AddTokenProvider<DataProtectorTokenProvider<User>>(
                     TokenOptions.DefaultProvider);
             
+
+            builder.Services.AddScoped<IReportService, ReportService>();
+            builder.Services.AddScoped<IReviewServices, ReviewServices>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
