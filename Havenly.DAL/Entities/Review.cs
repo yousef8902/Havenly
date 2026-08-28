@@ -8,17 +8,39 @@ namespace Havenly.DAL.Entities;
 public class Review
 {
     [Key]
-    public long ReviewID { get; set; }
+    public long ReviewID { get; private set; }
 
-    public long UserID { get; set; }
+    public string UserID { get; private set; }
     [ForeignKey(nameof(UserID))]
-    public User User { get; set; }
+    public User User { get; private set; }
 
-    public long BookingID { get; set; }
+    public long BookingID { get; private set; }
     [ForeignKey(nameof(BookingID))]
-    public Booking Booking { get; set; }
+    public Booking Booking { get; private set; }
 
-    public int Rating { get; set; }
+    public int Rating { get; private set; }
 
-    public string Comment { get; set; }   
+    public string Comment { get; private set; }
+
+    public string HostResponse { get; private set; }
+
+    public void Create(long reviewId, string userId, long bookingId, int rating, string comment = null)
+    {
+        ReviewID = reviewId;
+        UserID = userId;
+        BookingID = bookingId;
+        Rating = rating;
+        Comment = comment;
+    }
+
+    public void Update(int rating, string comment)
+    {
+        Rating = rating;
+        Comment = comment;
+    }
+
+    public void RespondToReview(string response)
+    {
+        HostResponse = response;
+    }
 }

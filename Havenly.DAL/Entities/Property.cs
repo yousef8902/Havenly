@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -5,10 +7,11 @@ namespace Havenly.DAL.Entities;
 
 public class Property
 {
+
     [Key]
     public long PropertyID { get; private set; }
 
-    public long OwnerUserID { get; private set; }
+    public string OwnerUserID { get; private set; }
     [ForeignKey(nameof(OwnerUserID))]
     [InverseProperty("Properties")]
     public User Owner { get; private set; }
@@ -34,7 +37,7 @@ public class Property
     public Listing Listing { get; private set; }
     public ICollection<PropertyAmenity> PropertyAmenities { get; private set; }
 
-    public void Create(long ownerUserId, long addressId, string propertyName, string description, int numberOfGuests, int capacity, int bathroomCount)
+    public void Create(string ownerUserId, long addressId, string propertyName, string description, int numberOfGuests, int capacity, int bathroomCount)
     {
         OwnerUserID = ownerUserId;
         AddressID = addressId;
