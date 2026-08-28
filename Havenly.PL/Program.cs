@@ -55,10 +55,18 @@ namespace Havenly.PL
 
                 // User settings
                 options.User.RequireUniqueEmail = true;
-                options.SignIn.RequireConfirmedAccount = true;
+
+                // No email service for now
+                options.SignIn.RequireConfirmedAccount = false;
             })
-          .AddEntityFrameworkStores<HavenlyDbContext>()
-          .AddDefaultTokenProviders();
+.AddEntityFrameworkStores<HavenlyDbContext>()
+.AddDefaultTokenProviders();
+
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Account/Login";
+                options.AccessDeniedPath = "/Account/AccessDenied";
+            });
 
             // Register repository implementations
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IUserRepository, Havenly.DAL.Repos.Implementations.UserRepository>();
@@ -77,35 +85,12 @@ namespace Havenly.PL
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyAmenityRepository, Havenly.DAL.Repos.Implementations.PropertyAmenityRepository>();
 
             builder.Services.AddScoped<IReportService, ReportService>();
+            // Business Services
+            builder.Services.AddScoped<IBookingService, BookingService>();
+            builder.Services.AddScoped<IPropertyService, PropertyService>();
+            builder.Services.AddScoped<IAccountService, AccountService>();
 
-
-            // Authentication
-            builder.Services.AddAuthentication(
-                CookieAuthenticationDefaults.AuthenticationScheme
-            )
-            .AddCookie(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                options =>
-                {
-                    options.LoginPath = new PathString("/Account/Login");
-                    options.AccessDeniedPath = new PathString("/Account/Login");
-                }
-            );
-
-            // ASP.NET Core Identity
-            builder.Services.AddIdentityCore<User>(identityOptions =>
-            {
-                // Email confirmation is disabled for now
-                // because no email service is configured.
-                identityOptions.SignIn.RequireConfirmedAccount = false;
-            })
-            .AddEntityFrameworkStores<HavenlyDbContext>()
-            .AddSignInManager()
-            .AddTokenProvider<DataProtectorTokenProvider<User>>(
-                TokenOptions.DefaultProvider
-            );
-
-          
+     
 
             //Mapper
             builder.Services.AddAutoMapper(cfg =>
@@ -115,13 +100,6 @@ namespace Havenly.PL
             });
 
           
-
-            // Business Services
-            builder.Services.AddScoped<IBookingService, BookingService>();
-            builder.Services.AddScoped<IPropertyService, PropertyService>();
-
-           
-
 
 
             var app = builder.Build();
@@ -167,9 +145,9 @@ namespace Havenly.PL
                 name: "default",
 
                 pattern: "{controller=Home}/{action=Index}/{id?}"
-            )
+            );
 
-e
+
 
             app.Run();
         }
