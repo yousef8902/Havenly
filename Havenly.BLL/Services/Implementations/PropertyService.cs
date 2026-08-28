@@ -38,7 +38,7 @@ namespace Havenly.BLL.Services.Implementations
 
         public async Task<PropertyDetailsVM?> GetPropertyDetailsByIdAsync(long id)
         {
-            var property = await _propertyRepository.GetById(id);
+            var property = await _propertyRepository.GetDetailbyId(id);
 
             if (property == null)
             {

@@ -220,52 +220,70 @@
                 </div>
 
                 <!-- Booking Form -->
-                <form asp-controller="Bookings" asp-action="Create" method="post" class="space-y-4" id="bookingForm">
-                    <input type="hidden" name="propertySlug" value="@Model.Id" />
-                    <input type="hidden" name="pricePerNight" value="@Model.Price" />
+                <form asp-controller="Booking" asp-action="Create" method="post" class="space-y-4" id="bookingForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ListingID" value="@Model.ListingID" />
+                    <input type="hidden" name="PricePerNight" value="@Model.Price" />
+
                     <div>
                         <label for="checkIn" class="block text-sm font-medium mb-2">Check in</label>
-                        <input type="date" name="checkIn" id="checkIn" required 
-                               class="w-full rounded-lg border border-border bg-background px-3 py-2" 
-                               value="@Model.Booking.CheckIn.ToString("yyyy-MM-dd")" />
+                        <input type="date"
+                               name="CheckIn"
+                               id="checkIn"
+                               required
+                               class="w-full rounded-lg border border-border bg-background px-3 py-2"
+                               value="@(Model.Booking.CheckIn.ToString("yyyy-MM-dd") == "0001-01-01" ? DateTime.Today.ToString("yyyy-MM-dd") : Model.Booking.CheckIn.ToString("yyyy-MM-dd"))"
+                               min="@DateTime.Today.ToString("yyyy-MM-dd")" />
                     </div>
 
                     <div>
                         <label for="checkOut" class="block text-sm font-medium mb-2">Check out</label>
-                        <input type="date" name="checkOut" id="checkOut" required 
+                        <input type="date"
+                               name="CheckOut"
+                               id="checkOut"
+                               required
                                class="w-full rounded-lg border border-border bg-background px-3 py-2"
-                               value="@Model.Booking.CheckOut.ToString("yyyy-MM-dd")" />
+                               value="@Model.Booking.CheckOut.ToString("yyyy-MM-dd")"
+                               min="@Model.Booking.CheckIn.ToString("yyyy-MM-dd")" />
                     </div>
 
                     <div>
                         <label for="guests" class="block text-sm font-medium mb-2">Guests</label>
-                        <select name="guests" id="guests" required 
-                                class="w-full rounded-lg border border-border bg-background px-3 py-2">
+                        <select name="Guests" id="guests" required class="w-full rounded-lg border border-border bg-background px-3 py-2">
                             @for (int i = 1; i <= Model.Guests; i++)
                             {
-                               <option value="@i" selected="@(i == Model.Booking.Guests ? "selected" : null)">@i guest@(i != 1 ? "s" : "")</option>
+                                <option value="@i" selected="@(i == Model.Booking.Guests ? "selected" : null)">
+                                    @i guest@(i != 1 ? "s" : "")
+                                </option>
                             }
                         </select>
                     </div>
 
+                    <!-- Status / Notice Banner -->
+                    <div id="noticeBanner" class="rounded-lg border border-border bg-secondary p-3 text-sm font-medium text-muted-foreground">
+                        Select dates to check availability.
+                    </div>
+
                     <!-- Price Breakdown -->
-                    <div class="space-y-2 border-t border-b border-border py-4">
+                    <div id="priceBreakdown" class="space-y-2 border-t border-b border-border py-4">
                         <div class="flex justify-between text-sm">
-                            <span>Nights (0)</span>
-                            <span>$0</span>
+                            <span id="nightsLabel">Nights (0)</span>
+                            <span id="subtotalVal">$0</span>
                         </div>
                         <div class="flex justify-between text-sm">
-                            <span>Service fee</span>
-                            <span>$0</span>
+                            <span>Service fee (9%)</span>
+                            <span id="serviceFeeVal">$0</span>
                         </div>
-                        <div class="flex justify-between font-semibold">
+                        <div class="flex justify-between font-semibold text-foreground text-base pt-1">
                             <span>Total</span>
-                            <span>$0</span>
+                            <span id="totalVal">$0</span>
                         </div>
                     </div>
 
                     <!-- Booking Button -->
-                    <button type="submit" class="w-full rounded-lg bg-primary px-4 py-3 font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed" id="bookButton">
+                    <button type="submit"
+                            id="bookButton"
+                            class="w-full rounded-lg bg-primary px-4 py-3 font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed">
                         Request booking
                     </button>
                 </form>
@@ -294,26 +312,121 @@
 @section Scripts {
     <script src="~/js/property.js" asp-append-version="true"></script>
     <script>
-        // Price calculation logic
-        document.getElementById('checkIn').addEventListener('change', calculatePrice);
-        document.getElementById('checkOut').addEventListener('change', calculatePrice);
+        (function() {
+            function initBookingCalculator() {
+                const checkInInput = document.getElementById('checkIn');
+                const checkOutInput = document.getElementById('checkOut');
+                const noticeBanner = document.getElementById('noticeBanner');
+                const bookButton = document.getElementById('bookButton');
 
-        function calculatePrice() {
-            const checkIn = new Date(document.getElementById('checkIn').value);
-            const checkOut = new Date(document.getElementById('checkOut').value);
-            const price = @Model.Price;
+                const nightsLabel = document.getElementById('nightsLabel');
+                const subtotalVal = document.getElementById('subtotalVal');
+                const serviceFeeVal = document.getElementById('serviceFeeVal');
+                const totalVal = document.getElementById('totalVal');
 
-            if (checkIn && checkOut && checkOut > checkIn) {
-                const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-                const subtotal = nights * price;
-                const serviceFee = Math.round(subtotal * 0.09);
-                const total = subtotal + serviceFee;
+                if (!checkInInput || !checkOutInput || !bookButton) return;
 
-                document.querySelectorAll('[data-nights]')[0]?.textContent = 'Nights (' + nights + ')';
-                document.querySelectorAll('[data-subtotal]')[0]?.textContent = '$' + subtotal;
-                document.querySelectorAll('[data-fee]')[0]?.textContent = '$' + serviceFee;
-                document.querySelectorAll('[data-total]')[0]?.textContent = '$' + total;
+                // Force invariant dot-decimal parsing in JS
+                const pricePerNight = parseFloat("@Model.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)") || 0;
+                const bookedDates = @Html.Raw(Json.Serialize(Model.BookedDates ?? new List<string>()));
+
+                function parseLocalDate(dateStr) {
+                    if (!dateStr) return null;
+                    const parts = dateStr.split('-');
+                    if (parts.length !== 3) return null;
+                    return new Date(parts[0], parts[1] - 1, parts[2]);
+                }
+
+                function updateCalculator() {
+                    const checkInVal = checkInInput.value;
+                    const checkOutVal = checkOutInput.value;
+
+                    if (!checkInVal || !checkOutVal) {
+                        noticeBanner.className = "rounded-lg border border-border bg-secondary p-3 text-sm font-medium text-muted-foreground";
+                        noticeBanner.textContent = "Select dates to check availability.";
+                        resetBreakdown();
+                        bookButton.disabled = true;
+                        return;
+                    }
+
+                    const checkIn = parseLocalDate(checkInVal);
+                    const checkOut = parseLocalDate(checkOutVal);
+
+                    if (!checkIn || !checkOut) {
+                        resetBreakdown();
+                        bookButton.disabled = true;
+                        return;
+                    }
+
+                    const diffTime = checkOut.getTime() - checkIn.getTime();
+                    const nights = Math.round(diffTime / (1000 * 3600 * 24));
+
+                    if (nights <= 0) {
+                        noticeBanner.className = "rounded-lg border border-destructive/35 bg-destructive/10 p-3 text-sm font-medium text-destructive";
+                        noticeBanner.textContent = "Check-out must be at least one night after check-in.";
+                        resetBreakdown();
+                        bookButton.disabled = true;
+                        return;
+                    }
+
+                    // Check for overlap
+                    let hasConflict = false;
+                    for (let i = 0; i < nights; i++) {
+                        const d = new Date(checkIn.getFullYear(), checkIn.getMonth(), checkIn.getDate() + i);
+                        const yr = d.getFullYear();
+                        const mo = String(d.getMonth() + 1).padStart(2, '0');
+                        const dy = String(d.getDate()).padStart(2, '0');
+                        const curDate = `${yr}-${mo}-${dy}`;
+
+                        if (bookedDates.includes(curDate)) {
+                            hasConflict = true;
+                            break;
+                        }
+                    }
+
+                    if (hasConflict) {
+                        noticeBanner.className = "rounded-lg border border-destructive/35 bg-destructive/10 p-3 text-sm font-medium text-destructive";
+                        noticeBanner.textContent = "Those dates overlap with an existing reservation.";
+                        resetBreakdown();
+                        bookButton.disabled = true;
+                    } else {
+                        noticeBanner.className = "rounded-lg border border-success/35 bg-success/10 p-3 text-sm font-medium text-success";
+                        noticeBanner.textContent = `${nights} ${nights === 1 ? 'night' : 'nights'} available for your stay.`;
+
+                        const subtotal = nights * pricePerNight;
+                        const serviceFee = Math.round(subtotal * 0.09);
+                        const total = subtotal + serviceFee;
+
+                        nightsLabel.textContent = `Nights (${nights}) — $${pricePerNight}/night`;
+                        subtotalVal.textContent = `$${subtotal}`;
+                        serviceFeeVal.textContent = `$${serviceFee}`;
+                        totalVal.textContent = `$${total}`;
+
+                        bookButton.disabled = false;
+                    }
+                }
+
+                function resetBreakdown() {
+                    nightsLabel.textContent = "Nights (0)";
+                    subtotalVal.textContent = "$0";
+                    serviceFeeVal.textContent = "$0";
+                    totalVal.textContent = "$0";
+                }
+
+                checkInInput.addEventListener('change', function() {
+                    checkOutInput.min = checkInInput.value;
+                    updateCalculator();
+                });
+                checkOutInput.addEventListener('change', updateCalculator);
+
+                updateCalculator();
             }
-        }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initBookingCalculator);
+            } else {
+                initBookingCalculator();
+            }
+        })();
     </script>
 }

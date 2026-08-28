@@ -70,5 +70,17 @@ namespace Havenly.DAL.Repos.Implementations
             try { return await context.SaveChangesAsync(); }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return 0; }
         }
+
+        
+
+        public async  Task<Property?> GetDetailbyId(long id)
+        {
+            return await context.Properties
+       .Include(p => p.Listing)
+       .Include(p => p.Images)
+       .Include(p=>p.PropertyAmenities)
+       .Include(p=>p.Address)
+       .FirstOrDefaultAsync(p => p.PropertyID == id);
+        }
     }
 }

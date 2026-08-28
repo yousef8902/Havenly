@@ -45,7 +45,7 @@ public class BookingController : Controller
     {
         if (!ModelState.IsValid)
         {
-            return View(model);
+            return View( model);
         }
 
         // TODO [Identity Integration]: Retrieve the real logged-in user's ID dynamically
