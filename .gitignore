@@ -44,6 +44,8 @@ ScaffoldingReadMe.txt
 # dotenv environment variables file
 .env
 
+# Node
+node_modules/
 # Others
 ~$*
 *~
@@ -60,3 +62,6 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+/TestHavenly
+/Havenly.DAL/Migrations
+Havenly.BLL.Tests
