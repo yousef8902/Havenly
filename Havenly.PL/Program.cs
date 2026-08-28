@@ -65,7 +65,7 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectio
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Property}/{action=Details}/{id?}")
+                pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
 
             app.Run();
