@@ -100,7 +100,7 @@ namespace Havenly.BLL.Services.Implementations
             };
         }
 
-        public async Task<IEnumerable<BookingDetailsVM>> GetBookingsByUserAsync(long userId)
+        public async Task<IEnumerable<BookingDetailsVM>> GetBookingsByUserAsync(string userId)
         {
             var bookings = await _unitOfWork.Bookings.GetAll()
        .Include(b => b.Guest)                    // For guest name/email
@@ -117,7 +117,7 @@ namespace Havenly.BLL.Services.Implementations
             return _mapper.Map<IEnumerable<BookingDetailsVM>>(bookings);
         }
 
-        public async Task<bool> CancelBookingAsync(long bookingId, long guestUserId)
+        public async Task<bool> CancelBookingAsync( long bookingId, string guestUserId)
         {
             var bookingList = await _unitOfWork.Bookings.Find(b => b.BookingID == bookingId && b.GuestUserID == guestUserId);
             var booking = bookingList.FirstOrDefault();

@@ -1,21 +1,19 @@
 
-using Havenly.BLL.Services.Abstractions;
-using Havenly.BLL.Services.Implementations;
-using Havenly.DAL.Database;
-using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
-using Havenly.DAL.Database;
-using Havenly.DAL.Entities;
 
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
+using Havenly.BLL.Services.Abstractions;
+using Havenly.BLL.Services.Implementations;
 using Havenly.BLL.Mappers;
 
-using Havenly.DAL.Database.Seed;
+using Havenly.DAL.Entities;
+using Havenly.DAL.Database;
 using Havenly.DAL.Repos.Abstractions;
 using Havenly.DAL.Repos.Implementations;
+using Havenly.DAL.Database.Seed;
 
 namespace Havenly.PL
 {
@@ -28,9 +26,31 @@ namespace Havenly.PL
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            Console.WriteLine(builder.Configuration.GetConnectionString("DefaultConnection"));
+           
             builder.Services.AddDbContext<HavenlyDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddIdentity<User, IdentityRole>(options =>
+            {
+                // Password settings
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = true;
+
+                // Lockout settings
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+
+                // User settings
+                options.User.RequireUniqueEmail = true;
+                options.SignIn.RequireConfirmedAccount = true;
+            })
+          .AddEntityFrameworkStores<HavenlyDbContext>()
+          .AddDefaultTokenProviders();
+
             // Register repository implementations
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IUserRepository, Havenly.DAL.Repos.Implementations.UserRepository>();
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyRepository, Havenly.DAL.Repos.Implementations.PropertyRepository>();
@@ -63,29 +83,28 @@ namespace Havenly.PL
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddScoped<IPropertyService, PropertyService>();
 
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
-                    options =>
-                    {
-                        options.LoginPath = new PathString("/Account/Login");
-                        options.AccessDeniedPath = new PathString("/Account/Login");
-                    });
-            builder.Services.AddIdentityCore<User>(identityOptions =>
-                    identityOptions.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<HavenlyDbContext>()
-                .AddTokenProvider<DataProtectorTokenProvider<User>>(
-                    TokenOptions.DefaultProvider);
-            
+           
+
+
             var app = builder.Build();
-            //using (var scope = app.Services.CreateScope())
-            //{
-            //    var dbContext = scope.ServiceProvider.GetRequiredService<HavenlyDbContext>();
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                //try
+                //{
+                    var context = services.GetRequiredService<HavenlyDbContext>();
+                    var userManager = services.GetRequiredService<UserManager<User>>();
+                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-               
-            //    await dbContext.Database.EnsureCreatedAsync();
-
-            //    await DatabaseSeeder.SeedAsync(dbContext);
-            //}
+                    await context.Database.MigrateAsync();
+                    await DatabaseSeeder.SeedAsync(context, userManager, roleManager);
+                //}
+                //catch (Exception ex)
+                //{
+                //    var logger = services.GetRequiredService<ILogger<Program>>();
+                //    logger.LogError(ex, "An error occurred while migrating or seeding the database.");
+                //}
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -103,7 +122,7 @@ namespace Havenly.PL
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
+                pattern: "{controller=Booking}/{action=MyBookings}/{id?}")
                 .WithStaticAssets();
 
             app.Run();

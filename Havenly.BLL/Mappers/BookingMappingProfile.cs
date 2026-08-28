@@ -10,7 +10,7 @@ namespace Havenly.BLL.Mappers
         {
             CreateMap<Booking, BookingDetailsVM>()
                 // Basic ID mappings
-                .ForMember(dest => dest.BookingId, opt => opt.MapFrom(src => (int)src.BookingID))
+                .ForMember(dest => dest.BookingId, opt => opt.MapFrom(src => src.BookingID.ToString()))
                 .ForMember(dest => dest.PropertyId, opt => opt.MapFrom(src =>
                     src.Listing != null ? src.Listing.PropertyID.ToString() : "0"))
 

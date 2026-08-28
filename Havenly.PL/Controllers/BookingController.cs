@@ -2,6 +2,8 @@
 // [Authorize]
 using Havenly.BLL.ModelVMs;
 using Havenly.BLL.Services.Abstractions;
+using Havenly.DAL.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 public class BookingController : Controller
@@ -9,15 +11,15 @@ public class BookingController : Controller
     private readonly IBookingService _bookingService;
 
     // TODO [Identity Integration]: Declare UserManager field to query logged-in user details
-    // private readonly UserManager<ApplicationUser> _userManager;
+     private readonly UserManager<User> _userManager;
 
 
     // TODO [Identity Integration]: Update constructor to inject UserManager<ApplicationUser>
-    // public BookingController(IBookingService bookingService, UserManager<ApplicationUser> userManager)
-    public BookingController(IBookingService bookingService)
+    
+    public BookingController(IBookingService bookingService, UserManager<User> userManager)
     {
         _bookingService = bookingService;
-        // _userManager = userManager;
+        _userManager = userManager;
     }
 
     [HttpGet]
@@ -49,8 +51,8 @@ public class BookingController : Controller
         }
 
         // TODO [Identity Integration]: Retrieve the real logged-in user's ID dynamically
-        // string currentUserIdString = _userManager.GetUserId(User);
-        // long resolvedUserId = long.Parse(currentUserIdString); // or keep as string if your IDs use Guids/strings
+        string resolvedUserId = _userManager.GetUserId(User);
+      
 
 
         var createVm = new BookingCreateVM
@@ -59,7 +61,7 @@ public class BookingController : Controller
             CheckIn = model.CheckIn,
             CheckOut = model.CheckOut,
             PricePerNight = model.PricePerNight,
-            GuestUserID = 4 // TODO [Identity Integration]: Replace placeholder '1' with resolvedUserId
+            GuestUserID = resolvedUserId
         };
 
 
@@ -79,11 +81,11 @@ public class BookingController : Controller
     public async Task<IActionResult> MyBookings()
     {
         // TODO [Identity Integration]: Fetch bookings for the currently authenticated user instead of hardcoded '1'
-        // string currentUserIdString = _userManager.GetUserId(User);
-        // long resolvedUserId = long.Parse(currentUserIdString);
-        // var bookings = await _bookingService.GetBookingsByUserAsync(resolvedUserId);
+         string resolvedUserId = _userManager.GetUserId(User);
+      
+         var bookings = await _bookingService.GetBookingsByUserAsync(resolvedUserId);
 
-        var bookings = await _bookingService.GetBookingsByUserAsync(4);
+   
         var viewModel = new BookingsPageVM
         {
             Bookings = bookings.ToList() 
@@ -95,8 +97,8 @@ public class BookingController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CancelBooking(long id)
     {
-        long currentUserId = 4;
-        bool cancelled = await _bookingService.CancelBookingAsync(id, currentUserId);
+        string resolvedUserId = _userManager.GetUserId(User);
+        bool cancelled = await _bookingService.CancelBookingAsync(id, resolvedUserId);
 
         if (cancelled)
         {

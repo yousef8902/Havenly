@@ -6,8 +6,8 @@ namespace Havenly.BLL.ModelVMs
 {
     public class BookingDetailsVM
     {
-        public int BookingId { get; set; } 
-        public string PropertyId { get; set; } = "";
+        public long BookingId { get; set; } 
+        public long PropertyId { get; set; } = 0;
         public string Title { get; set; } = "";
         public string City { get; set; } = "";
         public string Country { get; set; } = "";

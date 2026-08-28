@@ -7,7 +7,7 @@ namespace Havenly.BLL.ModelVMs
     public partial class BookingCreateVM
     {
 
-        public long GuestUserID { get; set; }
+        public string GuestUserID { get; set; }
         public long ListingID { get; set; }
         public DateTime CheckIn { get; set; }
         public DateTime CheckOut { get; set; }

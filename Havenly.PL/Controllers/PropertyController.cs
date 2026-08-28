@@ -27,7 +27,7 @@ public class PropertyController : Controller
     [HttpGet]
     public async Task<IActionResult> Detail(long id)
     {
-        if (id <= 0)
+        if (id == 0)
         {
             return NotFound();
         }

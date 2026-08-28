@@ -4,7 +4,7 @@ namespace Havenly.BLL.ModelVMs
 {
     public class BookingRequestFormVM
     {
-        public long GuestUserID { get; set; }
+        public string GuestUserID { get; set; }
 
         public long ListingID { get; set; }
 

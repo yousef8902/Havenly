@@ -10,7 +10,7 @@ namespace Havenly.DAL.Repos.Abstractions
     public interface IBookingRepository
     {
         Task<Booking?> GetById(long id);
-        Task<IEnumerable<Booking>> GetAll();
+        //Task<IEnumerable<Booking>> GetAll();
         Task<IEnumerable<Booking>> Find(Expression<Func<Booking, bool>> predicate);
         Task<Booking?> Get(Func<Booking, bool> predicate);
        
