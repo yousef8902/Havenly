@@ -1,7 +1,6 @@
 using Havenly.DAL.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Havenly.DAL.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace Havenly.DAL.Entities;
@@ -63,7 +62,7 @@ public class User : IdentityUser
 
     public void Delete()
     {
-        IsDeleted = true;
+        Status = UserStatus.Deleted;
     }
 
 

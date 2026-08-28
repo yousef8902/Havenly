@@ -17,7 +17,7 @@ namespace Havenly.PL.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(long bookingId, long userId, int rating, string comment)
+        public async Task<IActionResult> Create(long bookingId, String userId, int rating, string comment)
         {
             var success = await reviewServices.CreateReview(userId, bookingId, rating, comment);
             TempData["Message"] = success

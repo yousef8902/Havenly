@@ -1,6 +1,5 @@
 ﻿using Havenly.BLL.ModelVMs.Admin;
 using Havenly.DAL.Entities;
-using System.Collections.Generic;
 
 namespace Havenly.BLL.ModelVMs
 {
