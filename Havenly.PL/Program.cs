@@ -1,4 +1,5 @@
 
+
 using AutoMapper;
 
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ using Havenly.DAL.Repos.Abstractions;
 using Havenly.DAL.Repos.Implementations;
 using Havenly.DAL.Database.Seed;
 
+
 namespace Havenly.PL
 {
     public class Program
@@ -23,12 +25,19 @@ namespace Havenly.PL
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Add services to the container
             builder.Services.AddControllersWithViews();
 
+
            
+            // Register DbContext
             builder.Services.AddDbContext<HavenlyDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("DefaultConnection")
+                )
+            );
+
+
 
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
@@ -66,7 +75,35 @@ namespace Havenly.PL
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyImageRepository, Havenly.DAL.Repos.Implementations.PropertyImageRepository>();
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IAmenityRepository, Havenly.DAL.Repos.Implementations.AmenityRepository>();
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyAmenityRepository, Havenly.DAL.Repos.Implementations.PropertyAmenityRepository>();
-            builder.Services.AddScoped<IListingServices, ListingServices>();
+
+            builder.Services.AddScoped<IReportService, ReportService>();
+
+
+            // Authentication
+            builder.Services.AddAuthentication(
+                CookieAuthenticationDefaults.AuthenticationScheme
+            )
+            .AddCookie(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                options =>
+                {
+                    options.LoginPath = new PathString("/Account/Login");
+                    options.AccessDeniedPath = new PathString("/Account/Login");
+                }
+            );
+
+            // ASP.NET Core Identity
+            builder.Services.AddIdentityCore<User>(identityOptions =>
+            {
+                // Email confirmation is disabled for now
+                // because no email service is configured.
+                identityOptions.SignIn.RequireConfirmedAccount = false;
+            })
+            .AddEntityFrameworkStores<HavenlyDbContext>()
+            .AddSignInManager()
+            .AddTokenProvider<DataProtectorTokenProvider<User>>(
+                TokenOptions.DefaultProvider
+            );
 
           
 
@@ -84,6 +121,7 @@ namespace Havenly.PL
             builder.Services.AddScoped<IPropertyService, PropertyService>();
 
            
+
 
 
             var app = builder.Build();
@@ -106,24 +144,32 @@ namespace Havenly.PL
                 //}
             }
 
-            // Configure the HTTP request pipeline.
+            // Configure the HTTP request pipeline
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+
+                // The default HSTS value is 30 days.
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
+
             app.UseRouting();
+
+            // Authentication must come before Authorization
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();
+
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Booking}/{action=MyBookings}/{id?}")
-                .WithStaticAssets();
+
+                pattern: "{controller=Home}/{action=Index}/{id?}"
+            )
+
+e
 
             app.Run();
         }

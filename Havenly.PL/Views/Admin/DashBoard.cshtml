@@ -1,0 +1,78 @@
+﻿
+@model Havenly.BLL.ModelVMs.AdminDashboardVM
+
+<h2>Admin Dashboard</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info">@TempData["Message"]</div>
+}
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card p-3">
+            <small class="text-muted">Members</small>
+            <h2>@Model.Stats.MemberCount</h2>
+            <small class="text-muted">Guests, hosts and staff</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <small class="text-muted">Listings</small>
+            <h2>@Model.Stats.ListingCount</h2>
+            <small class="text-muted">Live and in review</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <small class="text-muted">Gross bookings</small>
+            <h2>@Model.Stats.GrossBookings.ToString("C")</h2>
+            <small class="text-muted">Excludes cancellations</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3">
+            <small class="text-muted">Pending review</small>
+            <h2>@Model.Stats.PendingReviewCount</h2>
+            <small class="text-muted">Awaiting moderation</small>
+        </div>
+    </div>
+</div>
+
+<h3>Pending Listings</h3>
+
+@if (!Model.PendingListings.Any())
+{
+    <p>No listings awaiting review.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var listing in Model.PendingListings)
+            {
+                <tr>
+                    <td>@listing.ListingID</td>
+                    <td>@listing.Description</td>
+                    <td>@listing.Price.ToString("C")</td>
+                    <td>
+                        <form asp-action="Approve" asp-route-id="@listing.ListingID" method="post" style="display:inline">
+                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                        </form>
+                        <form asp-action="Decline" asp-route-id="@listing.ListingID" method="post" style="display:inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

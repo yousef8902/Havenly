@@ -1,6 +1,6 @@
+using Havenly.DAL.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Havenly.DAL.Enums;
 using Microsoft.AspNetCore.Identity;
 
 namespace Havenly.DAL.Entities;
@@ -58,18 +58,10 @@ public class User : IdentityUser
        // Role = role;
     }
 
-    public void Suspend()
-    {
-        Status = UserStatus.Suspended;
-    }
-
-    public void Reinstate()
-    {
-        Status = UserStatus.Active;
-    }
-
     public void Delete()
     {
         Status = UserStatus.Deleted;
     }
+
+
 }
