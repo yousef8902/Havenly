@@ -25,7 +25,7 @@ public class Payment
     [StringLength(100)]
     public string TransactionID { get; private set; }
 
-    public void Create(long paymentId, long bookingId, string gateway, decimal amount, string transactionId)
+    public void Create(long paymentId, long  bookingId, string gateway, decimal amount, string transactionId)
     {
         PaymentID = paymentId;
         BookingID = bookingId;

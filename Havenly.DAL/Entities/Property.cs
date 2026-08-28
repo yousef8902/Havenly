@@ -7,33 +7,33 @@ public class Property
 {
 
     [Key]
-    public long PropertyID { get; private set; }
+    public long PropertyID { get;  set; }
 
-    public string OwnerUserID { get; private set; }
+    public string OwnerUserID { get;  set; }
     [ForeignKey(nameof(OwnerUserID))]
     [InverseProperty("Properties")]
-    public User Owner { get; private set; }
+    public User Owner { get;  set; }
 
-    public long AddressID { get; private set; }
+    public long AddressID { get;  set; }
     [ForeignKey(nameof(AddressID))]
-    public Address Address { get; private set; }
+    public Address Address { get;  set; }
 
     [Required]
     [StringLength(100)]
-    public string PropertyName { get; private set; }
+    public string PropertyName { get;  set; }
 
-    public string Description { get; private set; }
+    public string Description { get;  set; }
 
-    public int NumberOfGuests { get; private set; }
-    public int Capacity { get; private set; }
-    public int BathroomCount { get; private set; }
-    public bool IsDeleted { get; private set; }
+    public int NumberOfGuests { get;  set; }
+    public int Capacity { get;  set; }
+    public int BathroomCount { get;  set; }
+    public bool IsDeleted { get;  set; }
 
     // Navigation
-    public ICollection<Bedroom> Bedrooms { get; private set; }
-    public ICollection<PropertyImage> Images { get; private set; }
-    public Listing Listing { get; private set; }
-    public ICollection<PropertyAmenity> PropertyAmenities { get; private set; }
+    public ICollection<Bedroom> Bedrooms { get;  set; }
+    public ICollection<PropertyImage> Images { get;  set; }
+    public Listing Listing { get;  set; }
+    public ICollection<PropertyAmenity> PropertyAmenities { get;  set; }
 
     public void Create(string ownerUserId, long addressId, string propertyName, string description, int numberOfGuests, int capacity, int bathroomCount)
     {

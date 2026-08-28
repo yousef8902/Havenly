@@ -1,0 +1,151 @@
+@model Havenly.BLL.ModelVMs.PropertyCardVM
+
+@{
+    ViewData["Title"] = "Host dashboard — Havenly";
+    ViewData["Description"] = "Manage your properties and bookings.";
+    Layout = "~/Views/Shared/_WorkspaceLayout.cshtml";
+    ViewData["Workspace"] = "Host dashboard";
+    ViewData["WorkspaceRole"] = "Omar Khalil · Host";
+    ViewData["WorkspaceNav"] = "host";
+}
+
+<!-- Page Heading -->
+<div class="space-y-2 mb-8">
+    <h1 class="text-3xl font-bold">Overview</h1>
+    <p class="text-muted-foreground">Calendar, earnings and recent activity.</p>
+</div>
+
+<!-- Stat Cards Grid -->
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
+    <!-- Active Listings Card -->
+    <div class="rounded-2xl border border-border bg-card p-6">
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-muted-foreground">Active listings</p>
+            <p class="text-3xl font-bold">3</p>
+            <p class="text-xs text-muted-foreground">Ready for booking</p>
+        </div>
+    </div>
+
+    <!-- Pending Bookings Card -->
+    <div class="rounded-2xl border border-border bg-card p-6">
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-muted-foreground">Pending requests</p>
+            <p class="text-3xl font-bold">2</p>
+            <p class="text-xs text-muted-foreground">Awaiting response</p>
+        </div>
+    </div>
+
+    <!-- This Month Revenue Card -->
+    <div class="rounded-2xl border border-border bg-card p-6">
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-muted-foreground">This month</p>
+            <p class="text-3xl font-bold">$3,240</p>
+            <p class="text-xs text-muted-foreground">Revenue after fees</p>
+        </div>
+    </div>
+
+    <!-- Total Earnings Card -->
+    <div class="rounded-2xl border border-border bg-card p-6">
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-muted-foreground">Total earnings</p>
+            <p class="text-3xl font-bold">$28,450</p>
+            <p class="text-xs text-muted-foreground">Lifetime earnings</p>
+        </div>
+    </div>
+</div>
+
+<!-- Calendar Section -->
+<div class="mb-8">
+    <div class="rounded-2xl border border-border bg-card p-6">
+        <h2 class="text-xl font-semibold mb-4">Booking calendar</h2>
+        <p class="text-sm text-muted-foreground mb-4">Next 30 days overview</p>
+
+        <!-- Simple Calendar Grid -->
+        <div class="grid grid-cols-7 gap-2">
+            @for (int day = 1; day <= 30; day++)
+            {
+                var date = DateTime.Now.AddDays(day - 1);
+                var isBooked = day % 3 == 0; // Mock data
+                var isPending = day % 5 == 0;
+
+                <div class="aspect-square flex items-center justify-center rounded border @(isBooked ? "bg-primary text-primary-foreground" : isPending ? "bg-yellow-100 text-yellow-900" : "border-border hover:bg-secondary")">
+                    <span class="text-sm font-medium">@date.Day</span>
+                </div>
+            }
+        </div>
+
+        <div class="mt-4 flex gap-4 text-xs">
+            <div class="flex items-center gap-2">
+                <div class="h-3 w-3 rounded bg-primary"></div>
+                <span>Booked</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="h-3 w-3 rounded bg-yellow-100 border border-yellow-300"></div>
+                <span>Pending</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="h-3 w-3 rounded border border-border"></div>
+                <span>Available</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Bookings Section -->
+<div class="rounded-2xl border border-border bg-card overflow-hidden">
+    <div class="border-b border-border p-6">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold">Recent bookings</h2>
+            <a asp-controller="Host" asp-action="Bookings" class="text-sm font-semibold text-primary hover:underline">
+                View all
+            </a>
+        </div>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="border-b border-border bg-secondary/30">
+                <tr>
+                    <th class="text-left px-6 py-3 font-semibold text-sm text-muted-foreground">Guest</th>
+                    <th class="text-left px-6 py-3 font-semibold text-sm text-muted-foreground">Property</th>
+                    <th class="text-left px-6 py-3 font-semibold text-sm text-muted-foreground">Dates</th>
+                    <th class="text-left px-6 py-3 font-semibold text-sm text-muted-foreground">Total</th>
+                    <th class="text-left px-6 py-3 font-semibold text-sm text-muted-foreground">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+                <tr class="hover:bg-secondary/30">
+                    <td class="px-6 py-4">
+                        <div class="font-medium">Sarah Mitchell</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm">Beachfront villa</td>
+                    <td class="px-6 py-4 text-sm">Dec 15-20</td>
+                    <td class="px-6 py-4 text-sm font-semibold">$2,400</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-800">
+                            Pending
+                        </span>
+                    </td>
+                </tr>
+                <tr class="hover:bg-secondary/30">
+                    <td class="px-6 py-4">
+                        <div class="font-medium">James Brown</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm">Mountain cabin</td>
+                    <td class="px-6 py-4 text-sm">Dec 22-26</td>
+                    <td class="px-6 py-4 text-sm font-semibold">$1,800</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800">
+                            Approved
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/site.js" asp-append-version="true"></script>
+}

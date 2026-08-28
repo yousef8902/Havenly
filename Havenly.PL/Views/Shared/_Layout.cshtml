@@ -1,49 +1,150 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Havenly.PL</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Havenly.PL.styles.css" asp-append-version="true" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(ViewData["Title"] ?? "Havenly")</title>
+    <meta name="description" content="@(ViewData["Description"] ?? "Havenly — considered homes for short stays.")" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+   
+   
+    @* <link rel="stylesheet" href="~/css/source.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/ui.css" asp-append-version="true" /> *@
+    <link rel="icon" href="~/favicon.ico" type="image/x-icon" />
+    <!-- Google Font: DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS v3 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            display: ['"DM Sans"', 'system-ui', 'sans-serif'],
+                            sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+                        },
+                        colors: {
+                            background: 'oklch(0.985 0.003 106.4)',
+                            foreground: 'oklch(0.217 0.004 106.7)',
+                            surface: 'oklch(1 0 0)',
+                            warm: 'oklch(0.957 0.012 79.8)',
+                            card: {
+                                DEFAULT: 'oklch(1 0 0)',
+                                foreground: 'oklch(0.217 0.004 106.7)',
+                            },
+                            primary: {
+                                DEFAULT: 'oklch(0.476 0.078 162.2)',
+                                foreground: 'oklch(1 0 0)',
+                                light: 'oklch(0.952 0.013 159.9)',
+                            },
+                            secondary: {
+                                DEFAULT: 'oklch(0.951 0.004 106.5)',
+                                foreground: 'oklch(0.29 0.006 106.7)',
+                            },
+                            muted: {
+                                DEFAULT: 'oklch(0.951 0.004 106.5)',
+                                foreground: 'oklch(0.625 0.009 106.7)',
+                            },
+                            accent: {
+                                DEFAULT: 'oklch(0.706 0.118 160.9)',
+                                foreground: 'oklch(0.217 0.004 106.7)',
+                            },
+                            destructive: 'oklch(0.55 0.19 27)',
+                            border: 'oklch(0.917 0.007 106.5)',
+                            input: 'oklch(0.96 0.004 106.5)',
+                            ring: 'oklch(0.476 0.078 162.2)',
+                        },
+                        borderRadius: {
+                            'sm': 'calc(0.75rem - 4px)',
+                            'md': 'calc(0.75rem - 2px)',
+                            'lg': '0.75rem',
+                            'xl': 'calc(0.75rem + 4px)',
+                            '2xl': 'calc(0.75rem + 8px)',
+                        },
+                        boxShadow: {
+                            'soft': '0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)',
+                            'lift': '0 2px 4px rgba(0,0,0,0.05), 0 16px 40px rgba(0,0,0,0.1)',
+                        },
+                    },
+                },
+            };
+    </script>
+
+    <style>
+            * {
+                border-color: #e5e0d8;
+            }
+
+            body {
+                background-color: #faf9f7;
+                background-color: oklch(0.985 0.003 106.4);
+                color: oklch(0.217 0.004 106.7);
+                font-family: 'DM Sans', system-ui, sans-serif;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            h1, h2, h3 {
+                font-weight: 700;
+                letter-spacing: -0.025em;
+            }
+
+            .container-page {
+                margin-inline: auto;
+                width: 100%;
+                max-width: 80rem;
+                padding-inline: 1.25rem;
+            }
+
+            @@media (min-width: 1024px) {
+                .container-page {
+                    padding-inline: 2rem;
+                }
+            }
+
+            .shadow-soft {
+                box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
+            }
+
+            .shadow-lift {
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 16px 40px rgba(0,0,0,0.1);
+            }
+
+            .bg-primary {
+                background-color: #0d9488;
+                background-color: oklch(0.476 0.078 162.2);
+            }
+
+            .bg-card {
+                background-color: #ffffff;
+                background-color: oklch(1 0 0);
+            }
+
+            .bg-warm {
+                background-color: #f5f0e6;
+                background-color: oklch(0.957 0.012 79.8);
+            }
+
+            .text-muted-foreground {
+                color: #8a8578;
+                color: oklch(0.625 0.009 106.7);
+            }
+    </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Havenly.PL</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div class="flex min-h-screen flex-col">
+        <partial name="_SiteHeader" />
+        <main class="flex-1 pb-20 md:pb-0">
             @RenderBody()
         </main>
+        <partial name="_SiteFooter" />
+        <partial name="_MobileTabBar" />
     </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Havenly.PL - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <partial name="_Toasts" />
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

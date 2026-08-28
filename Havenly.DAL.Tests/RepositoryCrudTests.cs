@@ -144,7 +144,7 @@ namespace Havenly.DAL.Tests
             review.Create(
                 reviewId: 0,
                 userId: "1",
-                bookingId: 1,
+                bookingId: "1",
                 rating: 5,
                 comment: "good");
 

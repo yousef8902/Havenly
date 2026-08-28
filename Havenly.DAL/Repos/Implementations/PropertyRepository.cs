@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,8 @@ using Havenly.DAL.Database;
 using Havenly.DAL.Entities;
 using Havenly.DAL.Repos.Abstractions;
 using Microsoft.EntityFrameworkCore;
+
+
 
 namespace Havenly.DAL.Repos.Implementations
 {
@@ -35,10 +38,7 @@ namespace Havenly.DAL.Repos.Implementations
 
         public async Task<IEnumerable<Property>> Find(Expression<Func<Property, bool>> predicate)
         {
-            try { 
-                var list = await context.Properties.Where(predicate).ToArrayAsync(); 
-                Console.WriteLine("info:Properties fetched successfully");
-                return list; }
+            try { var list = await context.Properties.Where(predicate).ToListAsync(); Console.WriteLine("info:Properties fetched successfully"); return list; }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return Enumerable.Empty<Property>(); }
         }
 
@@ -75,6 +75,18 @@ namespace Havenly.DAL.Repos.Implementations
         {
             try { return await context.SaveChangesAsync(); }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return 0; }
+        }
+
+        
+
+        public async  Task<Property?> GetDetailbyId(long id)
+        {
+            return await context.Properties
+       .Include(p => p.Listing)
+       .Include(p => p.Images)
+       .Include(p=>p.PropertyAmenities)
+       .Include(p=>p.Address)
+       .FirstOrDefaultAsync(p => p.PropertyID == id);
         }
     }
 }
