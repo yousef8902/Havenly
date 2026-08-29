@@ -98,8 +98,9 @@ namespace Havenly.PL
             builder.Services.AddScoped<IPropertyService, PropertyService>();
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IListingServices, ListingServices>();
+            builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 
-     
+
 
             //Mapper
             builder.Services.AddAutoMapper(cfg =>

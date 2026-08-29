@@ -1,78 +1,248 @@
-﻿
-@model Havenly.BLL.ModelVMs.AdminDashboardVM
+﻿@model Havenly.BLL.ModelVMs.AdminDashboardVM
 
-<h2>Admin Dashboard</h2>
+<style>
+    .stat-card {
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: 1.25rem;
+        background: #fff;
+        transition: box-shadow 0.15s ease;
+    }
+
+        .stat-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.25rem 0;
+        }
+
+        .stat-card .stat-sub {
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+
+    .admin-tabs .nav-link {
+        border: none;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px 8px 0 0;
+    }
+
+        .admin-tabs .nav-link.active {
+            color: #212529;
+            border-bottom: 2px solid #212529;
+            background: transparent;
+        }
+
+    .admin-table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        .admin-table th {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #6c757d;
+            font-weight: 600;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 0.75rem;
+        }
+
+        .admin-table td {
+            vertical-align: middle;
+            padding: 0.85rem 0.5rem;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+    .badge-status {
+        font-weight: 500;
+        padding: 0.35em 0.75em;
+        border-radius: 999px;
+    }
+</style>
+
+<div class="mb-4">
+    <h2 class="fw-bold mb-1">Admin Dashboard</h2>
+    <p class="text-muted">Manage listings, members, and platform activity</p>
+</div>
 
 @if (TempData["Message"] != null)
 {
-    <div class="alert alert-info">@TempData["Message"]</div>
+    <div class="alert alert-info d-flex align-items-center">
+        <span>@TempData["Message"]</span>
+    </div>
 }
 
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card p-3">
-            <small class="text-muted">Members</small>
-            <h2>@Model.Stats.MemberCount</h2>
-            <small class="text-muted">Guests, hosts and staff</small>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="stat-label">Members</span>
+                <span>👥</span>
+            </div>
+            <div class="stat-value">@Model.Stats.MemberCount</div>
+            <div class="stat-sub">Guests, hosts and staff</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card p-3">
-            <small class="text-muted">Listings</small>
-            <h2>@Model.Stats.ListingCount</h2>
-            <small class="text-muted">Live and in review</small>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="stat-label">Listings</span>
+                <span>🏠</span>
+            </div>
+            <div class="stat-value">@Model.Stats.ListingCount</div>
+            <div class="stat-sub">Live and in review</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card p-3">
-            <small class="text-muted">Gross bookings</small>
-            <h2>@Model.Stats.GrossBookings.ToString("C")</h2>
-            <small class="text-muted">Excludes cancellations</small>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="stat-label">Gross bookings</span>
+                <span>💵</span>
+            </div>
+            <div class="stat-value">@Model.Stats.GrossBookings.ToString("C0")</div>
+            <div class="stat-sub">Excludes cancellations</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card p-3">
-            <small class="text-muted">Pending review</small>
-            <h2>@Model.Stats.PendingReviewCount</h2>
-            <small class="text-muted">Awaiting moderation</small>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="stat-label">Pending review</span>
+                <span>✅</span>
+            </div>
+            <div class="stat-value">@Model.Stats.PendingReviewCount</div>
+            <div class="stat-sub">Awaiting moderation</div>
         </div>
     </div>
 </div>
 
-<h3>Pending Listings</h3>
+<div class="bg-white rounded-3 border p-3">
+    <ul class="nav admin-tabs mb-3" id="adminTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="listings-tab" data-bs-toggle="tab" data-bs-target="#listings-pane" type="button" role="tab">
+                Listings
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="members-tab" data-bs-toggle="tab" data-bs-target="#members-pane" type="button" role="tab">
+                Members
+            </button>
+        </li>
+    </ul>
 
-@if (!Model.PendingListings.Any())
-{
-    <p>No listings awaiting review.</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Description</th>
-                <th>Price</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var listing in Model.PendingListings)
+    <div class="tab-content" id="adminTabContent">
+
+        @* ---------- LISTINGS TAB ---------- *@
+        <div class="tab-pane fade show active" id="listings-pane" role="tabpanel">
+            @if (!Model.PendingListings.Any())
             {
-                <tr>
-                    <td>@listing.ListingID</td>
-                    <td>@listing.Description</td>
-                    <td>@listing.Price.ToString("C")</td>
-                    <td>
-                        <form asp-action="Approve" asp-route-id="@listing.ListingID" method="post" style="display:inline">
-                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
-                        </form>
-                        <form asp-action="Decline" asp-route-id="@listing.ListingID" method="post" style="display:inline">
-                            <button type="submit" class="btn btn-danger btn-sm">Decline</button>
-                        </form>
-                    </td>
-                </tr>
+                <p class="text-muted text-center py-4 mb-0">No listings awaiting review.</p>
             }
-        </tbody>
-    </table>
-}
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table admin-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Description</th>
+                                <th>Price</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var listing in Model.PendingListings)
+                            {
+                                <tr>
+                                    <td class="text-muted">#@listing.ListingID</td>
+                                    <td class="fw-medium">@listing.Description</td>
+                                    <td>@listing.Price.ToString("C0")</td>
+                                    <td class="text-end">
+                                        <form asp-action="Approve" asp-route-id="@listing.ListingID" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-outline-success btn-sm rounded-pill px-3">Approve</button>
+                                        </form>
+                                        <form asp-action="Decline" asp-route-id="@listing.ListingID" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">Decline</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        @* ---------- MEMBERS TAB ---------- *@
+        <div class="tab-pane fade" id="members-pane" role="tabpanel">
+            @if (!Model.Members.Any())
+            {
+                <p class="text-muted text-center py-4 mb-0">No members found.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table admin-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Bookings</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var member in Model.Members)
+                            {
+                                <tr>
+                                    <td class="fw-medium">@member.Name</td>
+                                    <td class="text-muted">@member.Email</td>
+                                    <td><span class="badge bg-light text-dark border">@member.Role</span></td>
+                                    <td>@member.BookingsCount</td>
+                                    <td>
+                                        @if (member.Status == "Active")
+                                        {
+                                            <span class="badge-status bg-success-subtle text-success">● Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-status bg-danger-subtle text-danger">▲ Suspended</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        @if (member.Status == "Active")
+                                        {
+                                            <form asp-action="SuspendUser" asp-route-userId="@member.UserId" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-warning btn-sm rounded-pill px-3">Suspend</button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="ReinstateUser" asp-route-userId="@member.UserId" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-success btn-sm rounded-pill px-3">Reinstate</button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
