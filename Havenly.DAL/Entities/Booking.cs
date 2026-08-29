@@ -9,30 +9,30 @@ namespace Havenly.DAL.Entities;
 public class Booking
 {
     [Key]
-    public long BookingID { get; private set; }
+    public long BookingID { get;  set; }
 
-    public string GuestUserID { get; private set; }
+    public string GuestUserID { get;  set; }
     [ForeignKey(nameof(GuestUserID))]
-    public User Guest { get; private set; }
+    public User Guest { get; set; }
 
-    public long ListingID { get; private set; }
+    public long ListingID { get;  set; }
     [ForeignKey(nameof(ListingID))]
-    public Listing Listing { get; private set; }
+    public Listing Listing { get;  set; }
 
     [Column(TypeName = "datetime2")]
-    public DateTime CheckIn { get; private set; }
+    public DateTime CheckIn { get; set; }
 
     [Column(TypeName = "datetime2")]
-    public DateTime CheckOut { get; private set; }
+    public DateTime CheckOut { get;  set; }
 
     [Column(TypeName = "decimal(18,2)")]
-    public decimal TotalPrice { get; private set; }
+    public decimal TotalPrice { get;  set; }
 
     [Required]
-    public BookingStatus Status { get; private set; }
+    public BookingStatus Status { get;  set; }
 
-    public Payment Payment { get; private set; }
-    public ICollection<Review> Reviews { get; private set; }
+    public Payment Payment { get;  set; }
+    public ICollection<Review> Reviews { get;  set; }
 
     public void Create(long bookingId, string guestUserId, long listingId, DateTime checkIn, DateTime checkOut, decimal totalPrice, BookingStatus status)
     {

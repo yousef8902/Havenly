@@ -1,0 +1,74 @@
+﻿@model Havenly.BLL.ModelVMs.Account.LoginVM
+
+<h2>Login</h2>
+
+@* ---------- DIAGNOSTIC PANEL (remove once auth is verified working) ---------- *@
+<div class="card p-3 mb-4" style="background:#f8f9fa">
+    <h5>Auth Diagnostic</h5>
+    @if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        <p><strong>Status:</strong> ✅ Authenticated</p>
+        <p><strong>Name:</strong> @User.Identity.Name</p>
+        <p><strong>FullName claim:</strong> @User.FindFirst("FullName")?.Value</p>
+        <p><strong>Roles:</strong> @string.Join(", ", User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role).Select(c => c.Value))</p>
+        <details>
+            <summary>All claims</summary>
+            <ul>
+                @foreach (var claim in User.Claims)
+                {
+                    <li>@claim.Type = @claim.Value</li>
+                }
+            </ul>
+        </details>
+        <form asp-action="Logout" method="post">
+            <button type="submit" class="btn btn-sm btn-secondary">Logout</button>
+        </form>
+    }
+    else
+    {
+        <p><strong>Status:</strong> ❌ Not authenticated</p>
+    }
+</div>
+@* ---------- END DIAGNOSTIC PANEL ---------- *@
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <div class="mb-3 form-check">
+        <input asp-for="RememberMe" class="form-check-input" />
+        <label asp-for="RememberMe" class="form-check-label"></label>
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+</form>
+
+<hr />
+
+<form asp-action="ExternalLogin" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+    <button type="submit" name="provider" value="Google" class="btn btn-outline-dark">
+        Continue with Google
+    </button>
+</form>
+
+<p class="mt-3">
+    Don't have an account? <a asp-action="Register">Register</a>
+</p>

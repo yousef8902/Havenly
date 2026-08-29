@@ -1,11 +1,6 @@
-using Havenly.BLL.ModelVMs;
+
 using Havenly.BLL.Services.Abstractions;
-using Havenly.DAL.Database;
-using Havenly.DAL.Entities;
-using Havenly.PL.Data;
-
 using Microsoft.AspNetCore.Mvc;
-
 namespace Havenly.PL.Controllers;
 
 public class PropertyController : Controller

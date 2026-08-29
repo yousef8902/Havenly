@@ -22,8 +22,8 @@ public class HomeController : Controller
         //    Featured = approved.Take(4).Select((p, i) => DemoCatalog.ToCard(p, i == 0 ? "Guest Favourite" : i == 3 ? "New" : null)).ToList(),
         //    Recommended = approved.Skip(4).Take(4).Select((p, i) => DemoCatalog.ToCard(p, i == 1 ? "Top Rated" : null)).ToList()
         //};
-        //return View(vm);
-       throw new NotImplementedException();
+       return View();
+      //throw new NotImplementedException();
     }
 
     [HttpGet]
