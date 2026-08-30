@@ -27,7 +27,7 @@ namespace Havenly.DAL.Database.Seed
             await SeedBedrooms(context);
             await SeedPropertyImages(context);
             await SeedListings(context);
-            await SeedBookings(context);
+            //await SeedBookings(context);
             await SeedReviews(context);
             await SeedFavorites(context);
 
@@ -371,75 +371,75 @@ namespace Havenly.DAL.Database.Seed
             await context.SaveChangesAsync();
         }
 
-        private static async Task SeedBookings(HavenlyDbContext context)
-        {
-            var users = await context.Users.ToListAsync();
-            var listings = await context.Listings.ToListAsync();
+        //private static async Task SeedBookings(HavenlyDbContext context)
+        //{
+        //    var users = await context.Users.ToListAsync();
+        //    var listings = await context.Listings.ToListAsync();
 
-            var userMap = users.ToDictionary(u => u.Name, u => u.Id);
-            var listingMap = listings.ToDictionary(l => l.Description);
+        //    var userMap = users.ToDictionary(u => u.Name, u => u.Id);
+        //    var listingMap = listings.ToDictionary(l => l.Description);
 
-            var bookings = new List<Booking>
-            {
-                new Booking
-                {
-                    GuestUserID = userMap["Nadia Rahman"],
-                    ListingID = listingMap["Cliffside villa with infinity pool"].ListingID,
-                    CheckIn = DateTime.Parse("2026-09-04"),
-                    CheckOut = DateTime.Parse("2026-09-10"),
-                    TotalPrice = 2196,
-                    Status = BookingStatus.Approved
-                },
-                new Booking
-                {
-                    GuestUserID = userMap["Tom Bergman"],
-                    ListingID = listingMap["Glass cabin in the forest"].ListingID,
-                    CheckIn = DateTime.Parse("2026-08-20"),
-                    CheckOut = DateTime.Parse("2026-08-23"),
-                    TotalPrice = 897,
-                    Status = BookingStatus.Pending
-                },
-                new Booking
-                {
-                    GuestUserID = userMap["Yara Fahmy"],
-                    ListingID = listingMap["Bright oak apartment in old town"].ListingID,
-                    CheckIn = DateTime.Parse("2026-06-11"),
-                    CheckOut = DateTime.Parse("2026-06-15"),
-                    TotalPrice = 712,
-                    Status = BookingStatus.Completed
-                },
-                new Booking
-                {
-                    GuestUserID = userMap["Tom Bergman"],
-                    ListingID = listingMap["Restored stone farmhouse"].ListingID,
-                    CheckIn = DateTime.Parse("2026-05-02"),
-                    CheckOut = DateTime.Parse("2026-05-07"),
-                    TotalPrice = 1188,
-                    Status = BookingStatus.Completed
-                },
-                new Booking
-                {
-                    GuestUserID = userMap["Yara Fahmy"],
-                    ListingID = listingMap["Beachfront home with open terrace"].ListingID,
-                    CheckIn = DateTime.Parse("2026-09-01"),
-                    CheckOut = DateTime.Parse("2026-09-03"),
-                    TotalPrice = 654,
-                    Status = BookingStatus.Cancelled
-                },
-                new Booking
-                {
-                    GuestUserID = userMap["Chloe Deveraux"],
-                    ListingID = listingMap["Converted hay barn with beams"].ListingID,
-                    CheckIn = DateTime.Parse("2026-08-27"),
-                    CheckOut = DateTime.Parse("2026-08-31"),
-                    TotalPrice = 836,
-                    Status = BookingStatus.Pending
-                }
-            };
+        //    var bookings = new List<Booking>
+        //    {
+        //        new Booking
+        //        {
+        //            GuestUserID = userMap["Nadia Rahman"],
+        //            ListingID = listingMap["Cliffside villa with infinity pool"].ListingID,
+        //            CheckIn = DateTime.Parse("2026-09-04"),
+        //            CheckOut = DateTime.Parse("2026-09-10"),
+        //            TotalPrice = 2196,
+        //            Status = BookingStatus.Approved
+        //        },
+        //        new Booking
+        //        {
+        //            GuestUserID = userMap["Tom Bergman"],
+        //            ListingID = listingMap["Glass cabin in the forest"].ListingID,
+        //            CheckIn = DateTime.Parse("2026-08-20"),
+        //            CheckOut = DateTime.Parse("2026-08-23"),
+        //            TotalPrice = 897,
+        //            Status = BookingStatus.Pending
+        //        },
+        //        new Booking
+        //        {
+        //            GuestUserID = userMap["Yara Fahmy"],
+        //            ListingID = listingMap["Bright oak apartment in old town"].ListingID,
+        //            CheckIn = DateTime.Parse("2026-06-11"),
+        //            CheckOut = DateTime.Parse("2026-06-15"),
+        //            TotalPrice = 712,
+        //            Status = BookingStatus.Completed
+        //        },
+        //        new Booking
+        //        {
+        //            GuestUserID = userMap["Tom Bergman"],
+        //            ListingID = listingMap["Restored stone farmhouse"].ListingID,
+        //            CheckIn = DateTime.Parse("2026-05-02"),
+        //            CheckOut = DateTime.Parse("2026-05-07"),
+        //            TotalPrice = 1188,
+        //            Status = BookingStatus.Completed
+        //        },
+        //        new Booking
+        //        {
+        //            GuestUserID = userMap["Yara Fahmy"],
+        //            ListingID = listingMap["Beachfront home with open terrace"].ListingID,
+        //            CheckIn = DateTime.Parse("2026-09-01"),
+        //            CheckOut = DateTime.Parse("2026-09-03"),
+        //            TotalPrice = 654,
+        //            Status = BookingStatus.Cancelled
+        //        },
+        //        new Booking
+        //        {
+        //            GuestUserID = userMap["Chloe Deveraux"],
+        //            ListingID = listingMap["Converted hay barn with beams"].ListingID,
+        //            CheckIn = DateTime.Parse("2026-08-27"),
+        //            CheckOut = DateTime.Parse("2026-08-31"),
+        //            TotalPrice = 836,
+        //            Status = BookingStatus.Pending
+        //        }
+        //    };
 
-            await context.Bookings.AddRangeAsync(bookings);
-            await context.SaveChangesAsync();
-        }
+        //    await context.Bookings.AddRangeAsync(bookings);
+        //    await context.SaveChangesAsync();
+        //}
 
         private static async Task SeedReviews(HavenlyDbContext context)
         {

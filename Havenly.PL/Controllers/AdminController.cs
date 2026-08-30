@@ -29,7 +29,7 @@ namespace Havenly.PL.Controllers
                 Stats = await reportService.GetPlatformStats(),
                 PendingListings = await listingService.GetPendingListings()
             };
-            return View(vm);
+            return View("Index", vm);
         }
 
         [HttpPost]

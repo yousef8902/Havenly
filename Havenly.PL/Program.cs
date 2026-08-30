@@ -61,22 +61,22 @@ namespace Havenly.PL
           .AddDefaultTokenProviders();
 
             // Register repository implementations
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IUserRepository, Havenly.DAL.Repos.Implementations.UserRepository>();
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyRepository, Havenly.DAL.Repos.Implementations.PropertyRepository>();
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IBookingRepository, Havenly.DAL.Repos.Implementations.BookingRepository>();
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IFavoriteRepository, Havenly.DAL.Repos.Implementations.FavoriteRepository>();
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IReviewRepository, Havenly.DAL.Repos.Implementations.ReviewRepository>();
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IListingRepository, Havenly.DAL.Repos.Implementations.ListingRepository>();
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IAddressRepository, Havenly.DAL.Repos.Implementations.AddressRepository>();
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPaymentRepository, Havenly.DAL.Repos.Implementations.PaymentRepository>();
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IBedroomRepository, Havenly.DAL.Repos.Implementations.BedroomRepository>();
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IBedRepository, Havenly.DAL.Repos.Implementations.BedRepository>();
+            builder.Services.AddScoped<IUserRepository,UserRepository>();
+            builder.Services.AddScoped<IPropertyRepository,PropertyRepository>();
+            builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+            builder.Services.AddScoped<IFavoriteRepository,FavoriteRepository>();
+            builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+            builder.Services.AddScoped<IListingRepository,ListingRepository>();
+            builder.Services.AddScoped<IAddressRepository,AddressRepository>();
+            builder.Services.AddScoped<IPaymentRepository,PaymentRepository>();
+            builder.Services.AddScoped<IBedroomRepository,BedroomRepository>();
+            builder.Services.AddScoped<IBedRepository, BedRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyImageRepository, Havenly.DAL.Repos.Implementations.PropertyImageRepository>();
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IAmenityRepository, Havenly.DAL.Repos.Implementations.AmenityRepository>();
-            builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyAmenityRepository, Havenly.DAL.Repos.Implementations.PropertyAmenityRepository>();
+            builder.Services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
+            builder.Services.AddScoped<IAmenityRepository, AmenityRepository>();
+            builder.Services.AddScoped<IPropertyAmenityRepository, PropertyAmenityRepository>();
 
-            builder.Services.AddScoped<IReportService, ReportService>();
+           
 
 
             // Authentication
@@ -119,30 +119,33 @@ namespace Havenly.PL
             // Business Services
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddScoped<IPropertyService, PropertyService>();
+            builder.Services.AddScoped<IReportService, ReportService>();
+            builder.Services.AddScoped<IListingServices, ListingServices>();    
+            builder.Services.AddScoped<IReviewServices, ReviewServices>();
 
-           
+
 
 
 
             var app = builder.Build();
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                //try
-                //{
-                    var context = services.GetRequiredService<HavenlyDbContext>();
-                    var userManager = services.GetRequiredService<UserManager<User>>();
-                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            //using (var scope = app.Services.CreateScope())
+            //{
+            //    var services = scope.ServiceProvider;
+            //    //try
+            //    //{
+            //        var context = services.GetRequiredService<HavenlyDbContext>();
+            //        var userManager = services.GetRequiredService<UserManager<User>>();
+            //        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-                    await context.Database.MigrateAsync();
-                    await DatabaseSeeder.SeedAsync(context, userManager, roleManager);
-                //}
-                //catch (Exception ex)
-                //{
-                //    var logger = services.GetRequiredService<ILogger<Program>>();
-                //    logger.LogError(ex, "An error occurred while migrating or seeding the database.");
-                //}
-            }
+            //        await context.Database.MigrateAsync();
+            //        await DatabaseSeeder.SeedAsync(context, userManager, roleManager);
+            //    //}
+            //    //catch (Exception ex)
+            //    //{
+            //    //    var logger = services.GetRequiredService<ILogger<Program>>();
+            //    //    logger.LogError(ex, "An error occurred while migrating or seeding the database.");
+            //    //}
+            //}
 
             // Configure the HTTP request pipeline
             if (!app.Environment.IsDevelopment())
@@ -166,10 +169,10 @@ namespace Havenly.PL
             app.MapControllerRoute(
                 name: "default",
 
-                pattern: "{controller=Home}/{action=Index}/{id?}"
-            )
+                pattern: "{controller=Admin}/{action=Dashboard}/{id?}"
+            );
 
-e
+
 
             app.Run();
         }
