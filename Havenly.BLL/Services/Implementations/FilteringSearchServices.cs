@@ -75,7 +75,23 @@ namespace Havenly.BLL.Services.Implementations
         }
         public async Task<IQueryable<Property>> FilterByRatings(double low, double high)
         {
-            return Enumerable.Empty<Property>().AsQueryable();
+            try
+            {
+                Expression<Func<Property, bool>> condition = (x => x.Rating >= low &&
+                                                 x.Rating <= high && x.Listing.IsValid == true);
+                var query = await _RepoProperty.Find(condition);
+
+
+                return query.AsQueryable();
+            }
+            catch
+            {
+
+                Console.WriteLine("error while filtering by Ratings");
+                return Enumerable.Empty<Property>().AsQueryable();
+
+            }
+            
 
         }
     }

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Havenly.DAL.Entities;
 
-[Index(nameof(UserID), nameof(BookingID), IsUnique = true)]
+[Index(nameof(UserID), nameof(PropertyID), IsUnique = true)]
 public class Review
 {
     [Key]
@@ -14,21 +14,21 @@ public class Review
     [ForeignKey(nameof(UserID))]
     public User User { get;  set; }
 
-    public long BookingID { get;  set; }
-    [ForeignKey(nameof(BookingID))]
-    public Booking Booking { get;  set; }
-
+    public long PropertyID { get;  set; }
+    [ForeignKey(nameof(PropertyID))]
+    public Property Property { get;  set; }
+    
     public int Rating { get;  set; }
 
     public string Comment { get;  set; }
 
     public string? HostResponse { get;  set; }
 
-    public void Create(long reviewId, string userId, long bookingId, int rating, string comment = null)
+    public void Create(long reviewId, string userId, long PropertyID, int rating, string comment = null)
     {
         ReviewID = reviewId;
         UserID = userId;
-        BookingID = bookingId;
+        PropertyID = PropertyID;
         Rating = rating;
         Comment = comment;
     }

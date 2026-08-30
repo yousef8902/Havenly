@@ -113,6 +113,16 @@ namespace Havenly.DAL.Repos.Implementations
             }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); }
         }
+        public void UpdateReview(Property entity)
+        {
+            try
+            {
+                // update the passed entity directly
+                entity.UpdateReview(entity.Rating);
+                context.SaveChanges();
+            }
+            catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); }
+        }
 
         public async Task<int> SaveChanges()
         {

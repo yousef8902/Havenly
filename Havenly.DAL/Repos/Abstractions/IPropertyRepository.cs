@@ -21,5 +21,6 @@ namespace Havenly.DAL.Repos.Abstractions
         void Delete(Property entity);
         Task<int> SaveChanges();
         Task<Property?> GetDetailbyId(long id);
+        public void UpdateReview(Property entity);
     }
 }

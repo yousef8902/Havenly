@@ -28,12 +28,17 @@ public class Property
     public int Capacity { get;  set; }
     public int BathroomCount { get;  set; }
     public bool IsDeleted { get;  set; }
+    public double Rating { get; set; } = 0;
+    public long NumberOfReviews { get; set; } = 0;
+
 
     // Navigation
     public ICollection<Bedroom> Bedrooms { get;  set; }
     public ICollection<PropertyImage> Images { get;  set; }
     public Listing Listing { get;  set; }
     public ICollection<PropertyAmenity> PropertyAmenities { get;  set; }
+    public ICollection<Review>Reviews  { get; set; }
+
 
     public void Create(string ownerUserId, long addressId, string propertyName, string description, int numberOfGuests, int capacity, int bathroomCount)
     {
@@ -57,6 +62,11 @@ public class Property
         NumberOfGuests = numberOfGuests;
         Capacity = capacity;
         BathroomCount = bathroomCount;
+    }
+    public void UpdateReview(double Rating)
+    {
+        this.NumberOfReviews++;
+        this.Rating = (this.Rating+Rating)/this.NumberOfReviews;
     }
 
     public void Delete()
