@@ -1,4 +1,4 @@
-﻿using Havenly.BLL.ModelVMs.Account;
+using Havenly.BLL.ModelVMs.Account;
 using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Entities;
 using Havenly.DAL.Enums;
@@ -33,11 +33,16 @@ namespace Havenly.BLL.Services.Implementations
                     });
             }
 
+            var roleToAssign = string.Equals(model.Role, UserRoles.Host, StringComparison.OrdinalIgnoreCase) 
+                ? UserRoles.Host 
+                : UserRoles.Guest;
+
             var user = new User
             {
                 Name = model.Name,
                 Email = model.Email,
                 UserName = model.Email,
+                Role = roleToAssign,
                 Status = UserStatus.Active
             };
 
@@ -46,10 +51,7 @@ namespace Havenly.BLL.Services.Implementations
             if (!result.Succeeded)
                 return result;
 
-            // Every newly registered user starts as Guest
-            var roleResult = await _userManager.AddToRoleAsync(
-                user,
-                UserRoles.Guest);
+            var roleResult = await _userManager.AddToRoleAsync(user, roleToAssign);
 
             if (!roleResult.Succeeded)
             {

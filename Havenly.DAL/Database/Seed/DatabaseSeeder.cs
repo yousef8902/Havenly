@@ -1,4 +1,4 @@
-﻿
+
 using Havenly.DAL.Entities;
 using Havenly.DAL.Enums;
 using Microsoft.AspNetCore.Identity;
@@ -70,6 +70,9 @@ namespace Havenly.DAL.Database.Seed
         {
             var usersToSeed = new List<(string Name, string Email, string Role)>
     {
+        ("Test Guest", "guest@test.com", UserRoles.Guest),
+        ("Test Host", "host@test.com", UserRoles.Host),
+        ("Test Admin", "admin@test.com", UserRoles.Admin),
         ("Elena Marinos", "elena.marinos@havenly.co", UserRoles.Host),
         ("Nadia Rahman", "nadia.rahman@mail.com", UserRoles.Guest),
         ("Giulia Ferrari", "giulia@casafiora.it", UserRoles.Host),
@@ -98,7 +101,8 @@ namespace Havenly.DAL.Database.Seed
                     {
                         UserName = item.Email,      
                         Email = item.Email,         
-                        Name = item.Name,           
+                        Name = item.Name,
+                        Role = item.Role,
                         EmailConfirmed = true,
                         
                         Status = UserStatus.Active,

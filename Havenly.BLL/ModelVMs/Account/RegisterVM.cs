@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Havenly.BLL.ModelVMs.Account
 {
@@ -20,5 +20,8 @@ namespace Havenly.BLL.ModelVMs.Account
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "Passwords do not match.")]
         public string ConfirmPassword { get; set; } = string.Empty;
+
+        [Required]
+        public string Role { get; set; } = "Guest";
     }
 }

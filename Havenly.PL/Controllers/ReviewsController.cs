@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Havenly.BLL.Services.Abstractions;
 
 namespace Havenly.PL.Controllers
 {
-    // TODO: SECURITY — no authentication system exists yet.
-    // userId/hostUserId are currently passed as raw form values instead of
-    // being derived from the logged-in user's session/claims.
-    // Must fix once login is implemented, or any user could post as anyone.
+    [Authorize]
     public class ReviewsController : Controller
     {
         private readonly IReviewServices reviewServices;
@@ -17,8 +16,15 @@ namespace Havenly.PL.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(long bookingId, String userId, int rating, string comment)
+        public async Task<IActionResult> Create(long bookingId, int rating, string comment)
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                TempData["Message"] = "You must be logged in to submit a review.";
+                return RedirectToAction("Index", "Home");
+            }
+
             var success = await reviewServices.CreateReview(userId, bookingId, rating, comment);
             TempData["Message"] = success
                 ? "Review submitted."
@@ -27,8 +33,15 @@ namespace Havenly.PL.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Respond(long reviewId, long hostUserId, string response)
+        public async Task<IActionResult> Respond(long reviewId, string response)
         {
+            var hostUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(hostUserId))
+            {
+                TempData["Message"] = "You must be logged in to respond to a review.";
+                return RedirectToAction("Index", "Home");
+            }
+
             var success = await reviewServices.RespondToReview(hostUserId, reviewId, response);
             TempData["Message"] = success
                 ? "Response posted."

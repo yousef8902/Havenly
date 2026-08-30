@@ -137,6 +137,65 @@ namespace Havenly.BLL.Tests
             Assert.True(removedByOwner);
         }
 
+        [Fact]
+        public async Task UpdateProperty_ResetsApprovedListingToPendingStatus()
+        {
+            using var context = CreateContext(Guid.NewGuid().ToString());
+            var service = CreateService(context);
+            var propertyId = await CreateTestProperty(service, "host-1");
+
+            // Simulate admin approval
+            var listingRepo = new ListingRepository(context);
+            var listing = await listingRepo.GetById(propertyId);
+            listing!.Approve();
+            listingRepo.Update(listing);
+
+            var approvedDetails = await service.GetPropertyDetails(propertyId, "host-1");
+            Assert.Equal(ListingStatus.Approved, approvedDetails!.Listing.ListingStatus);
+
+            // Host edits property
+            var updateProperty = CreateProperty("host-1", "Updated Title", "Updated Description", 3, 3, 2);
+            var updateAddress = CreateAddress("Egypt", "Giza", "Updated Street");
+            var updateListing = CreateListing("Updated Description", 180m);
+
+            var updated = await service.UpdateProperty(propertyId, "host-1", updateProperty, updateAddress, updateListing, [], []);
+
+            var updatedDetails = await service.GetPropertyDetails(propertyId, "host-1");
+            Assert.True(updated);
+            Assert.NotNull(updatedDetails);
+            Assert.Equal(ListingStatus.Pending, updatedDetails!.Listing.ListingStatus);
+        }
+
+        [Fact]
+        public async Task CreateProperty_WithInvalidData_ReturnsFalse()
+        {
+            using var context = CreateContext(Guid.NewGuid().ToString());
+            var service = CreateService(context);
+
+            // Negative price
+            var property = CreateProperty("host-1", "Prop", "Desc", 2, 2, 1);
+            var address = CreateAddress("Egypt", "Cairo", "Street");
+            var invalidListing = CreateListing("Desc", -50m);
+
+            var result = await service.CreateProperty(property, address, invalidListing, [], [], []);
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task CreateProperty_WithNonExistentAmenity_ReturnsFalse()
+        {
+            using var context = CreateContext(Guid.NewGuid().ToString());
+            var service = CreateService(context);
+
+            var property = CreateProperty("host-1", "Prop", "Desc", 2, 2, 1);
+            var address = CreateAddress("Egypt", "Cairo", "Street");
+            var listing = CreateListing("Desc", 100m);
+            var invalidAmenities = new[] { CreatePropertyAmenity(99999) }; // Amenity ID 99999 does not exist
+
+            var result = await service.CreateProperty(property, address, listing, invalidAmenities, [], []);
+            Assert.False(result);
+        }
+
         private static async Task<long> CreateTestProperty(PropertyServices service, string ownerUserId)
         {
             var property = CreateProperty(ownerUserId, "Test Property", "A property used by a service test.", 2, 2, 1);
@@ -179,7 +238,7 @@ namespace Havenly.BLL.Tests
         private static Bedroom CreateBedroomWithBed(int roomNumber, string roomName, BedType bedType, int quantity)
         {
             var bedroom = new Bedroom();
-            bedroom.Create(0, 0, roomNumber, roomName);
+            bedroom.Create(0, 0, roomNumber, bedcnt: quantity, roomName: roomName);
 
             var bed = new Bed();
             bed.Create(0, 0, bedType, quantity);

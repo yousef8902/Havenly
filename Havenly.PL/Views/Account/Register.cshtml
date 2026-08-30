@@ -1,4 +1,4 @@
-﻿@model Havenly.BLL.ModelVMs.Account.RegisterVM
+@model Havenly.BLL.ModelVMs.Account.RegisterVM
 
 <h2>Register</h2>
 
@@ -34,6 +34,14 @@
         <label asp-for="ConfirmPassword" class="form-label"></label>
         <input asp-for="ConfirmPassword" class="form-control" />
         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Role" class="form-label">I want to</label>
+        <select asp-for="Role" class="form-control">
+            <option value="Guest">Explore and book stays (Guest)</option>
+            <option value="Host">List and manage my properties (Host)</option>
+        </select>
+        <span asp-validation-for="Role" class="text-danger"></span>
     </div>
     <button type="submit" class="btn btn-primary">Register</button>
 </form>

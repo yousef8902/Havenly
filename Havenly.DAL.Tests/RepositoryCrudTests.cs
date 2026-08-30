@@ -144,7 +144,7 @@ namespace Havenly.DAL.Tests
             review.Create(
                 reviewId: 0,
                 userId: "1",
-                bookingId: "1",
+                propertyId: 1,
                 rating: 5,
                 comment: "good");
 
@@ -247,6 +247,7 @@ namespace Havenly.DAL.Tests
                 bedroomId: 0,
                 propertyId: 1,
                 roomNumber: 1,
+                bedcnt: 1,
                 roomName: "R");
 
             await bedroomRepo.Add(bedroom);

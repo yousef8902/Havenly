@@ -132,14 +132,20 @@ namespace Havenly.DAL.Repos.Implementations
 
         
 
-        public async  Task<Property?> GetDetailbyId(long id)
+        public async Task<Property?> GetDetailbyId(long id)
         {
             return await context.Properties
-       .Include(p => p.Listing)
-       .Include(p => p.Images)
-       .Include(p=>p.PropertyAmenities)
-       .Include(p=>p.Address)
-       .FirstOrDefaultAsync(p => p.PropertyID == id);
+                .Include(p => p.Listing)
+                .Include(p => p.Address)
+                .Include(p => p.Owner)
+                .Include(p => p.Images)
+                .Include(p => p.PropertyAmenities)
+                    .ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Bedrooms)
+                    .ThenInclude(b => b.Beds)
+                .Include(p => p.Reviews)
+                    .ThenInclude(r => r.User)
+                .FirstOrDefaultAsync(p => p.PropertyID == id && !p.IsDeleted);
         }
     }
 }

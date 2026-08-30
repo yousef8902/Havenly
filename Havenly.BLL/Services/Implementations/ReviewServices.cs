@@ -1,4 +1,4 @@
-﻿using Havenly.BLL.Services.Abstractions;
+using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Entities;
 
 //using DAL.Entities;
@@ -72,47 +72,13 @@ namespace Havenly.BLL.Services.Implementations
 
         }
 
-        public async Task<bool> CreateReview(String userId, long PropertyId, int rating, string comment)
+        public async Task<bool> CreateReview(string userId, long bookingId, int rating, string comment)
         {
-            if (IsUserInBooking(userId, PropertyId) ==null) { 
-                return false;
-            }
             if (rating < 1 || rating > 5)
                 return false;
 
-            var Property = await propertyRepository.GetById(PropertyId);
-            if (Property is null)
-                return false;
-
-            if (Property.OwnerUserID .Equals (userId))
-                return false;
-
-            //if (Property.status != BookingStatus.Completed)
-            //    return false;
-
-            var existingReview = await reviewRepository.Get(r => r.UserID .Equals (userId) && r.PropertyID == PropertyId);
-            if (existingReview is not null)
-                return false;
-
-            var review = new Review();
-            review.Create(0, userId, PropertyId, rating, comment);
-            await reviewRepository.Add(review);
-            bool UpdatedReview=await updateReviewInProperty(Property,rating);
-            if (!UpdatedReview)
-            {
-                Console.WriteLine("failed to update rating in property");
-            }
-            return true;
-        }
-
-        public async Task<bool> RespondToReview(long hostUserId, long reviewId, string response)
-        {
-            var review = await reviewRepository.GetById(reviewId);
-            if (review is null)
-                return false;
-
-            var booking = await bookingRepository.GetById(review.PropertyID);
-            if (booking is null)
+            var booking = await bookingRepository.GetById(bookingId);
+            if (booking is null || booking.GuestUserID != userId)
                 return false;
 
             var listing = await listingRepository.GetById(booking.ListingID);
@@ -120,10 +86,28 @@ namespace Havenly.BLL.Services.Implementations
                 return false;
 
             var property = await propertyRepository.GetById(listing.PropertyID);
-            if (property is null)
+            if (property is null || property.OwnerUserID == userId)
                 return false;
 
-            if (!(property.OwnerUserID .Equals( hostUserId)))
+            var existingReview = await reviewRepository.Get(r => r.UserID == userId && r.PropertyID == property.PropertyID);
+            if (existingReview is not null)
+                return false;
+
+            var review = new Review();
+            review.Create(0, userId, property.PropertyID, rating, comment);
+            await reviewRepository.Add(review);
+            await updateReviewInProperty(property, rating);
+            return true;
+        }
+
+        public async Task<bool> RespondToReview(string hostUserId, long reviewId, string response)
+        {
+            var review = await reviewRepository.GetById(reviewId);
+            if (review is null)
+                return false;
+
+            var property = await propertyRepository.GetById(review.PropertyID);
+            if (property is null || property.OwnerUserID != hostUserId)
                 return false;
 
             return await reviewRepository.RespondToReview(reviewId, response);

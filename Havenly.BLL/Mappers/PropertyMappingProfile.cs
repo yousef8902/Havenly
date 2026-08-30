@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Havenly.BLL.ModelVMs;
 using Havenly.DAL.Entities;
 
@@ -49,11 +49,21 @@ namespace Havenly.BLL.Mappers
                 }))
 
                 // Fallbacks for optional sections
-                .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => 4.95))
-                .ForMember(dest => dest.Reviews, opt => opt.MapFrom(src => 124))
+                .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.Rating))
+                .ForMember(dest => dest.Reviews, opt => opt.MapFrom(src => (int)src.NumberOfReviews))
                 .ForMember(dest => dest.Rules, opt => opt.MapFrom(src => new List<string> { "Check-in after 3:00 PM", "Check-out before 11:00 AM", "No smoking indoors" }))
                 .ForMember(dest => dest.BookedDates, opt => opt.MapFrom(src => new List<string>()))
-                .ForMember(dest => dest.PropertyReviews, opt => opt.MapFrom(src => new List<ReviewItemVM>()))
+                .ForMember(dest => dest.PropertyReviews, opt => opt.MapFrom(src => src.Reviews != null
+                    ? src.Reviews.Select(r => new ReviewItemVM
+                    {
+                        Id = r.ReviewID.ToString(),
+                        PropertyId = r.PropertyID.ToString(),
+                        Author = r.User != null ? r.User.Name : "Guest",
+                        Rating = r.Rating,
+                        Body = r.Comment,
+                        HostResponse = r.HostResponse
+                    }).ToList()
+                    : new List<ReviewItemVM>()))
                 .ForMember(dest => dest.Similar, opt => opt.MapFrom(src => new List<PropertyCardVM>()))
                 .ForMember(dest => dest.Booking, opt => opt.MapFrom(src => new BookingRequestFormVM
                 {
@@ -73,8 +83,8 @@ namespace Havenly.BLL.Mappers
                 .ForMember(dest => dest.Bedrooms, opt => opt.MapFrom(src => src.Bedrooms != null && src.Bedrooms.Any() ? src.Bedrooms.Count : src.Capacity))
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Images != null && src.Images.Any() ? src.Images.First().ImagePath : "/images/p1.jpg"))
 
-                .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => 4.95))
-                .ForMember(dest => dest.Reviews, opt => opt.MapFrom(src => 124))
+                .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => src.Rating))
+                .ForMember(dest => dest.Reviews, opt => opt.MapFrom(src => (int)src.NumberOfReviews))
                 .ForMember(dest => dest.IsFavorite, opt => opt.MapFrom(src => false));
         }
     }

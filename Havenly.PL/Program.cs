@@ -101,6 +101,8 @@ namespace Havenly.PL
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IListingServices, ListingServices>();
             builder.Services.AddScoped<IPropertyServices, PropertyServices>();
+            builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+            builder.Services.AddScoped<IReviewServices, ReviewServices>();
             builder.Services.AddScoped<IUserManagementService, UserManagementService>();
 
 

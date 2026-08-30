@@ -24,11 +24,11 @@ public class Review
 
     public string? HostResponse { get;  set; }
 
-    public void Create(long reviewId, string userId, long PropertyID, int rating, string comment = null)
+    public void Create(long reviewId, string userId, long propertyId, int rating, string? comment = null)
     {
         ReviewID = reviewId;
         UserID = userId;
-        PropertyID = PropertyID;
+        PropertyID = propertyId;
         Rating = rating;
         Comment = comment;
     }

@@ -1,21 +1,17 @@
-// TODO [Identity Integration]: Add [Authorize] to restrict access to logged-in users only
-// [Authorize]
 using Havenly.BLL.ModelVMs;
 using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
+[Authorize]
 public class BookingController : Controller
 {
     private readonly IBookingService _bookingService;
 
-    // TODO [Identity Integration]: Declare UserManager field to query logged-in user details
-     private readonly UserManager<User> _userManager;
+    private readonly UserManager<User> _userManager;
 
-
-    // TODO [Identity Integration]: Update constructor to inject UserManager<ApplicationUser>
-    
     public BookingController(IBookingService bookingService, UserManager<User> userManager)
     {
         _bookingService = bookingService;
@@ -50,8 +46,7 @@ public class BookingController : Controller
             return View( model);
         }
 
-        // TODO [Identity Integration]: Retrieve the real logged-in user's ID dynamically
-        string resolvedUserId = _userManager.GetUserId(User);
+            string resolvedUserId = _userManager.GetUserId(User);
       
 
 
@@ -80,8 +75,7 @@ public class BookingController : Controller
     [HttpGet]
     public async Task<IActionResult> MyBookings()
     {
-        // TODO [Identity Integration]: Fetch bookings for the currently authenticated user instead of hardcoded '1'
-         string resolvedUserId = _userManager.GetUserId(User);
+             string resolvedUserId = _userManager.GetUserId(User);
       
          var bookings = await _bookingService.GetBookingsByUserAsync(resolvedUserId);
 

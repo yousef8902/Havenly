@@ -1,15 +1,12 @@
 ﻿using Havenly.BLL.ModelVMs;
 using Havenly.BLL.Services.Abstractions;
+using Havenly.DAL.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Havenly.PL.Controllers
 {
-
-
-    // TODO: SECURITY — no authentication/authorization system exists in the app yet.
-    // This controller and all its actions are currently publicly accessible.
-    // Must add [Authorize(Roles = "Admin")] once login/cookie auth is implemented.
-    // See: Havenly.DAL.Entities.User.Role (custom field, not ASP.NET Identity).
+    [Authorize(Roles = UserRoles.Admin)]
     public class AdminController : Controller
     {
 
