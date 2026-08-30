@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Havenly.BLL.ModelVM.Account
+namespace Havenly.BLL.ModelVMs.Account
 {
     public class LoginVM
     {

@@ -1,4 +1,4 @@
-﻿using Havenly.BLL.ModelVM.Account;
+﻿using Havenly.BLL.ModelVMs.Account;
 using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Entities;
 using Havenly.DAL.Enums;

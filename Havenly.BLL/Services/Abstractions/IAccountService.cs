@@ -1,5 +1,5 @@
 ﻿
-using Havenly.BLL.ModelVM.Account;
+using Havenly.BLL.ModelVMs.Account;
 using Microsoft.AspNetCore.Identity;
 
 namespace Havenly.BLL.Services.Abstractions
