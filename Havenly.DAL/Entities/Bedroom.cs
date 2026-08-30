@@ -7,25 +7,27 @@ namespace Havenly.DAL.Entities;
 public class Bedroom
 {
     [Key]
-    public long BedroomID { get; private set; }
+    public long BedroomID { get;  set; }
 
-    public long PropertyID { get; private set; }
+    public long  PropertyID { get;  set; }
     [ForeignKey(nameof(PropertyID))]
-    public Property Property { get; private set; }
+    public Property Property { get;  set; }
 
-    public int RoomNumber { get; private set; }
+    public int RoomNumber { get;  set; }
 
     [StringLength(50)]
-    public string RoomName { get; private set; }
+    public string RoomName { get;  set; }
 
-    public ICollection<Bed> Beds { get; private set; }
+    public int BedCount { get; set; }// mariam
+    public ICollection<Bed> Beds { get;  set; }
 
-    public void Create(long bedroomId, long propertyId, int roomNumber, string roomName = null)
+    public void Create(long bedroomId, long propertyId, int roomNumber,int bedcnt=0, string roomName = null)
     {
         BedroomID = bedroomId;
         PropertyID = propertyId;
         RoomNumber = roomNumber;
         RoomName = roomName;
+       BedCount=bedcnt;
         Beds = new List<Bed>();
     }
 
@@ -35,3 +37,8 @@ public class Bedroom
         RoomName = roomName;
     }
 }
+
+     
+  
+
+

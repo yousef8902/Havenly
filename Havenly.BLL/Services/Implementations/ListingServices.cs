@@ -2,8 +2,6 @@
 using Havenly.DAL.Entities;
 using Havenly.DAL.Enums;
 using Havenly.DAL.Repos.Abstractions;
-
-
 namespace Havenly.BLL.Services.Implementations
 {
     public class ListingServices:IListingServices

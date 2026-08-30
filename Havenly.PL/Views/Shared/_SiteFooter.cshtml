@@ -1,0 +1,74 @@
+<footer class="mt-24 bg-foreground text-background">
+    <div class="container-page py-16">
+        <div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
+            
+            <!-- Brand Column -->
+            <div class="max-w-[260px]">
+                <div class="flex items-center gap-2">
+                    <span class="grid size-8 place-items-center rounded-[10px] bg-accent text-foreground">
+                        <svg viewBox="0 0 24 24" class="size-4" fill="none" aria-hidden="true">
+                            <path d="M4 11.2 12 4.5l8 6.7V19a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span class="font-display text-xl font-bold tracking-tight">havenly</span>
+                </div>
+                <p class="mt-4 text-sm text-background/50">
+                    A curated marketplace of independent homes and the hosts who care for them.
+                </p>
+                <div class="mt-5 flex gap-2">
+                    <span class="grid size-8 place-items-center rounded-lg bg-background/10 text-background/80"><i data-lucide="instagram" class="size-4"></i></span>
+                    <span class="grid size-8 place-items-center rounded-lg bg-background/10 text-background/80"><i data-lucide="twitter" class="size-4"></i></span>
+                    <span class="grid size-8 place-items-center rounded-lg bg-background/10 text-background/80"><i data-lucide="facebook" class="size-4"></i></span>
+                </div>
+            </div>
+
+            <!-- Links Columns -->
+            <div class="grid grid-cols-2 gap-10 sm:grid-cols-4 lg:gap-16">
+                <div>
+                    <h2 class="text-sm font-semibold text-background/90">Company</h2>
+                    <ul class="mt-4 flex flex-col gap-2.5 text-sm text-background/50">
+                        <li><a asp-controller="Property" asp-action="Index" class="hover:text-background">About Us</a></li>
+                        <li><a asp-controller="Property" asp-action="Index" class="hover:text-background">Careers</a></li>
+                        <li><a asp-controller="Property" asp-action="Index" class="hover:text-background">Press</a></li>
+                        <li><a asp-controller="Property" asp-action="Index" class="hover:text-background">Blog</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h2 class="text-sm font-semibold text-background/90">Support</h2>
+                    <ul class="mt-4 flex flex-col gap-2.5 text-sm text-background/50">
+                        <li><a asp-controller="Property" asp-action="Index" class="hover:text-background">Help Center</a></li>
+                        <li><a asp-controller="Booking" asp-action="MyBookings" class="hover:text-background">My bookings</a></li>
+                        <li><a asp-controller="Booking" asp-action="MyBookings" class="hover:text-background">Cancellation</a></li>
+                        <li><a asp-controller="Property" asp-action="Index" class="hover:text-background">Reviews</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h2 class="text-sm font-semibold text-background/90">Hosting</h2>
+                    <ul class="mt-4 flex flex-col gap-2.5 text-sm text-background/50">
+                        <li><a asp-controller="Host" asp-action="Index" class="hover:text-background">Become a Host</a></li>
+                        <li><a asp-controller="Host" asp-action="Index" class="hover:text-background">List your place</a></li>
+                        <li><a asp-controller="Host" asp-action="Index" class="hover:text-background">Booking requests</a></li>
+                        <li><a asp-controller="Host" asp-action="Index" class="hover:text-background">Responsible Hosting</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h2 class="text-sm font-semibold text-background/90">Platform</h2>
+                    <ul class="mt-4 flex flex-col gap-2.5 text-sm text-background/50">
+                        <li><a asp-controller="Admin" asp-action="Index" class="hover:text-background">Admin console</a></li>
+                        <li><a asp-controller="Admin" asp-action="Index" class="hover:text-background">Activity log</a></li>
+                        <li><a asp-controller="Property" asp-action="Index" class="hover:text-background">Saved stays</a></li>
+                        <li><a asp-controller="Property" asp-action="Index" class="hover:text-background">Explore</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Copyright Bottom Bar -->
+        <div class="mt-14 flex flex-col gap-3 border-t border-background/10 pt-8 text-sm text-background/40 sm:flex-row sm:items-center sm:justify-between">
+            <p>© 2026 Havenly, Inc. All rights reserved.</p>
+            <p class="flex items-center gap-2">
+                <i data-lucide="globe" class="size-4"></i> English (US)
+            </p>
+        </div>
+    </div>
+</footer>

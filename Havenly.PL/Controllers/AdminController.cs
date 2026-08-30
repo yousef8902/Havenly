@@ -1,27 +1,35 @@
-﻿using Havenly.BLL.Services.Abstractions;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Havenly.BLL.Services.Abstractions;
+using Havenly.BLL.ModelVMs;
 
 namespace Havenly.PL.Controllers
 {
-
-
     // TODO: SECURITY — no authentication/authorization system exists in the app yet.
-    // This controller and all its actions are currently publicly accessible.
-    // Must add [Authorize(Roles = "Admin")] once login/cookie auth is implemented.
-    // See: Havenly.DAL.Entities.User.Role (custom field, not ASP.NET Identity).
     public class AdminController : Controller
     {
-
         private readonly IListingServices listingService;
+        private readonly IReportService reportService;
+        private readonly IUserManagementService userManagementService;
 
-        public AdminController(IListingServices listingService)
+        public AdminController(
+            IListingServices listingService,
+            IReportService reportService,
+            IUserManagementService userManagementService)
         {
             this.listingService = listingService;
+            this.reportService = reportService;
+            this.userManagementService = userManagementService;
         }
+
         public async Task<IActionResult> DashBoard()
         {
-            var pendingListings = await listingService.GetPendingListings();
-            return View(pendingListings);
+            var vm = new AdminDashboardVM
+            {
+                Stats = await reportService.GetPlatformStats(),
+                PendingListings = await listingService.GetPendingListings(),
+                Members = await userManagementService.GetAllMembers()
+            };
+            return View(vm);
         }
 
         [HttpPost]
@@ -37,6 +45,22 @@ namespace Havenly.PL.Controllers
         {
             var success = await listingService.DeclineListing(id);
             TempData["Message"] = success ? "Listing declined." : "Listing not found or could not be declined.";
+            return RedirectToAction(nameof(DashBoard));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SuspendUser(string userId)
+        {
+            var success = await userManagementService.SuspendUser(userId);
+            TempData["Message"] = success ? "Member suspended." : "Could not suspend member.";
+            return RedirectToAction(nameof(DashBoard));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReinstateUser(string userId)
+        {
+            var success = await userManagementService.ReinstateUser(userId);
+            TempData["Message"] = success ? "Member reinstated." : "Could not reinstate member.";
             return RedirectToAction(nameof(DashBoard));
         }
     }

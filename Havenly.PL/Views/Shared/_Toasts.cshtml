@@ -1,0 +1,8 @@
+@if (TempData["Toast"] is string ok)
+{
+    <script>window.addEventListener("DOMContentLoaded", function () { havenlyToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(ok))); });</script>
+}
+@if (TempData["ToastError"] is string err)
+{
+    <script>window.addEventListener("DOMContentLoaded", function () { havenlyToast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(err)), true); });</script>
+}

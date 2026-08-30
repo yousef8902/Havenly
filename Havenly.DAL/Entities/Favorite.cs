@@ -11,15 +11,15 @@ public class Favorite
     [Key]
     public long FavoriteID { get; private set; }
 
-    public string UserID { get; private set; }
+    public string UserID { get;  set; }
     [ForeignKey(nameof(UserID))]
-    public User User { get; private set; }
+    public User User { get;  set; }
 
-    public long ListingID { get; private set; }
+    public long ListingID { get;  set; }
     [ForeignKey(nameof(ListingID))]
-    public Listing Listing { get; private set; }
+    public Listing Listing { get;  set; }
 
-    public DateTime CreatedAt { get; private set; }
+    public DateTime CreatedAt { get;  set; }
     public void Create(string userId, long listingId)
     {
         UserID = userId;
