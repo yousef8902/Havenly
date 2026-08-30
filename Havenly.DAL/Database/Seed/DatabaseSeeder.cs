@@ -51,16 +51,6 @@ namespace Havenly.DAL.Database.Seed
         {
             var addresses = new List<Address>
             {
-<<<<<<< HEAD
-                new Address { City = "Paros", Country = "Greece", Street = "Naoussa Bay" },
-                new Address { City = "Copenhagen", Country = "Denmark", Street = "Nyhavn" },
-                new Address { City = "Val d'Orcia", Country = "Italy", Street = "Pienza" },
-                new Address { City = "Åre", Country = "Sweden", Street = "Björnänge" },
-                new Address { City = "Comporta", Country = "Portugal", Street = "Carvalhal" },
-                new Address { City = "Lisbon", Country = "Portugal", Street = "Príncipe Real" },
-                new Address { City = "Cotswolds", Country = "United Kingdom", Street = "Stow-on-the-Wold" },
-                new Address { City = "Menorca", Country = "Spain", Street = "Binibeca" }
-=======
                 // Provide latitude/longitude for the new non-nullable columns
                 new Address { City = "Paros", Country = "Greece", Street = "Naoussa Bay", Latitude = 37.085000m, Longitude = 25.131000m },
                 new Address { City = "Copenhagen", Country = "Denmark", Street = "Nyhavn", Latitude = 55.676100m, Longitude = 12.568300m },
@@ -70,7 +60,6 @@ namespace Havenly.DAL.Database.Seed
                 new Address { City = "Lisbon", Country = "Portugal", Street = "Príncipe Real", Latitude = 38.722300m, Longitude = -9.139300m },
                 new Address { City = "Cotswolds", Country = "United Kingdom", Street = "Stow-on-the-Wold", Latitude = 51.871900m, Longitude = -1.783200m },
                 new Address { City = "Menorca", Country = "Spain", Street = "Binibeca", Latitude = 39.954900m, Longitude = 4.123100m }
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
             };
 
             await context.Addresses.AddRangeAsync(addresses);
@@ -471,43 +460,6 @@ namespace Havenly.DAL.Database.Seed
                     bookingMap[key] = booking;
                 }
             }
-<<<<<<< HEAD
-
-            var reviews = new List<Review>
-            {
-                new Review
-                {
-                    UserID = userMap["Nadia Rahman"],
-                    BookingID = bookingMap["Nadia Rahman_Cliffside villa with infinity pool"].BookingID,
-                    Rating = 5,
-                    Comment = "The photos undersell the view. Elena left a bottle of local wine and a hand-drawn map of the swimming coves. The pool is genuinely as good as it looks."
-                },
-                new Review
-                {
-                    UserID = userMap["Tom Bergman"],
-                    BookingID = bookingMap["Tom Bergman_Restored stone farmhouse"].BookingID,
-                    Rating = 5,
-                    Comment = "Four adults and four kids and nobody felt crowded. The kitchen is well equipped and the drive down to Naoussa is only ten minutes."
-                },
-                new Review
-                {
-                    UserID = userMap["Yara Fahmy"],
-                    BookingID = bookingMap["Nadia Rahman_Cliffside villa with infinity pool"].BookingID,
-                    Rating = 4,
-                    Comment = "Beautiful house and a very responsive host. The road up is steep — take a proper car, not a scooter."
-                },
-                new Review
-                {
-                    UserID = userMap["Chloe Deveraux"],
-                    BookingID = bookingMap["Tom Bergman_Restored stone farmhouse"].BookingID,
-                    Rating = 5,
-                    Comment = "Giulia's breakfast baskets alone are worth the booking. We spent every evening on the terrace watching the light go over the valley."
-                }
-            };
-
-            await context.Reviews.AddRangeAsync(reviews);
-            await context.SaveChangesAsync();
-=======
             // The Review entity now associates with PropertyID (not BookingID).
             // Build a lookup of listings to resolve property IDs for the reviews.
             var listings = await context.Listings.ToListAsync();
@@ -538,26 +490,12 @@ namespace Havenly.DAL.Database.Seed
                 await context.Reviews.AddRangeAsync(reviews);
                 await context.SaveChangesAsync();
             }
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
         }
 
         private static async Task SeedFavorites(HavenlyDbContext context)
         {
             var users = await context.Users.ToListAsync();
             var properties = await context.Properties.ToListAsync();
-<<<<<<< HEAD
-
-            var userMap = users.ToDictionary(u => u.Name, u => u.Id);
-            var propertyMap = properties.ToDictionary(p => p.PropertyName);
-
-            var favorites = new List<Favorite>
-            {
-                new Favorite { UserID = userMap["Nadia Rahman"], ListingID = propertyMap["Casa Fiora — Restored Stone Farmhouse"].PropertyID },
-                new Favorite { UserID = userMap["Nadia Rahman"], ListingID = propertyMap["Pine Hollow — Glass Cabin in the Forest"].PropertyID },
-                new Favorite { UserID = userMap["Tom Bergman"], ListingID = propertyMap["Olive Ridge — Cliffside Villa with Infinity Pool"].PropertyID },
-                new Favorite { UserID = userMap["Yara Fahmy"], ListingID = propertyMap["North Loft — Bright Oak Apartment in the Old Town"].PropertyID },
-                new Favorite { UserID = userMap["Chloe Deveraux"], ListingID = propertyMap["Salt House — Beachfront Home with Open Terrace"].PropertyID }
-=======
             var listings = await context.Listings.ToListAsync();
 
             var userMap = users.ToDictionary(u => u.Name, u => u.Id);
@@ -574,7 +512,6 @@ namespace Havenly.DAL.Database.Seed
                 new Favorite { UserID = userMap["Tom Bergman"], ListingID = propertyToListing["Olive Ridge — Cliffside Villa with Infinity Pool"] },
                 new Favorite { UserID = userMap["Yara Fahmy"], ListingID = propertyToListing["North Loft — Bright Oak Apartment in the Old Town"] },
                 new Favorite { UserID = userMap["Chloe Deveraux"], ListingID = propertyToListing["Salt House — Beachfront Home with Open Terrace"] }
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
             };
 
             await context.Favorites.AddRangeAsync(favorites);

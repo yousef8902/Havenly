@@ -1,10 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-<<<<<<< HEAD
-namespace Havenly.BLL.ModelVMs.Account
-=======
 namespace Havenly.BLL.ModelVM.Account
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
 {
     public class LoginVM
     {

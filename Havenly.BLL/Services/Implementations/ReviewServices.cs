@@ -29,12 +29,7 @@ namespace Havenly.BLL.Services.Implementations
             this.listingRepository = listingRepository;
             this.propertyRepository = propertyRepository;
         }
-<<<<<<< HEAD
-
-        public async Task<bool> CreateReview(String userId, long bookingId, int rating, string comment)
-=======
         private async Task<bool> IsUserInBooking(String userId,long bookingId)
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
         {
             try
             {
@@ -89,21 +84,13 @@ namespace Havenly.BLL.Services.Implementations
             if (Property is null)
                 return false;
 
-<<<<<<< HEAD
-            if (booking.GuestUserID .Equals (userId))
-=======
             if (Property.OwnerUserID .Equals (userId))
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
                 return false;
 
             //if (Property.status != BookingStatus.Completed)
             //    return false;
 
-<<<<<<< HEAD
-            var existingReview = await reviewRepository.Get(r => r.UserID .Equals (userId) && r.BookingID == bookingId);
-=======
             var existingReview = await reviewRepository.Get(r => r.UserID .Equals (userId) && r.PropertyID == PropertyId);
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
             if (existingReview is not null)
                 return false;
 

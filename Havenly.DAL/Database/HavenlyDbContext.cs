@@ -43,11 +43,7 @@ public class HavenlyDbContext : IdentityDbContext<User>
         //modelBuilder.Entity<User>()
         //.HasIndex(u => u.Email)
         //.IsUnique();
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
 
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(HavenlyDbContext).Assembly);

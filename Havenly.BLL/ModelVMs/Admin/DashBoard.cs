@@ -7,6 +7,5 @@ namespace Havenly.BLL.ModelVMs
     {
         public PlatformStatsVM Stats { get; set; }
         public IEnumerable<Listing> PendingListings { get; set; }
-        public IEnumerable<MemberVM> Members { get; set; }
     }
 }

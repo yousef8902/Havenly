@@ -288,6 +288,9 @@ namespace Havenly.DAL.Migrations
                     b.Property<int>("NumberOfGuests")
                         .HasColumnType("int");
 
+                    b.Property<long>("NumberOfReviews")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("OwnerUserID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -296,6 +299,9 @@ namespace Havenly.DAL.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<double>("Rating")
+                        .HasColumnType("float");
 
                     b.HasKey("PropertyID");
 
@@ -354,7 +360,7 @@ namespace Havenly.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ReviewID"));
 
-                    b.Property<long>("BookingID")
+                    b.Property<long?>("BookingID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Comment")
@@ -364,6 +370,9 @@ namespace Havenly.DAL.Migrations
 
                     b.Property<string>("HostResponse")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("PropertyID")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Rating")
                         .HasColumnType("int");
@@ -376,7 +385,9 @@ namespace Havenly.DAL.Migrations
 
                     b.HasIndex("BookingID");
 
-                    b.HasIndex("UserID", "BookingID")
+                    b.HasIndex("PropertyID");
+
+                    b.HasIndex("UserID", "PropertyID")
                         .IsUnique();
 
                     b.ToTable("Reviews");
@@ -721,9 +732,13 @@ namespace Havenly.DAL.Migrations
 
             modelBuilder.Entity("Havenly.DAL.Entities.Review", b =>
                 {
-                    b.HasOne("Havenly.DAL.Entities.Booking", "Booking")
+                    b.HasOne("Havenly.DAL.Entities.Booking", null)
                         .WithMany("Reviews")
-                        .HasForeignKey("BookingID")
+                        .HasForeignKey("BookingID");
+
+                    b.HasOne("Havenly.DAL.Entities.Property", "Property")
+                        .WithMany("Reviews")
+                        .HasForeignKey("PropertyID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -733,7 +748,7 @@ namespace Havenly.DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Booking");
+                    b.Navigation("Property");
 
                     b.Navigation("User");
                 });
@@ -824,6 +839,8 @@ namespace Havenly.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("PropertyAmenities");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Havenly.DAL.Entities.User", b =>

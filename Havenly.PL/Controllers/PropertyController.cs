@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-
-using Havenly.BLL.Services.Abstractions;
-using Microsoft.AspNetCore.Mvc;
-=======
 using Havenly.BLL.ModelVMs;
 using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Database;
@@ -11,7 +6,6 @@ using Havenly.PL.Data;
 
 using Microsoft.AspNetCore.Mvc;
 
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
 namespace Havenly.PL.Controllers;
 
 public class PropertyController : Controller

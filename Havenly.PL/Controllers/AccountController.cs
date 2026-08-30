@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-﻿using Havenly.BLL.ModelVMs.Account;
-=======
 ﻿using Havenly.BLL.ModelVM.Account;
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
 using Havenly.BLL.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -82,11 +78,7 @@ namespace Havenly.PL.Controllers
                     return Redirect(returnUrl);
                 }
 
-<<<<<<< HEAD
-                return RedirectToAction("Login");
-=======
                 return RedirectToAction("Index", "Home");
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
             }
 
             if (result.IsLockedOut)
@@ -130,42 +122,5 @@ namespace Havenly.PL.Controllers
         {
             return View();
         }
-<<<<<<< HEAD
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult ExternalLogin(string provider, string? returnUrl = null)
-        {
-            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
-            var properties = _accountService.ConfigureExternalLogin(provider, redirectUrl);
-            return Challenge(properties, provider);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
-        {
-            if (remoteError is not null)
-            {
-                ModelState.AddModelError(string.Empty, $"Error from external provider: {remoteError}");
-                return View("Login");
-            }
-
-            var result = await _accountService.ExternalLoginCallbackAsync(returnUrl);
-
-            if (!result.Succeeded)
-            {
-                ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "External login failed.");
-                return View("Login");
-            }
-
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-            {
-                return Redirect(returnUrl);
-            }
-
-            return RedirectToAction("Index", "Home");
-        }
-=======
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
     }
 }

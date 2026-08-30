@@ -68,17 +68,6 @@ namespace Havenly.PL
                 options.AccessDeniedPath = "/Account/AccessDenied";
             });
 
-<<<<<<< HEAD
-            builder.Services.AddAuthentication()
-    .AddGoogle(options =>
-    {
-        options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-        options.CallbackPath = "/signin-google";
-    });
-
-=======
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
             // Register repository implementations
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IUserRepository, Havenly.DAL.Repos.Implementations.UserRepository>();
             builder.Services.AddScoped<Havenly.DAL.Repos.Abstractions.IPropertyRepository, Havenly.DAL.Repos.Implementations.PropertyRepository>();
@@ -100,15 +89,8 @@ namespace Havenly.PL
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddScoped<IPropertyService, PropertyService>();
             builder.Services.AddScoped<IAccountService, AccountService>();
-<<<<<<< HEAD
-            builder.Services.AddScoped<IListingServices, ListingServices>();
-            builder.Services.AddScoped<IUserManagementService, UserManagementService>();
-
-
-=======
 
      
->>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
 
             //Mapper
             builder.Services.AddAutoMapper(cfg =>
