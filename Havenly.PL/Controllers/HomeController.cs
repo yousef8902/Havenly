@@ -22,8 +22,13 @@ public class HomeController : Controller
         //    Featured = approved.Take(4).Select((p, i) => DemoCatalog.ToCard(p, i == 0 ? "Guest Favourite" : i == 3 ? "New" : null)).ToList(),
         //    Recommended = approved.Skip(4).Take(4).Select((p, i) => DemoCatalog.ToCard(p, i == 1 ? "Top Rated" : null)).ToList()
         //};
+<<<<<<< HEAD
        return View();
       //throw new NotImplementedException();
+=======
+        //return View(vm);
+       throw new NotImplementedException();
+>>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
     }
 
     [HttpGet]

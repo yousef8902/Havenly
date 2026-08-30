@@ -51,6 +51,7 @@ namespace Havenly.DAL.Database.Seed
         {
             var addresses = new List<Address>
             {
+<<<<<<< HEAD
                 new Address { City = "Paros", Country = "Greece", Street = "Naoussa Bay" },
                 new Address { City = "Copenhagen", Country = "Denmark", Street = "Nyhavn" },
                 new Address { City = "Val d'Orcia", Country = "Italy", Street = "Pienza" },
@@ -59,6 +60,17 @@ namespace Havenly.DAL.Database.Seed
                 new Address { City = "Lisbon", Country = "Portugal", Street = "Príncipe Real" },
                 new Address { City = "Cotswolds", Country = "United Kingdom", Street = "Stow-on-the-Wold" },
                 new Address { City = "Menorca", Country = "Spain", Street = "Binibeca" }
+=======
+                // Provide latitude/longitude for the new non-nullable columns
+                new Address { City = "Paros", Country = "Greece", Street = "Naoussa Bay", Latitude = 37.085000m, Longitude = 25.131000m },
+                new Address { City = "Copenhagen", Country = "Denmark", Street = "Nyhavn", Latitude = 55.676100m, Longitude = 12.568300m },
+                new Address { City = "Val d'Orcia", Country = "Italy", Street = "Pienza", Latitude = 43.066700m, Longitude = 11.633300m },
+                new Address { City = "Åre", Country = "Sweden", Street = "Björnänge", Latitude = 63.398000m, Longitude = 13.096000m },
+                new Address { City = "Comporta", Country = "Portugal", Street = "Carvalhal", Latitude = 38.354700m, Longitude = -8.771700m },
+                new Address { City = "Lisbon", Country = "Portugal", Street = "Príncipe Real", Latitude = 38.722300m, Longitude = -9.139300m },
+                new Address { City = "Cotswolds", Country = "United Kingdom", Street = "Stow-on-the-Wold", Latitude = 51.871900m, Longitude = -1.783200m },
+                new Address { City = "Menorca", Country = "Spain", Street = "Binibeca", Latitude = 39.954900m, Longitude = 4.123100m }
+>>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
             };
 
             await context.Addresses.AddRangeAsync(addresses);
@@ -459,6 +471,7 @@ namespace Havenly.DAL.Database.Seed
                     bookingMap[key] = booking;
                 }
             }
+<<<<<<< HEAD
 
             var reviews = new List<Review>
             {
@@ -494,12 +507,45 @@ namespace Havenly.DAL.Database.Seed
 
             await context.Reviews.AddRangeAsync(reviews);
             await context.SaveChangesAsync();
+=======
+            // The Review entity now associates with PropertyID (not BookingID).
+            // Build a lookup of listings to resolve property IDs for the reviews.
+            var listings = await context.Listings.ToListAsync();
+
+            var reviews = new List<Review>();
+
+            void TryAddReview(string bookingKey, string userName, int rating, string comment)
+            {
+                if (!bookingMap.TryGetValue(bookingKey, out var booking)) return;
+                var listing = listings.FirstOrDefault(l => l.ListingID == booking.ListingID);
+                if (listing == null) return;
+                reviews.Add(new Review
+                {
+                    UserID = userMap[userName],
+                    PropertyID = listing.PropertyID,
+                    Rating = rating,
+                    Comment = comment
+                });
+            }
+
+            TryAddReview("Nadia Rahman_Cliffside villa with infinity pool", "Nadia Rahman", 5, "The photos undersell the view. Elena left a bottle of local wine and a hand-drawn map of the swimming coves. The pool is genuinely as good as it looks.");
+            TryAddReview("Tom Bergman_Restored stone farmhouse", "Tom Bergman", 5, "Four adults and four kids and nobody felt crowded. The kitchen is well equipped and the drive down to Naoussa is only ten minutes.");
+            TryAddReview("Nadia Rahman_Cliffside villa with infinity pool", "Yara Fahmy", 4, "Beautiful house and a very responsive host. The road up is steep — take a proper car, not a scooter.");
+            TryAddReview("Tom Bergman_Restored stone farmhouse", "Chloe Deveraux", 5, "Giulia's breakfast baskets alone are worth the booking. We spent every evening on the terrace watching the light go over the valley.");
+
+            if (reviews.Any())
+            {
+                await context.Reviews.AddRangeAsync(reviews);
+                await context.SaveChangesAsync();
+            }
+>>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
         }
 
         private static async Task SeedFavorites(HavenlyDbContext context)
         {
             var users = await context.Users.ToListAsync();
             var properties = await context.Properties.ToListAsync();
+<<<<<<< HEAD
 
             var userMap = users.ToDictionary(u => u.Name, u => u.Id);
             var propertyMap = properties.ToDictionary(p => p.PropertyName);
@@ -511,6 +557,24 @@ namespace Havenly.DAL.Database.Seed
                 new Favorite { UserID = userMap["Tom Bergman"], ListingID = propertyMap["Olive Ridge — Cliffside Villa with Infinity Pool"].PropertyID },
                 new Favorite { UserID = userMap["Yara Fahmy"], ListingID = propertyMap["North Loft — Bright Oak Apartment in the Old Town"].PropertyID },
                 new Favorite { UserID = userMap["Chloe Deveraux"], ListingID = propertyMap["Salt House — Beachfront Home with Open Terrace"].PropertyID }
+=======
+            var listings = await context.Listings.ToListAsync();
+
+            var userMap = users.ToDictionary(u => u.Name, u => u.Id);
+
+            // Map property name -> listing id (many-to-one: a listing belongs to a property)
+            var propertyToListing = properties
+                .Join(listings, p => p.PropertyID, l => l.PropertyID, (p, l) => new { p.PropertyName, l.ListingID })
+                .ToDictionary(x => x.PropertyName, x => x.ListingID);
+
+            var favorites = new List<Favorite>
+            {
+                new Favorite { UserID = userMap["Nadia Rahman"], ListingID = propertyToListing["Casa Fiora — Restored Stone Farmhouse"] },
+                new Favorite { UserID = userMap["Nadia Rahman"], ListingID = propertyToListing["Pine Hollow — Glass Cabin in the Forest"] },
+                new Favorite { UserID = userMap["Tom Bergman"], ListingID = propertyToListing["Olive Ridge — Cliffside Villa with Infinity Pool"] },
+                new Favorite { UserID = userMap["Yara Fahmy"], ListingID = propertyToListing["North Loft — Bright Oak Apartment in the Old Town"] },
+                new Favorite { UserID = userMap["Chloe Deveraux"], ListingID = propertyToListing["Salt House — Beachfront Home with Open Terrace"] }
+>>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
             };
 
             await context.Favorites.AddRangeAsync(favorites);

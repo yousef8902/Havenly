@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ﻿using Havenly.BLL.ModelVMs.Account;
+=======
+﻿using Havenly.BLL.ModelVM.Account;
+>>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
 using Havenly.BLL.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -78,7 +82,11 @@ namespace Havenly.PL.Controllers
                     return Redirect(returnUrl);
                 }
 
+<<<<<<< HEAD
                 return RedirectToAction("Login");
+=======
+                return RedirectToAction("Index", "Home");
+>>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
             }
 
             if (result.IsLockedOut)
@@ -122,6 +130,7 @@ namespace Havenly.PL.Controllers
         {
             return View();
         }
+<<<<<<< HEAD
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -156,5 +165,7 @@ namespace Havenly.PL.Controllers
 
             return RedirectToAction("Index", "Home");
         }
+=======
+>>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
     }
 }

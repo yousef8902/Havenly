@@ -19,5 +19,9 @@ namespace Havenly.DAL.Repos.Abstractions
         void Delete(Property entity);
         Task<int> SaveChanges();
         Task<Property?> GetDetailbyId(long id);
+<<<<<<< HEAD
+=======
+        public void UpdateReview(Property entity);
+>>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
     }
 }

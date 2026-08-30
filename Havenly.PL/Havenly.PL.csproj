@@ -8,8 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.2.0" />
+<<<<<<< HEAD
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="10.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.11" />
+=======
+>>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

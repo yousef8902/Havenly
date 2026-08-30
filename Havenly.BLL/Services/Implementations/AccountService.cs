@@ -1,10 +1,17 @@
+<<<<<<< HEAD
 ﻿using Havenly.BLL.ModelVMs.Account;
+=======
+﻿using Havenly.BLL.ModelVM.Account;
+>>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
 using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Entities;
 using Havenly.DAL.Enums;
 using Microsoft.AspNetCore.Identity;
+<<<<<<< HEAD
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+=======
+>>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
 
 namespace Havenly.BLL.Services.Implementations
 {
@@ -71,6 +78,7 @@ namespace Havenly.BLL.Services.Implementations
                 lockoutOnFailure: true);
         }
 
+<<<<<<< HEAD
         public AuthenticationProperties ConfigureExternalLogin(string provider, string redirectUrl)
         {
             return _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
@@ -138,6 +146,8 @@ namespace Havenly.BLL.Services.Implementations
 
             return new ExternalLoginResultVM { Succeeded = true };
         }
+=======
+>>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
         public async Task LogoutAsync()
         {
             await _signInManager.SignOutAsync();

@@ -109,7 +109,11 @@ namespace Havenly.DAL.Repos.Implementations
             try
             {
                 // assume caller provided a tracked entity; update domain state and save
+<<<<<<< HEAD
                 user.Update(user.Name,  user.Email);
+=======
+                user.Update(user.Name, user.Email);
+>>>>>>> 63b1b37 (add search by review and change relation between (review->booking) to (review->user))
                 context.SaveChanges();
             }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); }
