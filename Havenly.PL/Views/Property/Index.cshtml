@@ -1,0 +1,302 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model IEnumerable<Havenly.BLL.ModelVMs.PropertyCardVM>
+
+@{
+    ViewData["Title"] = "Search stays — Havenly";
+    ViewData["Description"] = "Filter Havenly stays by city, price, guests, rooms, rating and amenities to find the right home for your dates.";
+
+    //hardcode needs to integrate with filter and search
+
+    var city = Context.Request.Query["city"].ToString();
+    var checkIn = Context.Request.Query["checkIn"].ToString();
+    var checkOut = Context.Request.Query["checkOut"].ToString();
+    var guests = Context.Request.Query["guests"].ToString();
+    var category = Context.Request.Query["category"].ToString();
+
+    var maxPriceStr = Context.Request.Query["maxPrice"].ToString();
+    int maxPrice = int.TryParse(maxPriceStr, out int parsedPrice) ? parsedPrice : 450;
+
+    var minRooms = Context.Request.Query["minRooms"].ToString();
+    minRooms = string.IsNullOrEmpty(minRooms) ? "any" : minRooms;
+
+    var minRating = Context.Request.Query["minRating"].ToString();
+    minRating = string.IsNullOrEmpty(minRating) ? "any" : minRating;
+
+    var sort = Context.Request.Query["sort"].ToString();
+    sort = string.IsNullOrEmpty(sort) ? "recommended" : sort;
+
+    var selectedAmenities = Context.Request.Query["amenities"].ToList();
+
+    var amenityList = new[] {
+        "Wi-Fi", "Parking", "Kitchen", "Air conditioning",
+        "Pool", "Hot tub", "Patio or balcony", "Dedicated workspace"
+    };
+
+    var categoriesList = new[] {
+        "City lofts", "Countryside", "Beachfront", "Cabins", "Islands", "Design homes"
+    };
+
+    int resultCount = Model?.Count() ?? 0;
+}
+
+<div class="container-page pt-6">
+    <!-- Compact Top Search Bar Component -->
+    <form asp-controller="Property" asp-action="Index" method="get" class="rounded-2xl border border-border bg-card p-2.5 shadow-sm">
+        <div class="grid gap-2.5 md:grid-cols-[1.4fr_1fr_1fr_auto_auto] md:items-end">
+            <div class="rounded-xl px-3 py-2 transition-colors hover:bg-secondary">
+                <label for="dest" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground block">Destination</label>
+                <input id="dest" name="city" type="text" value="@city" placeholder="Where to? e.g. Paros"
+                       class="h-11 border-0 bg-transparent px-0 text-sm w-full outline-none focus:ring-0" />
+            </div>
+
+            <div class="rounded-xl px-3 py-2 transition-colors hover:bg-secondary">
+                <label for="in" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground block">Check-in</label>
+                <input id="in" name="checkIn" type="date" value="@checkIn"
+                       class="h-11 border-0 bg-transparent px-0 text-sm w-full outline-none focus:ring-0" />
+            </div>
+
+            <div class="rounded-xl px-3 py-2 transition-colors hover:bg-secondary">
+                <label for="out" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground block">Check-out</label>
+                <input id="out" name="checkOut" type="date" value="@checkOut"
+                       class="h-11 border-0 bg-transparent px-0 text-sm w-full outline-none focus:ring-0" />
+            </div>
+
+            <div class="rounded-xl px-3 py-2 transition-colors hover:bg-secondary md:min-w-32">
+                <label for="gs" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground block">Guests</label>
+                <select id="gs" name="guests" class="h-11 border-0 bg-transparent px-0 text-sm w-full outline-none focus:ring-0">
+                    @foreach (var n in new[] { 1, 2, 4, 6, 8 })
+                    {
+                        <option value="@n" selected="@(guests == n.ToString() || (string.IsNullOrEmpty(guests) && n == 2))">
+                            @n+ guests
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <button type="submit" class="h-14 gap-2 rounded-xl px-6 bg-primary text-primary-foreground font-semibold flex items-center justify-center hover:bg-primary/90 transition">
+                <i data-lucide="search" class="size-4"></i>
+                <span>Search</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="container-page mt-8 grid gap-8 lg:grid-cols-[17rem_1fr]">
+    <!-- Left Sidebar Desktop Filter Panel -->
+    <aside class="hidden lg:block">
+        <div class="sticky top-24 rounded-2xl border border-border bg-card p-5">
+            <form id="filterForm" asp-controller="Property" asp-action="Index" method="get" class="space-y-6">
+                <!-- Keep existing top search context -->
+                <input type="hidden" name="city" value="@city" />
+                <input type="hidden" name="checkIn" value="@checkIn" />
+                <input type="hidden" name="checkOut" value="@checkOut" />
+                <input type="hidden" name="guests" value="@guests" />
+
+                <!-- Filter Panel Header -->
+                <div class="flex items-center justify-between">
+                    <h2 class="font-sans text-sm font-semibold uppercase tracking-wide text-foreground">Filters</h2>
+                    <a asp-controller="Property" asp-action="Index" asp-route-guests="@guests" class="h-8 rounded-md px-3 text-xs font-medium text-muted-foreground hover:bg-secondary hover:text-foreground inline-flex items-center justify-center transition">
+                        Reset
+                    </a>
+                </div>
+
+                <!-- Category -->
+                <div class="space-y-2">
+                    <label for="f-category" class="text-sm font-medium text-foreground block">Category</label>
+                    <select id="f-category" name="category" onchange="this.form.submit()" class="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="">Any category</option>
+                        @foreach (var cat in categoriesList)
+                        {
+                            <option value="@cat" selected="@(category == cat)">@cat</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Max Price Slider -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label for="f-price" class="text-sm font-medium text-foreground">Max price per night</label>
+                        <span class="text-sm font-semibold text-foreground">$@maxPrice</span>
+                    </div>
+                    <input type="range" id="f-price" name="maxPrice" min="80" max="600" step="10" value="@maxPrice"
+                           oninput="document.getElementById('priceDisplay').textContent = '$' + this.value"
+                           onchange="this.form.submit()"
+                           class="w-full accent-primary cursor-pointer" />
+                </div>
+
+                <!-- Guests Filter -->
+                <div class="space-y-2">
+                    <label for="f-guests" class="text-sm font-medium text-foreground block">Guests</label>
+                    <select id="f-guests" name="guests" onchange="this.form.submit()" class="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                        @foreach (var n in new[] { 1, 2, 4, 6, 8 })
+                        {
+                            <option value="@n" selected="@(guests == n.ToString())">@n+ guests</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Bedrooms -->
+                <div class="space-y-2">
+                    <label for="f-rooms" class="text-sm font-medium text-foreground block">Bedrooms</label>
+                    <select id="f-rooms" name="minRooms" onchange="this.form.submit()" class="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="any" selected="@(minRooms == "any")">Any</option>
+                        @foreach (var n in new[] { 1, 2, 3, 4 })
+                        {
+                            <option value="@n" selected="@(minRooms == n.ToString())">@n+ bedrooms</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Guest Rating -->
+                <div class="space-y-2">
+                    <label for="f-rating" class="text-sm font-medium text-foreground block">Guest rating</label>
+                    <select id="f-rating" name="minRating" onchange="this.form.submit()" class="h-11 w-full rounded-xl border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="any" selected="@(minRating == "any")">Any rating</option>
+                        <option value="4.5" selected="@(minRating == "4.5")">4.5+</option>
+                        <option value="4.8" selected="@(minRating == "4.8")">4.8+</option>
+                        <option value="4.9" selected="@(minRating == "4.9")">4.9+</option>
+                    </select>
+                </div>
+
+                <!-- Amenities Checklist -->
+                <fieldset class="space-y-3">
+                    <legend class="text-sm font-medium text-foreground">Amenities</legend>
+                    <div class="grid grid-cols-1 gap-2.5">
+                        @foreach (var a in amenityList)
+                        {
+                            var elementId = $"am-{a.Replace(" ", "-").ToLower()}";
+                            var isChecked = selectedAmenities.Contains(a);
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" id="@elementId" name="amenities" value="@a"
+                                       checked="@isChecked"
+                                       onchange="this.form.submit()"
+                                       class="size-4 rounded border-border text-primary focus:ring-primary cursor-pointer" />
+                                <label for="@elementId" class="text-sm font-normal text-foreground cursor-pointer">
+                                    @a
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Results Column -->
+    <div>
+        <!-- Results Header Bar -->
+        <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight">
+                    @(string.IsNullOrEmpty(city) ? "All stays" : $"Stays in {city}")
+                </h1>
+                <p class="text-sm text-muted-foreground">
+                    @resultCount @(resultCount == 1 ? "home" : "homes") match your filters
+                </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <!-- Sorting Select -->
+                <form asp-controller="Property" asp-action="Index" method="get">
+                    <input type="hidden" name="city" value="@city" />
+                    <input type="hidden" name="category" value="@category" />
+                    <input type="hidden" name="maxPrice" value="@maxPrice" />
+                    <input type="hidden" name="minRooms" value="@minRooms" />
+                    <input type="hidden" name="minRating" value="@minRating" />
+                    <select name="sort" onchange="this.form.submit()" aria-label="Sort results" class="h-11 w-48 rounded-xl border border-border bg-card px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="recommended" selected="@(sort == "recommended")">Recommended</option>
+                        <option value="price-asc" selected="@(sort == "price-asc")">Price: low to high</option>
+                        <option value="price-desc" selected="@(sort == "price-desc")">Price: high to low</option>
+                        <option value="rating" selected="@(sort == "rating")">Highest rated</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <!-- Property Grid / Empty State -->
+        @if (Model != null && Model.Any())
+        {
+            <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                @foreach (var property in Model)
+                {
+                    <article class="group relative overflow-hidden rounded-xl border border-border bg-surface transition-shadow hover:shadow-lift">
+                        <div class="relative aspect-4/3 overflow-hidden bg-secondary">
+                            <img src="@(string.IsNullOrEmpty(property.ImageUrl) ? "/images/placeholder.jpg" : property.ImageUrl)"
+                                 alt="@property.Title"
+                                 loading="lazy"
+                                 width="1200"
+                                 height="900"
+                                 class="size-full object-cover transition-transform duration-500 group-hover:scale-105" />
+
+                            <button type="button"
+                                    aria-label="Save to favorites"
+                                    class="absolute right-3 top-3 grid size-11 place-items-center rounded-full bg-card/90 text-foreground backdrop-blur transition-colors hover:bg-card">
+                                <i data-lucide="heart" class="size-5"></i>
+                            </button>
+                        </div>
+
+                        <div class="space-y-2 p-4">
+                            <div class="flex items-start justify-between gap-3">
+                                <h3 class="text-base font-semibold leading-snug">
+                                    <a asp-controller="Property" asp-action="Detail" asp-route-id="@property.Id" class="after:absolute after:inset-0 after:content-[''] text-foreground hover:underline">
+                                        @property.Title
+                                    </a>
+                                </h3>
+                                <span class="inline-flex items-center gap-1 text-sm shrink-0 pt-0.5">
+                                    <i data-lucide="star" class="size-4 fill-accent text-accent"></i>
+                                    <span class="font-semibold">@(property.Rating > 0 ? property.Rating.ToString("F2") : "4.94")</span>
+                                </span>
+                            </div>
+
+                            <p class="flex items-center gap-1 text-sm text-muted-foreground">
+                                <i data-lucide="map-pin" class="size-4 shrink-0"></i>
+                                @property.City, @property.Country
+                            </p>
+
+                            <div class="flex items-center justify-between pt-1">
+                                <span class="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                                    <i data-lucide="users" class="size-4"></i>
+                                    @(property.MaxGuests > 0 ? property.MaxGuests : 2) guests · @(property.Bedrooms > 0 ? property.Bedrooms : 3) bd
+                                </span>
+                                <span class="text-sm text-muted-foreground">
+                                    <span class="text-base font-semibold text-foreground">$@property.Price</span> / night
+                                </span>
+                            </div>
+
+                            <p class="text-xs text-muted-foreground">128 reviews</p>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Empty State Component -->
+            <div class="flex flex-col items-center rounded-2xl border border-dashed border-border bg-card px-6 py-16 text-center">
+                <div class="grid size-12 place-items-center rounded-full bg-secondary text-muted-foreground">
+                    <i data-lucide="map-pin-off" class="size-5"></i>
+                </div>
+                <h3 class="mt-4 text-lg font-semibold">No stays match these filters</h3>
+                <p class="mt-1 max-w-sm text-sm text-muted-foreground">
+                    Try widening your price range, lowering the minimum rating, or removing an amenity.
+                </p>
+                <div class="mt-6">
+                    <a asp-controller="Property" asp-action="Index" class="inline-flex h-10 items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold hover:bg-secondary transition">
+                        Clear all filters
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+}

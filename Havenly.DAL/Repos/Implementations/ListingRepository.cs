@@ -106,8 +106,15 @@ namespace Havenly.DAL.Repos.Implementations
         {
             try
             {
-                var list = await context.Listings.Where(l => l.ListingStatus == status).Include(l => l.Property)
-            .ThenInclude(p => p.Address).ToListAsync();
+                var list = await  context.Listings
+        .Include(l => l.Property)
+            .ThenInclude(p => p.Address)
+        .Include(l => l.Property)
+            .ThenInclude(p => p.Images)
+        .Include(l => l.Property)
+ .Where(l => l.ListingStatus == status)
+       
+        .ToListAsync(); ;
                 Console.WriteLine("info:Listings fetched successfully");
                 return list;
             }

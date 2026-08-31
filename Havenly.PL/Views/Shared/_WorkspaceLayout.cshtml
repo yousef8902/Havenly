@@ -16,7 +16,7 @@
 <body>
     @{
         var nav = ViewData["WorkspaceNav"] as string ?? "admin";
-        var isHost = nav == "admin";
+        var isHost =false;
     }
     <div class="min-h-screen bg-background lg:grid lg:grid-cols-[16rem_1fr]">
         <aside class="sticky top-0 hidden h-screen flex-col border-r border-sidebar-border bg-sidebar p-4 lg:flex">

@@ -32,6 +32,7 @@ public class Property
     // Navigation
     public ICollection<Bedroom> Bedrooms { get;  set; }
     public ICollection<PropertyImage> Images { get;  set; }
+   
     public Listing Listing { get;  set; }
     public ICollection<PropertyAmenity> PropertyAmenities { get;  set; }
 

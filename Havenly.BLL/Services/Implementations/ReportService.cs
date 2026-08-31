@@ -37,7 +37,8 @@ namespace Havenly.BLL.Services.Implementations
                 ListingCount = listings.Count(),
                 PendingReviewCount = pendingListings.Count(),
                 GrossBookings = nonCancelledBookings.Sum(b => b.TotalPrice)
-            };
+            };//need to add average ratings
+
         }
     }
 }

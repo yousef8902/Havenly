@@ -74,6 +74,7 @@ namespace Havenly.PL
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
             builder.Services.AddScoped<IAmenityRepository, AmenityRepository>();
+            builder.Services.AddScoped<IAdminRepository, AdminRepository>();
             builder.Services.AddScoped<IPropertyAmenityRepository, PropertyAmenityRepository>();
 
            
@@ -112,6 +113,7 @@ namespace Havenly.PL
             {
                 cfg.AddProfile<BookingMappingProfile>();
                 cfg.AddProfile<PropertyMappingProfile>();
+                cfg.AddProfile<AdminMappingProfile>();
             });
 
           
@@ -122,6 +124,7 @@ namespace Havenly.PL
             builder.Services.AddScoped<IReportService, ReportService>();
             builder.Services.AddScoped<IListingServices, ListingServices>();    
             builder.Services.AddScoped<IReviewServices, ReviewServices>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
 
 
 

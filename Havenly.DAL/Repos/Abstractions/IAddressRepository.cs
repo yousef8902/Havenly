@@ -1,8 +1,9 @@
+using Havenly.DAL.Entities;
+using Havenly.DAL.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Havenly.DAL.Entities;
 
 namespace Havenly.DAL.Repos.Abstractions
 {
