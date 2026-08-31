@@ -35,9 +35,9 @@ public class Booking
     public Payment Payment { get; set; }
     public ICollection<Review> Reviews { get; set; }
 
-    public void Create(long bookingId, string guestUserId, long listingId, DateTime checkIn, DateTime checkOut, decimal totalPrice, BookingStatus status)
+    public void Create( string guestUserId, long listingId, DateTime checkIn, DateTime checkOut, decimal totalPrice, BookingStatus status)
     {
-        BookingID = bookingId;
+       
         GuestUserID = guestUserId;
         ListingID = listingId;
         CheckIn = checkIn;

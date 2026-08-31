@@ -61,8 +61,8 @@ namespace Havenly.PL
                 // No email service for now
                 options.SignIn.RequireConfirmedAccount = false;
             })
-.AddEntityFrameworkStores<HavenlyDbContext>()
-.AddDefaultTokenProviders();
+          .AddEntityFrameworkStores<HavenlyDbContext>()
+          .AddDefaultTokenProviders();
 
             builder.Services.ConfigureApplicationCookie(options =>
             {
@@ -104,6 +104,34 @@ namespace Havenly.PL
             builder.Services.AddScoped<IFavoriteService, FavoriteService>();
             builder.Services.AddScoped<IReviewServices, ReviewServices>();
             builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+           
+
+
+            // Authentication
+            builder.Services.AddAuthentication(
+                CookieAuthenticationDefaults.AuthenticationScheme
+            )
+            .AddCookie(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                options =>
+                {
+                    options.LoginPath = new PathString("/Account/Login");
+                    options.AccessDeniedPath = new PathString("/Account/Login");
+                }
+            );
+
+            // ASP.NET Core Identity
+            builder.Services.AddIdentityCore<User>(identityOptions =>
+            {
+                // Email confirmation is disabled for now
+                // because no email service is configured.
+                identityOptions.SignIn.RequireConfirmedAccount = false;
+            })
+            .AddEntityFrameworkStores<HavenlyDbContext>()
+            .AddSignInManager()
+            .AddTokenProvider<DataProtectorTokenProvider<User>>(
+                TokenOptions.DefaultProvider
+            );
 
 
 
@@ -112,30 +140,42 @@ namespace Havenly.PL
             {
                 cfg.AddProfile<BookingMappingProfile>();
                 cfg.AddProfile<PropertyMappingProfile>();
+                cfg.AddProfile<AdminMappingProfile>();
             });
 
           
 
+            // Business Services
+            builder.Services.AddScoped<IBookingService, BookingService>();
+            builder.Services.AddScoped<IPropertyService, PropertyService>();
+            builder.Services.AddScoped<IReportService, ReportService>();
+            builder.Services.AddScoped<IListingServices, ListingServices>();    
+            builder.Services.AddScoped<IReviewServices, ReviewServices>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
+
+
+
+
 
             var app = builder.Build();
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                //try
-                //{
-                    var context = services.GetRequiredService<HavenlyDbContext>();
-                    var userManager = services.GetRequiredService<UserManager<User>>();
-                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            //using (var scope = app.Services.CreateScope())
+            //{
+            //    var services = scope.ServiceProvider;
+            //    //try
+            //    //{
+            //        var context = services.GetRequiredService<HavenlyDbContext>();
+            //        var userManager = services.GetRequiredService<UserManager<User>>();
+            //        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-                    await context.Database.MigrateAsync();
-                    await DatabaseSeeder.SeedAsync(context, userManager, roleManager);
-                //}
-                //catch (Exception ex)
-                //{
-                //    var logger = services.GetRequiredService<ILogger<Program>>();
-                //    logger.LogError(ex, "An error occurred while migrating or seeding the database.");
-                //}
-            }
+            //        await context.Database.MigrateAsync();
+            //        await DatabaseSeeder.SeedAsync(context, userManager, roleManager);
+            //    //}
+            //    //catch (Exception ex)
+            //    //{
+            //    //    var logger = services.GetRequiredService<ILogger<Program>>();
+            //    //    logger.LogError(ex, "An error occurred while migrating or seeding the database.");
+            //    //}
+            //}
 
             // Configure the HTTP request pipeline
             if (!app.Environment.IsDevelopment())
@@ -159,7 +199,7 @@ namespace Havenly.PL
             app.MapControllerRoute(
                 name: "default",
 
-                pattern: "{controller=Home}/{action=Index}/{id?}"
+                pattern: "{controller=Admin}/{action=Dashboard}/{id?}"
             );
 
 

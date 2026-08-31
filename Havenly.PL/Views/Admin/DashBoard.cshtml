@@ -60,14 +60,14 @@ else
             @foreach (var listing in Model.PendingListings)
             {
                 <tr>
-                    <td>@listing.ListingID</td>
-                    <td>@listing.Description</td>
+                    <td>@listing.ListingId</td>
+                    <td>@listing.</td>
                     <td>@listing.Price.ToString("C")</td>
                     <td>
-                        <form asp-action="Approve" asp-route-id="@listing.ListingID" method="post" style="display:inline">
+                        <form asp-action="Approve" asp-route-id="@listing.ListingId" method="post" style="display:inline">
                             <button type="submit" class="btn btn-success btn-sm">Approve</button>
                         </form>
-                        <form asp-action="Decline" asp-route-id="@listing.ListingID" method="post" style="display:inline">
+                        <form asp-action="Decline" asp-route-id="@listing.ListingId" method="post" style="display:inline">
                             <button type="submit" class="btn btn-danger btn-sm">Decline</button>
                         </form>
                     </td>

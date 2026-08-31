@@ -12,6 +12,7 @@ public class Listing
 
     [Key]
     public long    ListingID { get; private set; }
+   
 
     public long PropertyID { get;  set; }
     [ForeignKey(nameof(PropertyID))]

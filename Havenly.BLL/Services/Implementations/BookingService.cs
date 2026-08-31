@@ -6,6 +6,7 @@ using Havenly.DAL.Enums;
 using Havenly.DAL.Repos.Abstractions;
 using Havenly.DAL.Repos.Implementations;
 using Microsoft.EntityFrameworkCore;
+using System.Net.NetworkInformation;
 
 namespace Havenly.BLL.Services.Implementations
 {
@@ -77,15 +78,9 @@ namespace Havenly.BLL.Services.Implementations
             decimal totalPrice = subtotal + serviceFee;
 
             // Mapping
-            var booking = new Booking
-            {
-                GuestUserID = dto.GuestUserID,
-                ListingID = dto.ListingID,
-                CheckIn = dto.CheckIn,
-                CheckOut = dto.CheckOut,
-                TotalPrice = totalPrice,
-                Status = BookingStatus.Pending
-            };
+            var booking = new Booking( );
+            booking.Create(dto.GuestUserID, dto.ListingID, dto.CheckIn, dto.CheckOut, totalPrice, BookingStatus.Pending);
+
 
             //Save via Unit of Work
             await _unitOfWork.Bookings.AddBooking(booking);
@@ -129,7 +124,7 @@ namespace Havenly.BLL.Services.Implementations
             }
 
             
-            booking.Status=BookingStatus.Cancelled;
+            booking.UpdateStatus(BookingStatus.Cancelled);
 
             
             await _unitOfWork.SaveChangesAsync();
