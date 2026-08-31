@@ -142,7 +142,7 @@ namespace Havenly.BLL.ModelVMs
         public string Id { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         //public string Email { get; set; } = string.Empty;
-        //public string Role { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
         public DateTime? JoinedDate { get; set; }
         public UserStatus Status { get; set; }
         public int BookingsCount { get; set; }

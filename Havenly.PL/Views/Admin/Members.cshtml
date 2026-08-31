@@ -172,11 +172,10 @@
                         <td class="p-4 text-muted-foreground">@user.Phone</td>
                         <td class="p-4">
                             <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
-                                @* @(user.Role == "Admin" ? "bg-purple-100 text-purple-800" :
-                                  user.Role == "Host" ? "bg-blue-100 text-blue-800" :
-                                  "bg-gray-100 text-gray-800")">
-                                @user.Role *@
-                                Role
+                                @(user.Role == "Admin" ? "bg-purple-100 text-purple-800" :
+                                user.Role == "Host" ? "bg-blue-100 text-blue-800" :
+                                "bg-gray-100 text-gray-800")">
+                                @user.Role
                             </span>
                         </td>
                         <td class="p-4 text-muted-foreground">@(user.JoinedDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
