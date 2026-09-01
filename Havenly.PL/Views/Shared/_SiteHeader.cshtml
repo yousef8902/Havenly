@@ -33,13 +33,16 @@
                 else if (User.IsInRole("Admin"))
                 {
                     <a asp-controller="Admin" asp-action="DashBoard" class="rounded-full bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 px-4 py-2 text-sm font-semibold inline-flex items-center gap-1.5">
-                        Admin Dashboard
+                        Admin Console
                     </a>
                 }
                 else
                 {
-                    <a asp-controller="Host" asp-action="Index" class="hidden rounded-full inline-flex lg:inline-flex px-4 py-2 text-sm font-medium hover:bg-secondary">
-                        Host Workspace
+                    <a asp-controller="Account" asp-action="Profile" class="rounded-full bg-secondary text-foreground hover:bg-secondary/80 px-4 py-2 text-sm font-semibold inline-flex items-center gap-1.5">
+                        <svg class="size-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        My Profile
                     </a>
                 }
 

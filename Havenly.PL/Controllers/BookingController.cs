@@ -68,6 +68,11 @@ public class BookingController : Controller
             return View(model);
         }
 
+        if (result.BookingID.HasValue && result.BookingID.Value > 0)
+        {
+            return RedirectToAction("Checkout", "Payment", new { bookingId = result.BookingID.Value });
+        }
+
         TempData["SuccessMessage"] = result.Message;
         return RedirectToAction(nameof(MyBookings));
     }

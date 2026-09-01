@@ -9,7 +9,9 @@ namespace Havenly.DAL.Repos.Abstractions
     public interface IPaymentRepository
     {
         Task<Payment?> GetById(long id);
+        Task<Payment?> GetByBookingIdAsync(long bookingId);
         Task<IEnumerable<Payment>> GetAll();
+        Task<IEnumerable<Payment>> GetPaymentsWithDetailsAsync();
         Task<IEnumerable<Payment>> Find(Expression<Func<Payment, bool>> predicate);
         Task<Payment?> Get(Func<Payment, bool> predicate);
         Task Add(Payment entity);

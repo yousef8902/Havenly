@@ -1,15 +1,14 @@
+using System.Linq;
+using System.Threading.Tasks;
 using Havenly.BLL.ModelVMs;
 using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Enums;
-using Havenly.PL.Data;
-
 using Microsoft.AspNetCore.Mvc;
 
 namespace Havenly.PL.Controllers;
 
 public class HomeController : Controller
 {
-    
     private readonly IListingServices _listingService;
 
     public HomeController(IListingServices listingService)
@@ -24,38 +23,42 @@ public class HomeController : Controller
         ViewData["Description"] = "Havenly is a short-term rental marketplace for considered homes.";
         ViewData["TransparentHeader"] = true;
 
-        
-        var approvedListings = await _listingService.GetListingsAsync(ListingStatus.Approved);
+        var listings = (await _listingService.GetListingsAsync(ListingStatus.Approved)).ToList();
+        if (!listings.Any())
+        {
+            listings = (await _listingService.GetListingsAsync(ListingStatus.Pending)).ToList();
+        }
 
-        
-        var featuredCards = approvedListings
+        var featuredCards = listings
             .Take(4)
             .Select(l => new PropertyCardVM
             {
                 Id = l.ListingID,
-                Title = l.Property?.PropertyName ?? "Title",
-                City = l.Property?.Address?.City ?? "Unknown City",
-                Country = l.Property?.Address?.Country ?? "Unknown Country",
+                Title = l.Property?.PropertyName ?? "Havenly Stay",
+                City = l.Property?.Address?.City ?? "Cairo",
+                Country = l.Property?.Address?.Country ?? "Egypt",
                 Price = l.Price,
-                //Rating = l.AverageRating > 0 ? l.AverageRating : 4.9,
-                ImageUrl = l.Property?.Images?.FirstOrDefault()?.ImagePath ?? "/images/p7.jpg",
-               
+                Rating = l.Property != null && l.Property.Rating > 0 ? l.Property.Rating : 4.9,
+                ImageUrl = l.Property?.Images?.FirstOrDefault(i => i.IsPrimary == true)?.ImagePath
+                           ?? l.Property?.Images?.FirstOrDefault()?.ImagePath
+                           ?? "/images/p1.jpg"
             })
             .ToList();
 
-        var recommendedCards = approvedListings
-            .Skip(1)
+        var recommendedCards = listings
+            .Skip(2)
             .Take(2)
             .Select(l => new PropertyCardVM
             {
                 Id = l.ListingID,
-                Title = l.Property?.PropertyName ?? "Title",
-                City = l.Property?.Address?.City ?? "Unknown City",
-                Country = l.Property?.Address?.Country ?? "Unknown Country",
+                Title = l.Property?.PropertyName ?? "Havenly Stay",
+                City = l.Property?.Address?.City ?? "Alexandria",
+                Country = l.Property?.Address?.Country ?? "Egypt",
                 Price = l.Price,
-                //Rating = l.AverageRating > 0 ? l.AverageRating : 4.8,
-                ImageUrl = l.Property?.Images?.FirstOrDefault()?.ImagePath ?? "/images/placeholder.jpg",
-               
+                Rating = l.Property != null && l.Property.Rating > 0 ? l.Property.Rating : 4.8,
+                ImageUrl = l.Property?.Images?.FirstOrDefault(i => i.IsPrimary == true)?.ImagePath
+                           ?? l.Property?.Images?.FirstOrDefault()?.ImagePath
+                           ?? "/images/p3.jpg"
             })
             .ToList();
 
@@ -68,8 +71,6 @@ public class HomeController : Controller
 
         return View(viewModel);
     }
-
- 
 
     [HttpGet]
     public IActionResult Error()
@@ -86,4 +87,3 @@ public class HomeController : Controller
         return View("NotFound");
     }
 }
-

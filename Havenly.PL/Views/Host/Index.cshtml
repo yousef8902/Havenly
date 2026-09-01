@@ -5,7 +5,7 @@
     ViewData["Description"] = "Manage your properties and bookings.";
     Layout = "~/Views/Shared/_WorkspaceLayout.cshtml";
     ViewData["Workspace"] = "Host dashboard";
-    ViewData["WorkspaceRole"] = "Omar Khalil · Host";
+    ViewData["WorkspaceRole"] = $"{User.Identity?.Name ?? "Host"} · Host";
     ViewData["WorkspaceNav"] = "host";
 }
 
@@ -17,6 +17,18 @@
 
 <!-- Stat Cards Grid -->
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
+    <!-- Net Earnings Card -->
+    <div class="rounded-2xl border border-border bg-card p-6">
+        <div class="space-y-2">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-muted-foreground">Net Earnings</p>
+                <a asp-action="Payouts" class="text-xs font-semibold text-primary hover:underline">Payouts →</a>
+            </div>
+            <p class="text-3xl font-bold text-foreground">$@(((decimal)(ViewBag.TotalEarnings ?? 0m)).ToString("N2"))</p>
+            <p class="text-xs text-emerald-600 font-medium">Pending: $@(((decimal)(ViewBag.PendingPayouts ?? 0m)).ToString("N2"))</p>
+        </div>
+    </div>
+
     <!-- Active Listings Card -->
     <div class="rounded-2xl border border-border bg-card p-6">
         <div class="space-y-2">
@@ -32,15 +44,6 @@
             <p class="text-sm font-medium text-muted-foreground">Pending review</p>
             <p class="text-3xl font-bold">@(ViewBag.PendingListings ?? 0)</p>
             <p class="text-xs text-muted-foreground">Awaiting admin check</p>
-        </div>
-    </div>
-
-    <!-- Total Listings Card -->
-    <div class="rounded-2xl border border-border bg-card p-6">
-        <div class="space-y-2">
-            <p class="text-sm font-medium text-muted-foreground">Total properties</p>
-            <p class="text-3xl font-bold">@(ViewBag.TotalListings ?? 0)</p>
-            <p class="text-xs text-muted-foreground">In your portfolio</p>
         </div>
     </div>
 

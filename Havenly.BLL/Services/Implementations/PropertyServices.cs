@@ -93,7 +93,8 @@ namespace Havenly.BLL.Services.Implementations
                     property.Description,
                     property.NumberOfGuests,
                     property.Capacity,
-                    property.BathroomCount);
+                    property.BathroomCount,
+                    property.Category);
                 await propertyRepository.Add(property);
 
                 // Every newly submitted host listing starts pending for the admin workflow.
@@ -143,7 +144,8 @@ namespace Havenly.BLL.Services.Implementations
                     property.Description,
                     property.NumberOfGuests,
                     property.Capacity,
-                    property.BathroomCount);
+                    property.BathroomCount,
+                    property.Category);
                 propertyRepository.Update(existingProperty);
 
                 existingProperty.Address.Update(

@@ -1,4 +1,4 @@
-﻿@model Havenly.BLL.ModelVMs.BookingsPageVM
+@model Havenly.BLL.ModelVMs.BookingsPageVM
 
 @{ViewData["Title"] = "My bookings — Havenly";
     ViewData["Description"] = "Track upcoming, pending, completed and cancelled Havenly stays.";
@@ -53,7 +53,7 @@
 
                             <!-- Property Details -->
                             <div class="space-y-2">
-                                <a asp-controller="Property" asp-action="Details" asp-route-id="@booking.PropertyId" class="font-semibold hover:text-primary">
+                                <a asp-controller="Property" asp-action="Detail" asp-route-id="@booking.PropertyId" class="font-semibold hover:text-primary">
                                     @booking.Title
                                 </a>
                                 <p class="text-sm text-muted-foreground">@booking.City, @booking.Country</p>
@@ -88,7 +88,14 @@
                                 </div>
 
                                 <!-- Actions -->
-                                <div class="flex gap-2">
+                                <div class="flex gap-2 items-center">
+                                    @if (booking.Status == "Pending")
+                                    {
+                                        <a asp-controller="Payment" asp-action="Checkout" asp-route-bookingId="@booking.BookingId"
+                                           class="rounded-lg bg-primary px-3 py-1 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition">
+                                            Pay Now
+                                        </a>
+                                    }
                                     @if (booking.Status == "Approved" || booking.Status == "Pending")
                                     {
                                         <form asp-controller="Booking" asp-action="CancelBooking" method="post" class="inline" 
@@ -125,8 +132,8 @@
                 <p class="text-sm text-muted-foreground text-center max-w-md mb-4">
                     When a booking reaches this stage, you'll find it here with all its details.
                 </p>
-                <a asp-controller="Search" asp-action="Index" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
-                    Find a stay
+                <a asp-controller="Property" asp-action="Index" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+                    Explore stays
                 </a>
             </div>
         }

@@ -16,6 +16,7 @@ namespace Havenly.BLL.ModelVMs
         public int MaxGuests { get; set; }
         public int Bedrooms { get; set; }
         public string ImageUrl { get; set; } = "";
+        public string Category { get; set; } = "Design homes";
         public string? Badge { get; set; }
         public string Status { get; set; } = "approved";
         public bool ShowStatus { get; set; }
@@ -141,7 +142,7 @@ namespace Havenly.BLL.ModelVMs
     {
         public string Id { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
-        //public string Email { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
         public DateTime? JoinedDate { get; set; }
         public UserStatus Status { get; set; }

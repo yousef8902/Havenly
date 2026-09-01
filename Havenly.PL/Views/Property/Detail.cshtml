@@ -288,22 +288,18 @@
                     </button>
                 </form>
 
-                <!-- Favorite Button -->
-                <button type="button" class="w-full flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 hover:bg-secondary"
-                        data-property-id="@Model.Id" data-toggle-favorite="true">
-                    <svg class="size-5 @(Model.IsFavorite ? "fill-red-500 text-red-500" : "text-muted-foreground")" fill="@(Model.IsFavorite ? "currentColor" : "none")" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                    </svg>
-                    <span>@(Model.IsFavorite ? "Saved" : "Save")</span>
-                </button>
-
-                <!-- Share Button -->
-                <button type="button" class="w-full flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 hover:bg-secondary" onclick="navigator.share({title: '@Model.Title', url: window.location.href})">
-                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C9.839 10.319 13.159 7.5 17 7.5c-2.342 0-4.523.922-6.136 2.364M4.5 6H3m16.5 0h-1.5M9 20.25a6.375 6.375 0 1 0 0-12.75A6.375 6.375 0 0 0 9 20.25z"></path>
-                    </svg>
-                    <span>Share</span>
-                </button>
+                <!-- Favorite Button Form -->
+                <form asp-controller="Favorites" asp-action="Toggle" method="post" class="w-full">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="listingId" value="@Model.ListingID" />
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                    <button type="submit" class="w-full flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 hover:bg-secondary transition font-medium text-sm">
+                        <svg class="size-5 @(Model.IsFavorite ? "fill-red-500 text-red-500" : "text-muted-foreground")" fill="@(Model.IsFavorite ? "currentColor" : "none")" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                        <span>@(Model.IsFavorite ? "Saved to Favorites" : "Save to Favorites")</span>
+                    </button>
+                </form>
             </div>
         </div>
     </div>

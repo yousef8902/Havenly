@@ -16,15 +16,15 @@ public class PropertyImage
     [ForeignKey(nameof(PropertyID))]
     public Property Property { get;  set; }
 
-    [Required]
-    public bool? IsPrimary { get; set; }// mariam -- for UI
+    public bool? IsPrimary { get; set; } = false;// mariam -- for UI
     public string ImagePath { get;  set; }
 
-    public void Create(long imageId, long propertyId, string imagePath)
+    public void Create(long imageId, long propertyId, string imagePath, bool isPrimary = false)
     {
         ImageID = imageId;
         PropertyID = propertyId;
         ImagePath = imagePath;
+        IsPrimary = isPrimary;
     }
 
     public void UpdatePath(string imagePath)

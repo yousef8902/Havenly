@@ -1,4 +1,4 @@
-﻿@model Havenly.BLL.ModelVMs.AdminBookingsVM
+@model Havenly.BLL.ModelVMs.AdminBookingsVM
 @using Havenly.DAL.Enums
 
 @{
@@ -211,7 +211,7 @@
                                         </svg>
                                     </div>
                                 }
-                                <a asp-controller="Property" asp-action="Details" asp-route-id="@booking.PropertyId"
+                                <a asp-controller="Property" asp-action="Detail" asp-route-id="@booking.PropertyId"
                                    class="hover:underline text-foreground font-medium">
                                     @booking.propertyName
                                 </a>

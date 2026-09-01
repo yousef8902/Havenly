@@ -1,8 +1,9 @@
-﻿using Havenly.BLL.ModelVMs;
+using Havenly.BLL.ModelVMs;
 using Havenly.BLL.ModelVMs.Admin;
 using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Entities;
 using Havenly.DAL.Enums;
+using Havenly.DAL.Repos.Abstractions;
 
 namespace Havenly.BLL.Services.Implementations
 {
@@ -17,7 +18,6 @@ namespace Havenly.BLL.Services.Implementations
 
         public async Task<AdminDashboardVM> GetDashboardDataAsync()
         {
-            // Get all data in parallel for performance
             var totalMembersTask = _repository.GetMembersCountAsync(null, null);
             var totalListingsTask = _repository.GetListingsCountAsync(null, null);
             var pendingListingsTask = _repository.GetListingsCountAsync(ListingStatus.Pending, null);
@@ -42,16 +42,13 @@ namespace Havenly.BLL.Services.Implementations
                 ListingId = l.ListingID,
                 PropertyName = l.Property?.PropertyName ?? "Unknown",
                 HostName = l.Property?.Owner?.Name ?? "Unknown",
-                HostId = l.Property?.OwnerUserID?? string.Empty,
-                
+                HostId = l.Property?.OwnerUserID ?? string.Empty,
                 Location = l.Property?.Address != null
                     ? $"{l.Property.Address.City}, {l.Property.Address.Country}"
                     : "N/A",
                 ImageUrl = l.Property?.Images ?? new List<PropertyImage>(),
                 Price = l.Price
             }).ToList();
-
-           
 
             return new AdminDashboardVM
             {
@@ -62,10 +59,8 @@ namespace Havenly.BLL.Services.Implementations
                     GrossBookings = grossBookings,
                     PendingReviewCount = pendingListings,
                     TotalBookings = bookings.Count
-                  
                 },
-                PendingListings = pendingList,
-               
+                PendingListings = pendingList
             };
         }
 
@@ -83,9 +78,8 @@ namespace Havenly.BLL.Services.Implementations
                 Id = l.ListingID,
                 Title = l.Property?.PropertyName ?? "Unknown",
                 HostName = l.Property?.Owner?.Name ?? "Unknown",
-                HostId = l.Property?.OwnerUserID ??   string.Empty,
+                HostId = l.Property?.OwnerUserID ?? string.Empty,
                 Status = l.ListingStatus,
-                
                 Price = l.Price,
                 Location = l.Property?.Address != null
                     ? $"{l.Property.Address.City}, {l.Property.Address.Country}"
@@ -97,7 +91,7 @@ namespace Havenly.BLL.Services.Implementations
                     .Average(r => (double?)r.Rating) ?? 0
             }).ToList();
 
-            // Get stats
+            // Get accurate stats
             var total = await _repository.GetListingsCountAsync(null, null);
             var pending = await _repository.GetListingsCountAsync(ListingStatus.Pending, null);
             var approved = await _repository.GetListingsCountAsync(ListingStatus.Approved, null);
@@ -130,16 +124,12 @@ namespace Havenly.BLL.Services.Implementations
 
         public async Task<bool> ApproveListingAsync(int listingId, int adminUserId)
         {
-            var result = await _repository.ApproveListingAsync(listingId, adminUserId);
-            
-            return result;
+            return await _repository.ApproveListingAsync(listingId, adminUserId.ToString());
         }
 
         public async Task<bool> RejectListingAsync(int listingId, int adminUserId, string? reason = null)
         {
-            var result = await _repository.RejectListingAsync(listingId, adminUserId, reason);
-            
-            return result;
+            return await _repository.RejectListingAsync(listingId, adminUserId.ToString(), reason);
         }
 
         public async Task<AdminMembersVM> GetMembersDataAsync(
@@ -154,19 +144,18 @@ namespace Havenly.BLL.Services.Implementations
             {
                 Id = u.Id,
                 FullName = u.Name,
-                // Email = u.Email,
-
+                Email = u.Email ?? string.Empty,
+                Role = u.Role ?? "Guest",
                 Status = u.Status,
                 BookingsCount = u.Bookings?.Count ?? 0,
                 TotalSpent = u.Bookings?
                     .Where(b => b.Status != BookingStatus.Cancelled)
                     .Sum(b => b.TotalPrice) ?? 0,
                 Phone = u.PhoneNumber ?? string.Empty,
-               
                 IsVerified = u.Status == UserStatus.Active
             }).ToList();
 
-            // Get stats
+            // Get accurate member counts
             var allUsers = await _repository.GetMembersAsync(null, null, 1, int.MaxValue);
             var allUsersList = allUsers.Items;
 
@@ -189,16 +178,16 @@ namespace Havenly.BLL.Services.Implementations
                     Total = allUsersList.Count,
                     Active = allUsersList.Count(u => u.Status == UserStatus.Active),
                     Suspended = allUsersList.Count(u => u.Status == UserStatus.Suspended),
-                    //Guests = allUsersList.Count(u => u.Role == UserRole.Guest),
-                    //Hosts = allUsersList.Count(u => u.Role == UserRole.Host),
-                    //Admins = allUsersList.Count(u => u.Role == UserRole.Admin)
+                    Guests = allUsersList.Count(u => string.Equals(u.Role, "Guest", StringComparison.OrdinalIgnoreCase)),
+                    Hosts = allUsersList.Count(u => string.Equals(u.Role, "Host", StringComparison.OrdinalIgnoreCase)),
+                    Admins = allUsersList.Count(u => string.Equals(u.Role, "Admin", StringComparison.OrdinalIgnoreCase))
                 }
             };
         }
 
         public async Task<bool> ToggleUserStatusAsync(string userId, bool isActive)
         {
-            return await _repository.ToggleUserStatusAsync(int.Parse(userId), isActive);
+            return await _repository.ToggleUserStatusAsync(userId, isActive);
         }
 
         public async Task<AdminBookingsVM> GetBookingsDataAsync(
@@ -225,11 +214,10 @@ namespace Havenly.BLL.Services.Implementations
                 Nights = (b.CheckOut - b.CheckIn).Days,
                 Total = b.TotalPrice,
                 Status = b.Status.ToString(),
-
-                ImageUrl = b.Listing?.Property?.Images?.FirstOrDefault()?.ImagePath ?? string.Empty
+                ImageUrl = b.Listing?.Property?.Images?.FirstOrDefault()?.ImagePath ?? "/images/p1.jpg"
             }).ToList();
 
-            // Get stats
+            // Get stats across all bookings
             var allBookings = await _repository.GetBookingsAsync(null, null, null, null, 1, int.MaxValue);
             var allBookingsList = allBookings.Items;
 
@@ -267,7 +255,5 @@ namespace Havenly.BLL.Services.Implementations
                 }
             };
         }
-
-      
     }
 }

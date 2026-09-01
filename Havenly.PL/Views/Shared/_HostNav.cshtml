@@ -8,18 +8,11 @@
         Overview
     </a>
 
-    <a asp-controller="Host" asp-action="Bookings" class="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground @(ViewContext.RouteData.Values["action"]?.ToString() == "Bookings" && ViewContext.RouteData.Values["controller"]?.ToString() == "Host" ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold" : "")">
-        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-        </svg>
-        Bookings
-    </a>
-
     <a asp-controller="Host" asp-action="ListProperties" class="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground @(ViewContext.RouteData.Values["action"]?.ToString() == "ListProperties" && ViewContext.RouteData.Values["controller"]?.ToString() == "Host" ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold" : "")">
         <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
         </svg>
-        Properties
+        My Properties
     </a>
 
     <a asp-controller="Host" asp-action="CreateProperty" class="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground @(ViewContext.RouteData.Values["action"]?.ToString() == "CreateProperty" && ViewContext.RouteData.Values["controller"]?.ToString() == "Host" ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold" : "")">
@@ -29,10 +22,17 @@
         New Property
     </a>
 
-    <a asp-controller="Host" asp-action="Messages" class="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground @(ViewContext.RouteData.Values["action"]?.ToString() == "Messages" && ViewContext.RouteData.Values["controller"]?.ToString() == "Host" ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold" : "")">
+    <a asp-controller="Host" asp-action="Bookings" class="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground @(ViewContext.RouteData.Values["action"]?.ToString() == "Bookings" && ViewContext.RouteData.Values["controller"]?.ToString() == "Host" ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold" : "")">
         <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
-        Messages
+        Booking Requests
+    </a>
+
+    <a asp-controller="Host" asp-action="Payouts" class="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground @(ViewContext.RouteData.Values["action"]?.ToString() == "Payouts" && ViewContext.RouteData.Values["controller"]?.ToString() == "Host" ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold" : "")">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        Payouts & Earnings
     </a>
 </nav>

@@ -50,7 +50,20 @@ namespace Havenly.DAL.Repos.Implementations
 
         public async Task<IEnumerable<Property>> GetAll()
         {
-            try { var list = await context.Properties.ToListAsync(); Console.WriteLine("info:Properties fetched successfully"); return list; }
+            try
+            {
+                var list = await context.Properties
+                    .Where(p => !p.IsDeleted)
+                    .Include(p => p.Address)
+                    .Include(p => p.Listing)
+                    .Include(p => p.Images)
+                    .Include(p => p.PropertyAmenities)
+                        .ThenInclude(pa => pa.Amenity)
+                    .Include(p => p.Bedrooms)
+                    .ToListAsync();
+                Console.WriteLine("info:Properties fetched successfully");
+                return list;
+            }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return Enumerable.Empty<Property>(); }
         }
 
@@ -108,7 +121,7 @@ namespace Havenly.DAL.Repos.Implementations
             try
             {
                 // update the passed entity directly
-                entity.Update(entity.PropertyName, entity.Description, entity.NumberOfGuests, entity.Capacity, entity.BathroomCount);
+                entity.Update(entity.PropertyName, entity.Description, entity.NumberOfGuests, entity.Capacity, entity.BathroomCount, entity.Category);
                 context.SaveChanges();
             }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); }

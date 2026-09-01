@@ -23,13 +23,10 @@
             </button>
         </form>
 
-        <!-- Dynamic Badge (e.g., Guest Favourite) -->
-        @if (ViewData["Badge"] != null)
-        {
-            <span class="absolute left-3 top-3 rounded-full bg-surface/95 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur">
-                @ViewData["Badge"]
-            </span>
-        }
+        <!-- Dynamic Badge / Category Pill -->
+        <span class="absolute left-3 top-3 rounded-full bg-surface/95 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur shadow-sm">
+            @(ViewData["Badge"]?.ToString() ?? (string.IsNullOrEmpty(Model.Category) ? "Design homes" : Model.Category))
+        </span>
     </div>
 
     <!-- Content Body -->

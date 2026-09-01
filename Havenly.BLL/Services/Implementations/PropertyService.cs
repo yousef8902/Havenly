@@ -1,4 +1,4 @@
-﻿using Havenly.BLL.Services.Abstractions;
+using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Repos.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Havenly.BLL.ModelVMs;
@@ -22,9 +22,16 @@ namespace Havenly.BLL.Services.Implementations
             var properties = await _propertyRepository.GetAll();
             var query = properties.AsQueryable();
 
+            // Only show approved listings
+            query = query.Where(p => p.Listing != null && p.Listing.ListingStatus == Havenly.DAL.Enums.ListingStatus.Approved);
+
             if (!string.IsNullOrWhiteSpace(city))
             {
-                query = query.Where(p => p.Address.City != null && p.Address.City.Contains(city, StringComparison.OrdinalIgnoreCase));
+                var s = city.Trim().ToLower();
+                query = query.Where(p => p.Address != null && 
+                    ((p.Address.City != null && p.Address.City.ToLower().Contains(s)) ||
+                     (p.Address.Country != null && p.Address.Country.ToLower().Contains(s)) ||
+                     p.PropertyName.ToLower().Contains(s)));
             }
 
             if (guests > 0)
@@ -32,7 +39,6 @@ namespace Havenly.BLL.Services.Implementations
                 query = query.Where(p => p.NumberOfGuests >= guests);
             }
 
-          
             return _mapper.Map<IEnumerable<PropertyCardVM>>(query);
         }
 

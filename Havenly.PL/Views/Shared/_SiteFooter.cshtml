@@ -45,19 +45,19 @@
                 <div>
                     <h2 class="text-sm font-semibold text-background/90">Hosting</h2>
                     <ul class="mt-4 flex flex-col gap-2.5 text-sm text-background/50">
-                        <li><a asp-controller="Host" asp-action="Index" class="hover:text-background">Become a Host</a></li>
-                        <li><a asp-controller="Host" asp-action="Index" class="hover:text-background">List your place</a></li>
-                        <li><a asp-controller="Host" asp-action="Index" class="hover:text-background">Booking requests</a></li>
-                        <li><a asp-controller="Host" asp-action="Index" class="hover:text-background">Responsible Hosting</a></li>
+                        <li><a asp-controller="Host" asp-action="Index" class="hover:text-background">Host Overview</a></li>
+                        <li><a asp-controller="Host" asp-action="CreateProperty" class="hover:text-background">List your place</a></li>
+                        <li><a asp-controller="Host" asp-action="Bookings" class="hover:text-background">Booking requests</a></li>
+                        <li><a asp-controller="Host" asp-action="ListProperties" class="hover:text-background">My Properties</a></li>
                     </ul>
                 </div>
                 <div>
                     <h2 class="text-sm font-semibold text-background/90">Platform</h2>
                     <ul class="mt-4 flex flex-col gap-2.5 text-sm text-background/50">
-                        <li><a asp-controller="Admin" asp-action="Index" class="hover:text-background">Admin console</a></li>
-                        <li><a asp-controller="Admin" asp-action="Index" class="hover:text-background">Activity log</a></li>
-                        <li><a asp-controller="Property" asp-action="Index" class="hover:text-background">Saved stays</a></li>
+                        <li><a asp-controller="Admin" asp-action="DashBoard" class="hover:text-background">Admin console</a></li>
+                        <li><a asp-controller="Favorites" asp-action="Index" class="hover:text-background">Saved stays</a></li>
                         <li><a asp-controller="Property" asp-action="Index" class="hover:text-background">Explore</a></li>
+                        <li><a asp-controller="Booking" asp-action="MyBookings" class="hover:text-background">My bookings</a></li>
                     </ul>
                 </div>
             </div>
