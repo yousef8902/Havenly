@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Access Restricted — Havenly";
+}
+
+<div class="container-page py-20 max-w-lg mx-auto text-center">
+    <div class="rounded-3xl border border-border bg-card p-8 sm:p-10 shadow-lift space-y-6">
+        <!-- Lock Icon -->
+        <div class="inline-flex size-16 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 mb-2">
+            <svg class="size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+        </div>
+
+        <div class="space-y-2">
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Access Restricted</h1>
+            <p class="text-sm text-muted-foreground">
+                You do not have the required permissions to access this workspace. This area is reserved for specific account roles.
+            </p>
+        </div>
+
+        <div class="pt-2 flex flex-col sm:flex-row gap-3">
+            <a asp-controller="Home" asp-action="Index" class="flex-1 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition">
+                Return to Home
+            </a>
+            <a asp-controller="Account" asp-action="Profile" class="flex-1 rounded-xl border border-border bg-background py-3 text-sm font-semibold hover:bg-secondary transition">
+                My Profile
+            </a>
+        </div>
+    </div>
+</div>

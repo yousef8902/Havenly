@@ -1,0 +1,59 @@
+@model Havenly.BLL.ModelVMs.Payment.PaymentSuccessVM
+
+@{
+    ViewData["Title"] = "Payment Successful — Havenly";
+}
+
+<div class="container-page py-16 max-w-xl mx-auto text-center">
+    <div class="rounded-3xl border border-border bg-card p-8 sm:p-10 shadow-lift space-y-6">
+        <!-- Success Icon -->
+        <div class="inline-flex size-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 mb-2">
+            <svg class="size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+
+        <div class="space-y-1">
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Payment confirmed!</h1>
+            <p class="text-sm text-muted-foreground">Your booking is approved and your stay is confirmed.</p>
+        </div>
+
+        <!-- Receipt Box -->
+        <div class="rounded-2xl bg-secondary/50 p-6 text-left border border-border space-y-3 text-sm">
+            <div class="flex justify-between pb-3 border-b border-border">
+                <span class="text-muted-foreground">Transaction ID</span>
+                <span class="font-mono font-bold text-foreground">@Model.TransactionId</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-muted-foreground">Property</span>
+                <span class="font-semibold text-foreground">@Model.PropertyName</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-muted-foreground">Location</span>
+                <span class="text-foreground">@Model.Location</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-muted-foreground">Dates</span>
+                <span class="font-semibold text-foreground">@Model.CheckIn.ToString("MMM d, yyyy") – @Model.CheckOut.ToString("MMM d, yyyy")</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-muted-foreground">Gateway</span>
+                <span class="font-semibold text-foreground">@Model.Gateway</span>
+            </div>
+            <div class="flex justify-between pt-3 border-t border-border text-base font-bold">
+                <span>Amount Paid</span>
+                <span class="text-emerald-600 text-lg font-extrabold">$@Model.Amount.ToString("N2")</span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <a asp-controller="Booking" asp-action="MyBookings" class="flex-1 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition">
+                View My Bookings
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="flex-1 rounded-xl border border-border bg-background py-3 text-sm font-semibold hover:bg-secondary transition">
+                Explore More Places
+            </a>
+        </div>
+    </div>
+</div>
