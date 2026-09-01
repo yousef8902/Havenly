@@ -1,14 +1,11 @@
-<<<<<<< HEAD
-
 
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 
-=======
+
 using AutoMapper;
 using Havenly.BLL.Mappers;
->>>>>>> f579157ecaad4bcea04906a7f75d1fbc327d0020
 using Havenly.BLL.Services.Abstractions;
 using Havenly.BLL.Services.Implementations;
 using Havenly.DAL.Database;
