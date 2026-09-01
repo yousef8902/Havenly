@@ -24,7 +24,7 @@ namespace Havenly.BLL.Services.Implementations
             _password = password;
         }
 
-        public async Task SendEmailAsync(string toEmail, string subject, string body)
+        private async Task SendEmailAsync(string toEmail, string subject, string body)
         {
             try
             {
@@ -44,17 +44,99 @@ namespace Havenly.BLL.Services.Implementations
 
 
         }
-        public async Task SendEmailRequestbooking(string toEmail,Booking booking)
-        { 
-            string subject= "Booking Request";
-            string body = $"A new booking request has been submitted for {booking.Listing.Property.PropertyName}. Please review and take necessary action.";
-            SendEmailAsync(toEmail, subject, body);
+        public async Task SendEmailRequestbookingToHost(string toEmail, Booking booking)
+        {
+            //if (booking == null)
+            //{
+            //    Console.WriteLine("booking is null");
+            //    return;
+            //}
+            try
+            {
+                string subject = "Booking Request";
+                string body = $"A new booking request has been submitted for . Please review and take necessary action.";
+                await SendEmailAsync(toEmail, subject, body);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
 
+
+
+            }
+        }
+        public async Task ReciveEmailRequestbookingFromHost(string toEmail, Booking booking)
+        {
+            //if (booking == null)
+            //{
+            //    Console.WriteLine("booking is null");
+            //    return;
+            //}
+            try
+            {
+                string subject = "Booking Request";
+                string body = $"A new booking request has been submitted for . Please review and take necessary action.";
+                await SendEmailAsync(toEmail, subject, body);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+
+
+
+            }
+
+
+        }
+        public async Task SendEmailRequestPropertyToAdmin(string toEmail, Booking booking)
+        {
+            //if (booking == null)
+            //{
+            //    Console.WriteLine("booking is null");
+            //    return;
+            //}
+            try
+            {
+                string subject = "Booking Request";
+                string body = $"A new booking request has been submitted for . Please review and take necessary action.";
+                await SendEmailAsync(toEmail, subject, body);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+
+
+
+            }
+
+
+        }
+        public async Task ReciveEmailRequestPropertyFromAdmin(string toEmail, Booking booking)
+        {
+            //if (booking == null)
+            //{
+            //    Console.WriteLine("booking is null");
+            //    return;
+            //}
+            try
+            {
+                string subject = "Booking Request";
+                string body = $"A new booking request has been submitted for . Please review and take necessary action.";
+                await SendEmailAsync(toEmail, subject, body);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+
+
+
+            }
 
 
         }
 
-        }
+
+    }
 
 }
 
