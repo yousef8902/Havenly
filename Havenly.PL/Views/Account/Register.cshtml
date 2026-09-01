@@ -1,0 +1,83 @@
+@model Havenly.BLL.ModelVMs.Account.RegisterVM
+
+@{
+    ViewData["Title"] = "Sign up — Havenly";
+}
+
+<div class="container-page py-12">
+    <div class="max-w-md mx-auto">
+        <div class="rounded-3xl border border-border bg-card p-8 shadow-lift space-y-6">
+            <div class="text-center space-y-2">
+                <div class="inline-flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-2">
+                    <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight">Create your account</h1>
+                <p class="text-sm text-muted-foreground">Join Havenly to explore or host unique places</p>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm font-medium text-destructive">
+                    <ul class="space-y-1 list-disc list-inside">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <form asp-action="Register" method="post" class="space-y-4">
+                @Html.AntiForgeryToken()
+
+                <div>
+                    <label asp-for="Name" class="block text-sm font-semibold mb-1.5"></label>
+                    <input asp-for="Name" placeholder="Your full name" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <span asp-validation-for="Name" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Email" class="block text-sm font-semibold mb-1.5"></label>
+                    <input asp-for="Email" type="email" placeholder="name@example.com" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <span asp-validation-for="Email" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Password" class="block text-sm font-semibold mb-1.5"></label>
+                    <input asp-for="Password" type="password" placeholder="••••••••" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <span asp-validation-for="Password" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="ConfirmPassword" class="block text-sm font-semibold mb-1.5"></label>
+                    <input asp-for="ConfirmPassword" type="password" placeholder="••••••••" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <span asp-validation-for="ConfirmPassword" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Role" class="block text-sm font-semibold mb-1.5">I want to</label>
+                    <select asp-for="Role" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none">
+                        <option value="Guest">Explore and book stays (Guest)</option>
+                        <option value="Host">List and manage my properties (Host)</option>
+                    </select>
+                    <span asp-validation-for="Role" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+
+                <button type="submit" class="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition">
+                    Create account
+                </button>
+            </form>
+
+            <p class="text-center text-sm text-muted-foreground pt-2">
+                Already have an account? 
+                <a asp-action="Login" class="font-semibold text-primary hover:underline">Log in</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

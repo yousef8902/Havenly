@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(ViewData["Title"] ?? "Havenly")</title>
+    <meta name="description" content="@(ViewData["Description"] ?? "Havenly workspace")" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&display=swap" />
+    <link rel="stylesheet" href="~/css/source.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/ui.css" asp-append-version="true" />
+    <link rel="icon" href="~/favicon.ico" type="image/x-icon" />
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    @{
+        var nav = ViewData["WorkspaceNav"] as string ?? (User.IsInRole("Admin") ? "admin" : "host");
+        var isHost = nav.Equals("host", StringComparison.OrdinalIgnoreCase);
+    }
+    <div class="min-h-screen bg-background lg:grid lg:grid-cols-[16rem_1fr]">
+        <aside class="sticky top-0 hidden h-screen flex-col border-r border-sidebar-border bg-sidebar p-4 lg:flex">
+            <partial name="_Logo" />
+            <p class="mt-6 px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">@ViewData["Workspace"]</p>
+            <div class="mt-2">
+                <partial name="@(isHost ? "_HostNav" : "_AdminNav")" />
+            </div>
+            <div class="mt-auto rounded-xl border border-sidebar-border bg-card p-3">
+                <p class="text-sm font-medium">@ViewData["WorkspaceRole"]</p>
+                <a asp-controller="Home" asp-action="Index" class="text-xs text-primary underline-offset-2 hover:underline">Back to Havenly</a>
+            </div>
+        </aside>
+        <div class="flex min-h-screen flex-col">
+            <header class="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border bg-background/90 px-5 backdrop-blur lg:hidden">
+                <partial name="_Logo" />
+                <button type="button" class="inline-flex size-11 items-center justify-center rounded-md border border-input bg-background shadow-sm" data-sheet-open="workspace-sheet" aria-label="Open workspace menu">
+                    <i data-lucide="menu" class="size-5"></i>
+                </button>
+            </header>
+            <div id="workspace-sheet" data-sheet data-side="left" hidden>
+                <div class="sheet-overlay" data-sheet-close></div>
+                <div class="sheet-panel p-6">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h2 class="text-lg font-semibold">@ViewData["Workspace"]</h2>
+                        <button type="button" data-sheet-close class="rounded-md p-2" aria-label="Close"><i data-lucide="x" class="size-4"></i></button>
+                    </div>
+                    <partial name="@(isHost ? "_HostNav" : "_AdminNav")" />
+                </div>
+            </div>
+            <main class="flex-1 px-5 py-8 lg:px-10 lg:py-10">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+    <partial name="_Toasts" />
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

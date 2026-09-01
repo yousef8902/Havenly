@@ -1,8 +1,10 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Havenly.DAL.Entities;
+
 
 namespace Havenly.DAL.Repos.Abstractions
 {
@@ -18,5 +20,7 @@ namespace Havenly.DAL.Repos.Abstractions
         void Update(Property entity);
         void Delete(Property entity);
         Task<int> SaveChanges();
+        Task<Property?> GetDetailbyId(long id);
+        public void UpdateReview(Property entity);
     }
 }

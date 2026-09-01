@@ -1,8 +1,209 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model Havenly.BLL.ModelVMs.HomeIndexVM
+
+@{
+    ViewData["Title"] = "Havenly — Find a place that feels like home";
+    ViewData["TransparentHeader"] = true;
+
+    var pills = new[] {
+        new { Label = "City lofts", Category = "City lofts", Icon = "building-2" },
+        new { Label = "Countryside", Category = "Countryside", Icon = "tree-pine" },
+        new { Label = "Beachfront", Category = "Beachfront", Icon = "waves" },
+        new { Label = "Cabins", Category = "Cabins", Icon = "mountain" },
+        new { Label = "Islands", Category = "Islands", Icon = "party-popper" },
+        new { Label = "Design homes", Category = "Design homes", Icon = "gem" },
+        new { Label = "Eco stays", Category = "Countryside", Icon = "leaf" },
+        new { Label = "Luxury", Category = "Islands", Icon = "crown" }
+    };
+
+    var steps = new[] {
+        new { Num = "01", Title = "Search your destination", Body = "Filter by dates, guests, price and amenities.", Icon = "search" },
+        new { Num = "02", Title = "Choose your dates", Body = "Availability is checked live against existing bookings.", Icon = "calendar-check" },
+        new { Num = "03", Title = "Book securely", Body = "You're only charged once the host approves your request.", Icon = "credit-card" },
+        new { Num = "04", Title = "Enjoy your stay", Body = "Message your host any time and get 24/7 support during the trip.", Icon = "sparkles" }
+    };
+
+    var confidence = new[] {
+        new { Title = "Verified Properties", Body = "Every host completes ID and property verification before publishing.", Icon = "shield-check" },
+        new { Title = "Secure Payments", Body = "Payments are held until check-in and refunded per listing policy.", Icon = "credit-card" },
+        new { Title = "24/7 Support", Body = "Real people, day or night, for anything that comes up during a stay.", Icon = "headphones" }
+    };
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Section -->
+<section class="relative flex min-h-[700px] flex-col">
+    <div class="absolute inset-0 -z-10">
+        <img src="~/images/hero.jpg" alt="Villa terrace" class="size-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-b from-foreground/50 via-foreground/25 to-foreground/60"></div>
+    </div>
+
+    <div class="flex flex-1 flex-col items-center justify-center px-5 pb-16 pt-32 text-center lg:px-8">
+        <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-background/30 bg-background/20 px-4 py-1.5 backdrop-blur-sm">
+            <span class="size-2 rounded-full bg-accent"></span>
+            <span class="text-sm font-medium text-primary-foreground">Handpicked stays for every style and destination</span>
+        </div>
+
+        <h1 class="max-w-3xl text-4xl leading-tight text-primary-foreground md:text-6xl font-bold tracking-tight">
+            Find a place that feels <span class="font-light italic">like home.</span>
+        </h1>
+
+        <p class="mt-5 max-w-xl text-lg text-primary-foreground/80 md:text-xl">
+            Discover considered homes for short stays around the globe.
+        </p>
+
+        <!-- Search Bar Form -->
+        <div class="mt-10 w-full max-w-[880px]">
+            <form asp-controller="Property" asp-action="Index" method="get" class="rounded-2xl border border-border bg-card p-3 shadow-lift text-left">
+                <div class="grid gap-2.5 md:grid-cols-[1.4fr_1fr_1fr_1fr_auto] md:items-end">
+
+                    <!-- Destination -->
+                    <div class="rounded-xl px-3 py-2 transition-colors hover:bg-secondary">
+                        <label for="dest" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground block">Destination</label>
+                        <input id="dest" name="City" type="text" placeholder="Where to? e.g. Dahab"
+                               class="h-11 border-0 bg-transparent px-0 text-sm w-full outline-none focus:ring-0" />
+                    </div>
+
+                    <!-- Check-In -->
+                    <div class="rounded-xl px-3 py-2 transition-colors hover:bg-secondary">
+                        <label for="in" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground block">Check-in</label>
+                        <input id="in" name="CheckIn" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                               class="h-11 border-0 bg-transparent px-0 text-sm w-full outline-none focus:ring-0" />
+                    </div>
+
+                    <!-- Check-Out -->
+                    <div class="rounded-xl px-3 py-2 transition-colors hover:bg-secondary">
+                        <label for="out" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground block">Check-out</label>
+                        <input id="out" name="CheckOut" type="date" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")"
+                               class="h-11 border-0 bg-transparent px-0 text-sm w-full outline-none focus:ring-0" />
+                    </div>
+
+                    <!-- Guests -->
+                    <div class="rounded-xl px-3 py-2 transition-colors hover:bg-secondary">
+                        <label for="gs" class="text-xs font-semibold uppercase tracking-wide text-muted-foreground block">Guests</label>
+                        <select id="gs" name="Guests" class="h-11 border-0 bg-transparent px-0 text-sm w-full outline-none focus:ring-0">
+                            <option value="1">1 guest</option>
+                            <option value="2" selected>2 guests</option>
+                            <option value="3">3 guests</option>
+                            <option value="4">4+ guests</option>
+                        </select>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="h-14 gap-2 rounded-xl px-6 bg-primary text-primary-foreground font-semibold flex items-center justify-center hover:bg-primary/90 transition">
+                        <i data-lucide="search" class="size-4"></i>
+                        <span>Search</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Category Pills Section -->
+<section class="container-page pb-8 pt-12">
+    <div class="-mx-5 flex gap-3 overflow-x-auto px-5 pb-2 lg:mx-0 lg:px-0">
+        @foreach (var p in pills)
+        {
+            <a asp-controller="Property" asp-action="Index" asp-route-category="@p.Category"
+               class="flex shrink-0 flex-col items-center gap-2 rounded-xl border border-border bg-surface px-5 py-3 text-muted-foreground transition-colors hover:border-primary hover:bg-primary-light hover:text-primary">
+                <i data-lucide="@p.Icon" class="size-[22px]"></i>
+                <span class="whitespace-nowrap text-xs font-medium">@p.Label</span>
+            </a>
+        }
+    </div>
+</section>
+
+<!-- Database-Driven Featured Stays Section -->
+<section class="mt-20 bg-muted/40 py-16">
+    <div class="container-page">
+        <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <div>
+                <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-primary">Featured stays</p>
+                <h2 class="text-3xl font-bold">Handpicked by our team</h2>
+            </div>
+            <a asp-controller="Property" asp-action="Index" class="flex items-center gap-1 text-base font-semibold text-primary hover:underline">
+                View all <i data-lucide="arrow-right" class="size-4"></i>
+            </a>
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            @if (Model.Featured != null && Model.Featured.Any())
+            {
+                int index = 0;
+                @foreach (var item in Model.Featured)
+                {
+                    string badge = index == 0 ? "Guest Favourite" : (index == 3 ? "New" : null);
+                    ViewData["Badge"] = badge;
+                    <partial name="_PropertyCard" model="item" view-data="ViewData" />
+                    index++;
+                }
+            }
+            else
+            {
+                <div class="col-span-full text-center py-8 text-muted-foreground">
+                    No featured stays found in database.
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Database-Driven Recommended Stays Section -->
+<section class="container-page py-16">
+    <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-primary">Recommended for you</p>
+            <h2 class="text-3xl font-bold">Stays you might love</h2>
+        </div>
+        <a asp-controller="Property" asp-action="Index" class="flex items-center gap-1 text-base font-semibold text-primary hover:underline">
+            Explore more <i data-lucide="arrow-right" class="size-4"></i>
+        </a>
+    </div>
+
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        @if (Model.Recommended != null && Model.Recommended.Any())
+        {
+            int index = 0;
+            @foreach (var item in Model.Recommended)
+            {
+                string badge = index == 1 ? "Top Rated" : null;
+                ViewData["Badge"] = badge;
+                <partial name="_PropertyCard" model="item" view-data="ViewData" />
+                index++;
+            }
+        }
+        else
+        {
+            <div class="col-span-full text-center py-8 text-muted-foreground">
+                No recommended stays available.
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Process & Confidence Sections -->
+<section class="container-page py-16">
+    <div class="mb-12 text-center">
+        <p class="mb-3 text-sm font-semibold uppercase tracking-wide text-primary">Simple process</p>
+        <h2 class="text-3xl font-bold">How Havenly works</h2>
+    </div>
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        @foreach (var s in steps)
+        {
+            <div class="rounded-2xl border border-border bg-surface p-8">
+                <p class="mb-6 text-xs font-bold tracking-widest text-muted-foreground">@s.Num</p>
+                <span class="mb-5 grid size-12 place-items-center rounded-xl bg-primary-light text-primary">
+                    <i data-lucide="@s.Icon" class="size-5"></i>
+                </span>
+                <h3 class="text-lg font-semibold">@s.Title</h3>
+                <p class="mt-2 text-sm text-muted-foreground">@s.Body</p>
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+}

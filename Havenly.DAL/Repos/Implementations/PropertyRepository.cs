@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,8 @@ using Havenly.DAL.Database;
 using Havenly.DAL.Entities;
 using Havenly.DAL.Repos.Abstractions;
 using Microsoft.EntityFrameworkCore;
+
+
 
 namespace Havenly.DAL.Repos.Implementations
 {
@@ -35,10 +38,7 @@ namespace Havenly.DAL.Repos.Implementations
 
         public async Task<IEnumerable<Property>> Find(Expression<Func<Property, bool>> predicate)
         {
-            try { 
-                var list = await context.Properties.Where(predicate).ToArrayAsync(); 
-                Console.WriteLine("info:Properties fetched successfully");
-                return list; }
+            try { var list = await context.Properties.Where(predicate).ToListAsync(); Console.WriteLine("info:Properties fetched successfully"); return list; }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return Enumerable.Empty<Property>(); }
         }
 
@@ -50,7 +50,20 @@ namespace Havenly.DAL.Repos.Implementations
 
         public async Task<IEnumerable<Property>> GetAll()
         {
-            try { var list = await context.Properties.ToListAsync(); Console.WriteLine("info:Properties fetched successfully"); return list; }
+            try
+            {
+                var list = await context.Properties
+                    .Where(p => !p.IsDeleted)
+                    .Include(p => p.Address)
+                    .Include(p => p.Listing)
+                    .Include(p => p.Images)
+                    .Include(p => p.PropertyAmenities)
+                        .ThenInclude(pa => pa.Amenity)
+                    .Include(p => p.Bedrooms)
+                    .ToListAsync();
+                Console.WriteLine("info:Properties fetched successfully");
+                return list;
+            }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return Enumerable.Empty<Property>(); }
         }
 
@@ -108,7 +121,17 @@ namespace Havenly.DAL.Repos.Implementations
             try
             {
                 // update the passed entity directly
-                entity.Update(entity.PropertyName, entity.Description, entity.NumberOfGuests, entity.Capacity, entity.BathroomCount);
+                entity.Update(entity.PropertyName, entity.Description, entity.NumberOfGuests, entity.Capacity, entity.BathroomCount, entity.Category);
+                context.SaveChanges();
+            }
+            catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); }
+        }
+        public void UpdateReview(Property entity)
+        {
+            try
+            {
+                // update the passed entity directly
+                entity.UpdateReview(entity.Rating);
                 context.SaveChanges();
             }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); }
@@ -118,6 +141,24 @@ namespace Havenly.DAL.Repos.Implementations
         {
             try { return await context.SaveChangesAsync(); }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return 0; }
+        }
+
+        
+
+        public async Task<Property?> GetDetailbyId(long id)
+        {
+            return await context.Properties
+                .Include(p => p.Listing)
+                .Include(p => p.Address)
+                .Include(p => p.Owner)
+                .Include(p => p.Images)
+                .Include(p => p.PropertyAmenities)
+                    .ThenInclude(pa => pa.Amenity)
+                .Include(p => p.Bedrooms)
+                    .ThenInclude(b => b.Beds)
+                .Include(p => p.Reviews)
+                    .ThenInclude(r => r.User)
+                .FirstOrDefaultAsync(p => p.PropertyID == id && !p.IsDeleted);
         }
     }
 }

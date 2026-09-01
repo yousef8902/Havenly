@@ -19,21 +19,35 @@ public class HavenlyDbContext : IdentityDbContext<User>
             .WithMany(u => u.Bookings)
             .HasForeignKey(b => b.GuestUserID)
             .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<Favorite>()
            .HasOne(b => b.User)
            .WithMany(u => u.Favorites)
            .HasForeignKey(b => b.UserID)
            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<Review>()
-          .HasOne(b => b.Booking)
+          .HasOne(b => b.User)
           .WithMany(u => u.Reviews)
-          .HasForeignKey(b => b.BookingID)
+          .HasForeignKey(b => b.UserID)
           .OnDelete(DeleteBehavior.Restrict);
 
+           modelBuilder.Entity<Review>().
+           HasOne(r => r.Property)
+          .WithMany(p => p.Reviews)
+          .HasForeignKey(r => r.PropertyID)
+          .OnDelete(DeleteBehavior.NoAction);   // or DeleteBehavior.NoAction
+
+
         //uniquness
-        modelBuilder.Entity<User>()
-        .HasIndex(u => u.Email)
-        .IsUnique();
+        //modelBuilder.Entity<User>()
+        //.HasIndex(u => u.Email)
+        //.IsUnique();
+
+
+
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(HavenlyDbContext).Assembly);
+
 
 
     }
@@ -54,6 +68,5 @@ public class HavenlyDbContext : IdentityDbContext<User>
     public DbSet<Amenity> Amenities { get; set; }
     public DbSet<PropertyAmenity> PropertyAmenities { get; set; }
 
-    
     
 }

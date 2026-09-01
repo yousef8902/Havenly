@@ -1,6 +1,8 @@
 using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Entities;
+using Havenly.DAL.Enums;
 using Havenly.DAL.Repos.Abstractions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Havenly.BLL.Services.Implementations
 {
@@ -79,6 +81,8 @@ namespace Havenly.BLL.Services.Implementations
 
             try
             {
+                // Use transaction to ensure all-or-nothing semantics.
+                // If any step fails, all changes are rolled back.
                 // Address is saved first because Property uses AddressID as its foreign key.
                 await addressRepository.Add(address);
 
@@ -89,7 +93,8 @@ namespace Havenly.BLL.Services.Implementations
                     property.Description,
                     property.NumberOfGuests,
                     property.Capacity,
-                    property.BathroomCount);
+                    property.BathroomCount,
+                    property.Category);
                 await propertyRepository.Add(property);
 
                 // Every newly submitted host listing starts pending for the admin workflow.
@@ -139,7 +144,8 @@ namespace Havenly.BLL.Services.Implementations
                     property.Description,
                     property.NumberOfGuests,
                     property.Capacity,
-                    property.BathroomCount);
+                    property.BathroomCount,
+                    property.Category);
                 propertyRepository.Update(existingProperty);
 
                 existingProperty.Address.Update(
@@ -151,6 +157,7 @@ namespace Havenly.BLL.Services.Implementations
                 addressRepository.Update(existingProperty.Address);
 
                 existingProperty.Listing.Update(listing.Description, listing.Price);
+                existingProperty.Listing.ListingStatus = ListingStatus.Pending;
                 listingRepository.Update(existingProperty.Listing);
 
                 await SynchronizeAmenities(existingProperty, amenities);
@@ -313,9 +320,9 @@ namespace Havenly.BLL.Services.Implementations
         {
             foreach (var bedroom in bedrooms)
             {
-                // Keep the submitted beds before Create resets the entity collection.
-                var beds = bedroom.Beds.ToList();
-                bedroom.Create(0, propertyId, bedroom.RoomNumber, bedroom.RoomName);
+                var beds = bedroom.Beds?.ToList() ?? new List<Bed>();
+                var bedCount = bedroom.BedCount > 0 ? bedroom.BedCount : (beds.Any() ? beds.Sum(b => b.Quantity) : 1);
+                bedroom.Create(0, propertyId, bedroom.RoomNumber, bedcnt: bedCount, roomName: bedroom.RoomName);
                 await bedroomRepository.Add(bedroom);
 
                 foreach (var bed in beds)

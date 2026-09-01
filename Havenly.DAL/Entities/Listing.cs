@@ -11,23 +11,24 @@ public class Listing
 
 
     [Key]
-    public long ListingID { get; private set; }
+    public long    ListingID { get; private set; }
+   
 
-    public long PropertyID { get; private set; }
+    public long PropertyID { get;  set; }
     [ForeignKey(nameof(PropertyID))]
-    public Property Property { get; private set; }
+    public Property Property { get;  set; }
 
-    public string Description { get; private set; }
+    public string Description { get;  set; }
 
     [Column(TypeName = "decimal(18,2)")]
-    public decimal Price { get; private set; }
+    public decimal Price { get;  set; }
 
-    public bool IsValid { get; private set; }
+    public bool IsValid { get;  set; }
 
-    public ListingStatus ListingStatus { get; private set; }
+    public ListingStatus ListingStatus { get;  set; }
 
-    public ICollection<Favorite> Favorites { get; private set; }
-    public ICollection<Booking> Bookings { get; private set; }
+    public ICollection<Favorite> Favorites { get;  set; }
+    public ICollection<Booking> Bookings { get;  set; }
 
     public void Create(long propertyId, string description, decimal price, bool isValid = true)
     {

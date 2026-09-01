@@ -144,7 +144,7 @@ namespace Havenly.DAL.Tests
             review.Create(
                 reviewId: 0,
                 userId: "1",
-                bookingId: 1,
+                propertyId: 1,
                 rating: 5,
                 comment: "good");
 
@@ -205,10 +205,15 @@ namespace Havenly.DAL.Tests
             using var context = CreateContext(dbName);
             var repo = new PaymentRepository(context);
 
+            var booking = new Booking();
+            booking.Create("u1", 1, DateTime.Today, DateTime.Today.AddDays(1), 10m, Havenly.DAL.Enums.BookingStatus.Pending);
+            await context.Bookings.AddAsync(booking);
+            await context.SaveChangesAsync();
+
             var pay = new Payment();
             pay.Create(
                 paymentId: 0,
-                bookingId: 1,
+                bookingId: booking.BookingID,
                 gateway: "G",
                 amount: 10m,
                 transactionId: "T");
@@ -236,6 +241,11 @@ namespace Havenly.DAL.Tests
             var dbName = Guid.NewGuid().ToString();
             using var context = CreateContext(dbName);
 
+            var prop = new Property();
+            prop.Create("u1", 0, "Test Prop", "Desc", 2, 2, 1);
+            await context.Properties.AddAsync(prop);
+            await context.SaveChangesAsync();
+
             var bedroomRepo = new BedroomRepository(context);
             var bedRepo = new BedRepository(context);
             var imgRepo = new PropertyImageRepository(context);
@@ -245,8 +255,9 @@ namespace Havenly.DAL.Tests
             var bedroom = new Bedroom();
             bedroom.Create(
                 bedroomId: 0,
-                propertyId: 1,
+                propertyId: prop.PropertyID,
                 roomNumber: 1,
+                bedcnt: 1,
                 roomName: "R");
 
             await bedroomRepo.Add(bedroom);
@@ -265,7 +276,7 @@ namespace Havenly.DAL.Tests
             var img = new PropertyImage();
             img.Create(
                 imageId: 0,
-                propertyId: 1,
+                propertyId: prop.PropertyID,
                 imagePath: "p.jpg");
 
             await imgRepo.Add(img);
@@ -273,7 +284,7 @@ namespace Havenly.DAL.Tests
 
             var amen = new Amenity();
             amen.Create(
-                amenitiesId: 0,
+                amenitiesId: 1,
                 name: "A");
 
             await amenRepo.Add(amen);
@@ -281,7 +292,7 @@ namespace Havenly.DAL.Tests
 
             var pa = new PropertyAmenity();
             pa.Create(
-                propertyId: 1,
+                propertyId: prop.PropertyID,
                 amenityId: amen.AmenitiesID);
 
             await paRepo.Add(pa);

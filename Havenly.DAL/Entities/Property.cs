@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,37 +5,43 @@ namespace Havenly.DAL.Entities;
 
 public class Property
 {
-
     [Key]
-    public long PropertyID { get; private set; }
+    public long PropertyID { get; set; }
 
-    public string OwnerUserID { get; private set; }
+    public string OwnerUserID { get; set; }
     [ForeignKey(nameof(OwnerUserID))]
     [InverseProperty("Properties")]
-    public User Owner { get; private set; }
+    public User Owner { get; set; }
 
-    public long AddressID { get; private set; }
+    public long AddressID { get; set; }
     [ForeignKey(nameof(AddressID))]
-    public Address Address { get; private set; }
+    public Address Address { get; set; }
 
     [Required]
     [StringLength(100)]
-    public string PropertyName { get; private set; }
+    public string PropertyName { get; set; }
 
-    public string Description { get; private set; }
+    public string Description { get; set; }
 
-    public int NumberOfGuests { get; private set; }
-    public int Capacity { get; private set; }
-    public int BathroomCount { get; private set; }
-    public bool IsDeleted { get; private set; }
+    [StringLength(100)]
+    public string Category { get; set; } = "Design homes";
+
+    public int NumberOfGuests { get; set; }
+    public int Capacity { get; set; }
+    public int BathroomCount { get; set; }
+    public bool IsDeleted { get; set; }
+    public double Rating { get; set; } = 0;
+    public long NumberOfReviews { get; set; } = 0;
 
     // Navigation
-    public ICollection<Bedroom> Bedrooms { get; private set; }
-    public ICollection<PropertyImage> Images { get; private set; }
-    public Listing Listing { get; private set; }
-    public ICollection<PropertyAmenity> PropertyAmenities { get; private set; }
+    public ICollection<Bedroom> Bedrooms { get; set; }
+    public ICollection<PropertyImage> Images { get; set; }
+   
+    public Listing Listing { get; set; }
+    public ICollection<PropertyAmenity> PropertyAmenities { get; set; }
+    public ICollection<Review> Reviews { get; set; }
 
-    public void Create(string ownerUserId, long addressId, string propertyName, string description, int numberOfGuests, int capacity, int bathroomCount)
+    public void Create(string ownerUserId, long addressId, string propertyName, string description, int numberOfGuests, int capacity, int bathroomCount, string category = "Design homes")
     {
         OwnerUserID = ownerUserId;
         AddressID = addressId;
@@ -46,19 +50,27 @@ public class Property
         NumberOfGuests = numberOfGuests;
         Capacity = capacity;
         BathroomCount = bathroomCount;
+        Category = string.IsNullOrWhiteSpace(category) ? "Design homes" : category;
         IsDeleted = false;
         Bedrooms = new List<Bedroom>();
         Images = new List<PropertyImage>();
         PropertyAmenities = new List<PropertyAmenity>();
     }
 
-    public void Update(string propertyName, string description, int numberOfGuests, int capacity, int bathroomCount)
+    public void Update(string propertyName, string description, int numberOfGuests, int capacity, int bathroomCount, string category = "Design homes")
     {
         PropertyName = propertyName;
         Description = description;
         NumberOfGuests = numberOfGuests;
         Capacity = capacity;
         BathroomCount = bathroomCount;
+        Category = string.IsNullOrWhiteSpace(category) ? "Design homes" : category;
+    }
+
+    public void UpdateReview(double Rating)
+    {
+        this.NumberOfReviews++;
+        this.Rating = (this.Rating + Rating) / this.NumberOfReviews;
     }
 
     public void Delete()

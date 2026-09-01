@@ -1,0 +1,67 @@
+@* Site Header Navigation *@
+@{
+    var transparentHeader = ViewData["TransparentHeader"] as bool? ?? false;
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+}
+
+<header class="@(transparentHeader ? "absolute inset-x-0 top-0 z-40 text-primary-foreground" : "sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur")">
+    <div class="container-page flex h-16 items-center justify-between gap-4">
+        <partial name="_Logo" />
+
+        <!-- Desktop Navigation -->
+        <nav aria-label="Main" class="hidden items-center gap-1 md:flex">
+            <a asp-controller="Property" asp-action="Index" class="@(transparentHeader ? "rounded-full px-4 py-2 text-sm font-medium opacity-80 transition-opacity hover:opacity-100" : "rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground") @(currentAction == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "Search" ? (transparentHeader ? "opacity-100" : "bg-secondary text-foreground") : "")">
+                Explore
+            </a>
+            <a asp-controller="Booking" asp-action="MyBookings" class="@(transparentHeader ? "rounded-full px-4 py-2 text-sm font-medium opacity-80 transition-opacity hover:opacity-100" : "rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground") @(currentAction == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "Bookings" ? (transparentHeader ? "opacity-100" : "bg-secondary text-foreground") : "")">
+                My bookings
+            </a>
+            <a asp-controller="Favorites" asp-action="Index" class="@(transparentHeader ? "rounded-full px-4 py-2 text-sm font-medium opacity-80 transition-opacity hover:opacity-100" : "rounded-full px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground") @(currentAction == "Index" && ViewContext.RouteData.Values["controller"]?.ToString() == "Favorites" ? (transparentHeader ? "opacity-100" : "bg-secondary text-foreground") : "")">
+                Favorites
+            </a>
+        </nav>
+
+        <div class="flex items-center gap-2">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                @if (User.IsInRole("Host"))
+                {
+                    <a asp-controller="Host" asp-action="Index" class="rounded-full bg-primary/10 text-primary hover:bg-primary/20 px-4 py-2 text-sm font-semibold inline-flex items-center gap-1.5">
+                        Host Dashboard
+                    </a>
+                }
+                else if (User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Admin" asp-action="DashBoard" class="rounded-full bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 px-4 py-2 text-sm font-semibold inline-flex items-center gap-1.5">
+                        Admin Console
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Profile" class="rounded-full bg-secondary text-foreground hover:bg-secondary/80 px-4 py-2 text-sm font-semibold inline-flex items-center gap-1.5">
+                        <svg class="size-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        My Profile
+                    </a>
+                }
+
+                <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="rounded-full border border-border px-4 py-2 text-sm font-medium hover:bg-secondary">
+                        Log out
+                    </button>
+                </form>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Login" class="rounded-full px-4 py-2 text-sm font-medium hover:bg-secondary">
+                    Log in
+                </a>
+                <a asp-controller="Account" asp-action="Register" class="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
+                    Sign up
+                </a>
+            }
+        </div>
+    </div>
+</header>

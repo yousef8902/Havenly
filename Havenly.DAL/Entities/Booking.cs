@@ -9,8 +9,9 @@ namespace Havenly.DAL.Entities;
 public class Booking
 {
     [Key]
-    public long BookingID { get; set; }
+    public long BookingID { get; private set; }
 
+    // Make setters public so the seeder can initialize instances using object initializers
     public string GuestUserID { get; set; }
     [ForeignKey(nameof(GuestUserID))]
     public User Guest { get; set; }
@@ -32,5 +33,33 @@ public class Booking
     public BookingStatus Status { get; set; }
 
     public Payment Payment { get; set; }
-    public ICollection<Review> Reviews { get; set; }   
+    public ICollection<Review> Reviews { get; set; }
+
+    public void Create( string guestUserId, long listingId, DateTime checkIn, DateTime checkOut, decimal totalPrice, BookingStatus status)
+    {
+       
+        GuestUserID = guestUserId;
+        ListingID = listingId;
+        CheckIn = checkIn;
+        CheckOut = checkOut;
+        TotalPrice = totalPrice;
+        Status = status;
+        Reviews = new List<Review>();
+    }
+
+    public void UpdateDates(DateTime checkIn, DateTime checkOut)
+    {
+        CheckIn = checkIn;
+        CheckOut = checkOut;
+    }
+
+    public void UpdateStatus(BookingStatus status)
+    {
+        Status = status;
+    }
+
+    public void AssignPayment(Payment payment)
+    {
+        Payment = payment;
+    }
 }

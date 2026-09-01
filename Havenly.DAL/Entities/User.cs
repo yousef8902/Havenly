@@ -1,55 +1,74 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+
 using Havenly.DAL.Enums;
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Havenly.DAL.Entities;
 
 public class User : IdentityUser
 {
- 
-
-    
     [Required]
     [StringLength(100)]
-    public string Name { get; private set; }
+    public string Name { get; set; }
 
-    [Required]
-    [StringLength(255)]
-    public string PasswordHash { get; private set; }
-
-    [Required]
-    [StringLength(100)]
-    [EmailAddress]
-    public string Email { get; private set; }
-
-    [Required]
     [StringLength(50)]
-    public string Role { get; private set; }
+    public string Role { get; set; } = UserRoles.Guest;
 
-    public UserStatus Status { get; private set; }
+    public UserStatus Status { get; set; }
 
     // Navigation Properties
+
     [InverseProperty("Owner")]
-    public ICollection<Property> Properties { get; private set; }
+    public ICollection<Property> Properties { get; set; }
 
     [InverseProperty("Guest")]
-    public ICollection<Booking> Bookings { get; private set; }
+    public ICollection<Booking> Bookings { get; set; }
 
-    public ICollection<Favorite> Favorites { get; private set; }
-    public ICollection<Review> Reviews { get; private set; }
-    
+    public ICollection<Favorite> Favorites { get; set; }
+
+    public ICollection<Review> Reviews { get; set; }
+
+
+    // Create User
+    public void Create(string name, string email, string role = UserRoles.Guest)
+    {
+        Name = name;
+        Email = email;
+        UserName = email;
+        Role = role;
+        Status = UserStatus.Active;
+
+        // Initialize navigation properties
+        Properties = new List<Property>();
+        Bookings = new List<Booking>();
+        Favorites = new List<Favorite>();
+        Reviews = new List<Review>();
+    }
+
     public void Create(string name, string passwordHash, string email, string role)
     {
         Name = name;
         PasswordHash = passwordHash;
         Email = email;
+        UserName = email;
         Role = role;
         Status = UserStatus.Active;
+
         Properties = new List<Property>();
         Bookings = new List<Booking>();
         Favorites = new List<Favorite>();
         Reviews = new List<Review>();
+    }
+
+
+    // Update User
+    public void Update(string name, string email, string role = UserRoles.Guest)
+    {
+        Name = name;
+        Email = email;
+        UserName = email;
+        Role = role;
     }
 
     public void Update(string name, string passwordHash, string email, string role)
@@ -57,19 +76,12 @@ public class User : IdentityUser
         Name = name;
         PasswordHash = passwordHash;
         Email = email;
+        UserName = email;
         Role = role;
     }
 
-    public void Suspend()
-    {
-        Status = UserStatus.Suspended;
-    }
 
-    public void Reinstate()
-    {
-        Status = UserStatus.Active;
-    }
-
+    // Delete User
     public void Delete()
     {
         Status = UserStatus.Deleted;

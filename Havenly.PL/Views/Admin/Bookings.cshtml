@@ -1,0 +1,435 @@
+@model Havenly.BLL.ModelVMs.AdminBookingsVM
+@using Havenly.DAL.Enums
+
+@{
+    ViewData["Title"] = "Bookings — Havenly Admin";
+    ViewData["Description"] = "Manage all bookings on the platform.";
+    Layout = "~/Views/Shared/_WorkspaceLayout.cshtml";
+    ViewData["WorkspaceNav"] = "admin";
+    ViewData["Workspace"] = "Admin console";
+    ViewData["WorkspaceRole"] = "Omar Khalil · Administrator";
+}
+
+<!-- Page Heading -->
+<div class="space-y-1 mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight">Bookings</h1>
+            <p class="text-muted-foreground">Manage all bookings across the platform.</p>
+        </div>
+        <div class="flex gap-2">
+            <a asp-controller="Admin" asp-action="Dashboard" class="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary transition">
+                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-700">
+        @TempData["Message"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
+        @TempData["Error"]
+    </div>
+}
+
+<!-- Stats Cards -->
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-6">
+    <div class="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <p class="text-sm text-muted-foreground">Total Bookings</p>
+        <p class="text-2xl font-bold">@Model.Stats.Total.ToString("N0")</p>
+    </div>
+    <div class="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <p class="text-sm text-muted-foreground">Confirmed</p>
+        <p class="text-2xl font-bold text-emerald-600">@Model.Stats.Confirmed.ToString("N0")</p>
+    </div>
+    <div class="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <p class="text-sm text-muted-foreground">Pending</p>
+        <p class="text-2xl font-bold text-yellow-600">@Model.Stats.Pending.ToString("N0")</p>
+    </div>
+    <div class="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <p class="text-sm text-muted-foreground">Cancelled</p>
+        <p class="text-2xl font-bold text-red-600">@Model.Stats.Cancelled.ToString("N0")</p>
+    </div>
+    <div class="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <p class="text-sm text-muted-foreground">Completed</p>
+        <p class="text-2xl font-bold text-blue-600">@Model.Stats.Completed.ToString("N0")</p>
+    </div>
+</div>
+
+<!-- Revenue Stats -->
+<div class="grid gap-4 sm:grid-cols-2 mb-6">
+    <div class="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <p class="text-sm text-muted-foreground">Total Revenue</p>
+        <p class="text-2xl font-bold text-primary">$@Model.Stats.TotalRevenue.ToString("N2")</p>
+    </div>
+    <div class="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <p class="text-sm text-muted-foreground">Average Booking Value</p>
+        <p class="text-2xl font-bold text-primary">$@Model.Stats.AverageBookingValue.ToString("N2")</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="mb-6 flex flex-wrap items-center gap-4">
+    <div class="flex flex-wrap gap-2">
+        <!-- Status Filter -->
+        <a asp-controller="Admin" asp-action="Bookings"
+           asp-route-status="all"
+           asp-route-search="@Model.Filters.SearchTerm"
+           asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")"
+           asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")"
+           asp-route-page="1"
+           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "all" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+            All
+        </a>
+        <a asp-controller="Admin" asp-action="Bookings"
+           asp-route-status="pending"
+           asp-route-search="@Model.Filters.SearchTerm"
+           asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")"
+           asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")"
+           asp-route-page="1"
+           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "pending" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+            Pending
+        </a>
+        <a asp-controller="Admin" asp-action="Bookings"
+           asp-route-status="confirmed"
+           asp-route-search="@Model.Filters.SearchTerm"
+           asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")"
+           asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")"
+           asp-route-page="1"
+           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "approved" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+            Confirmed
+        </a>
+        <a asp-controller="Admin" asp-action="Bookings"
+           asp-route-status="cancelled"
+           asp-route-search="@Model.Filters.SearchTerm"
+           asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")"
+           asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")"
+           asp-route-page="1"
+           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "cancelled" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+            Cancelled
+        </a>
+        <a asp-controller="Admin" asp-action="Bookings"
+           asp-route-status="completed"
+           asp-route-search="@Model.Filters.SearchTerm"
+           asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")"
+           asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")"
+           asp-route-page="1"
+           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "completed" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+            Completed
+        </a>
+    </div>
+
+    <!-- Search -->
+    <div class="flex-1 max-w-sm ml-auto flex gap-2">
+        <input type="text"
+               id="searchBookings"
+               placeholder="Search by property, guest, or host..."
+               class="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+               value="@Model.Filters.SearchTerm" />
+        <button id="searchButton" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition text-sm font-medium">
+            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Search
+        </button>
+    </div>
+</div>
+
+<!-- Date Range Filters -->
+<div class="mb-4 flex flex-wrap items-center gap-4">
+    <div class="flex items-center gap-2">
+        <label for="fromDate" class="text-sm text-muted-foreground">From:</label>
+        <input type="date"
+               id="fromDate"
+               class="h-10 rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+               value="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="flex items-center gap-2">
+        <label for="toDate" class="text-sm text-muted-foreground">To:</label>
+        <input type="date"
+               id="toDate"
+               class="h-10 rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+               value="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")" />
+    </div>
+    <button id="applyDateFilter" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition text-sm font-medium">
+        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Apply Date Range
+    </button>
+    <a asp-controller="Admin" asp-action="Bookings"
+       asp-route-status="@Model.Filters.Status"
+       asp-route-search="@Model.Filters.SearchTerm"
+       asp-route-page="1"
+       class="text-sm text-primary hover:underline">
+        Clear Dates
+    </a>
+</div>
+
+<!-- Bookings Table -->
+<div class="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
+    <table class="w-full text-sm text-left" id="bookingsTable">
+        <thead class="border-b border-border bg-muted/40 text-muted-foreground">
+            <tr>
+                <th class="p-4 font-medium">Property</th>
+                <th class="p-4 font-medium">Guest</th>
+                <th class="p-4 font-medium">Host</th>
+                <th class="p-4 font-medium">Check In</th>
+                <th class="p-4 font-medium">Check Out</th>
+                <th class="p-4 font-medium text-right">Total</th>
+                <th class="p-4 font-medium">Status</th>
+                <th class="p-4 font-medium text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-border">
+            @if (Model.Bookings != null && Model.Bookings.Any())
+            {
+                @foreach (var booking in Model.Bookings)
+                {
+                    <tr class="hover:bg-muted/50 transition booking-row">
+                        <td class="p-4 font-medium">
+                            <div class="flex items-center gap-3">
+                                @if (!string.IsNullOrEmpty(booking.ImageUrl))
+                                {
+                                    <img src="@booking.ImageUrl" alt="@booking.propertyName" class="size-10 rounded-lg object-cover" />
+                                }
+                                else
+                                {
+                                    <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
+                                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        </svg>
+                                    </div>
+                                }
+                                <a asp-controller="Property" asp-action="Detail" asp-route-id="@booking.PropertyId"
+                                   class="hover:underline text-foreground font-medium">
+                                    @booking.propertyName
+                                </a>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                            <div class="flex items-center gap-2">
+                                <div class="size-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs">
+                                    @{
+                                        var guestInitials = "U";
+                                        if (!string.IsNullOrEmpty(booking.Guest))
+                                        {
+                                            var parts = booking.Guest.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                            if (parts.Length == 1) guestInitials = parts[0][0].ToString().ToUpper();
+                                            else if (parts.Length > 1) guestInitials = $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+                                        }
+                                    }
+                                    @guestInitials
+                                </div>
+                                @booking.Guest
+                            </div>
+                        </td>
+                        <td class="p-4 text-muted-foreground">@booking.HostName</td>
+                        <td class="p-4 text-muted-foreground">@booking.CheckIn.ToString("MMM dd, yyyy")</td>
+                        <td class="p-4 text-muted-foreground">@booking.CheckOut.ToString("MMM dd, yyyy")</td>
+                        <td class="p-4 text-right font-medium">$@booking.Total.ToString("N2")</td>
+                        <td class="p-4">
+                            <span class="inline-flex items-center rounded-full @booking.StatusColor px-2.5 py-0.5 text-xs font-semibold">
+                                @booking.StatusDisplay
+                            </span>
+                        </td>
+                        <td class="p-4 text-right">
+                            <div class="flex justify-end gap-2">
+                               
+                                    <a asp-controller="Admin" asp-action="BookingDetails" asp-route-id="@booking.BookingId"
+                                       class="inline-flex items-center gap-1 h-8 rounded-lg border border-border bg-background px-3 text-xs font-medium hover:bg-secondary transition">
+                                        View
+                                    </a>
+                                
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" class="p-8 text-center text-muted-foreground">
+                        <div class="flex flex-col items-center gap-2">
+                            <svg class="size-12 text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p>No bookings found matching your criteria.</p>
+                            <a asp-controller="Admin" asp-action="Bookings" class="text-primary hover:underline text-sm">Clear filters</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+@if (Model.Pagination != null && Model.Pagination.TotalPages > 1)
+{
+    <div class="mt-6 flex items-center justify-between">
+        <p class="text-sm text-muted-foreground">
+            Showing @(((Model.Pagination.CurrentPage - 1) * Model.Pagination.PageSize) + 1) to
+            @Math.Min(Model.Pagination.CurrentPage * Model.Pagination.PageSize, Model.Pagination.TotalItems)
+            of @Model.Pagination.TotalItems results
+        </p>
+        <div class="flex gap-2">
+            @if (Model.Pagination.HasPrevious)
+            {
+                <a asp-controller="Admin" asp-action="Bookings"
+                   asp-route-status="@Model.Filters.Status"
+                   asp-route-search="@Model.Filters.SearchTerm"
+                   asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")"
+                   asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")"
+                   asp-route-page="@(Model.Pagination.CurrentPage - 1)"
+                   class="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-border hover:bg-secondary transition text-sm">
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Previous
+                </a>
+            }
+            @for (int i = 1; i <= Model.Pagination.TotalPages; i++)
+            {
+                if (i == Model.Pagination.CurrentPage)
+                {
+                    <span class="inline-flex items-center px-3 py-2 rounded-lg bg-primary text-white text-sm font-medium">@i</span>
+                }
+                else if (i == 1 || i == Model.Pagination.TotalPages || Math.Abs(i - Model.Pagination.CurrentPage) <= 1)
+                {
+                    <a asp-controller="Admin" asp-action="Bookings"
+                       asp-route-status="@Model.Filters.Status"
+                       asp-route-search="@Model.Filters.SearchTerm"
+                       asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")"
+                       asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")"
+                       asp-route-page="@i"
+                       class="inline-flex items-center px-3 py-2 rounded-lg border border-border hover:bg-secondary transition text-sm">
+                        @i
+                    </a>
+                }
+                else if (i == Model.Pagination.CurrentPage - 2 || i == Model.Pagination.CurrentPage + 2)
+                {
+                    <span class="inline-flex items-center px-3 py-2 text-sm text-muted-foreground">...</span>
+                }
+            }
+            @if (Model.Pagination.HasNext)
+            {
+                <a asp-controller="Admin" asp-action="Bookings"
+                   asp-route-status="@Model.Filters.Status"
+                   asp-route-search="@Model.Filters.SearchTerm"
+                   asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")"
+                   asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")"
+                   asp-route-page="@(Model.Pagination.CurrentPage + 1)"
+                   class="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-border hover:bg-secondary transition text-sm">
+                    Next
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchBookings');
+            const searchButton = document.getElementById('searchButton');
+
+            if (searchInput && searchButton) {
+                searchButton.addEventListener('click', function() {
+                    const query = searchInput.value.trim();
+                    const currentUrl = new URL(window.location.href);
+                    if (query) {
+                        currentUrl.searchParams.set('search', query);
+                    } else {
+                        currentUrl.searchParams.delete('search');
+                    }
+                    currentUrl.searchParams.set('page', '1');
+                    window.location.href = currentUrl.toString();
+                });
+
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        searchButton.click();
+                    }
+                });
+
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        searchInput.value = '';
+                        searchButton.click();
+                    }
+                });
+            }
+
+            // Date Range Filter
+            const fromDate = document.getElementById('fromDate');
+            const toDate = document.getElementById('toDate');
+            const applyDateFilter = document.getElementById('applyDateFilter');
+
+            if (applyDateFilter && fromDate && toDate) {
+                applyDateFilter.addEventListener('click', function() {
+                    const currentUrl = new URL(window.location.href);
+
+                    if (fromDate.value) {
+                        currentUrl.searchParams.set('fromDate', fromDate.value);
+                    } else {
+                        currentUrl.searchParams.delete('fromDate');
+                    }
+
+                    if (toDate.value) {
+                        currentUrl.searchParams.set('toDate', toDate.value);
+                    } else {
+                        currentUrl.searchParams.delete('toDate');
+                    }
+
+                    currentUrl.searchParams.set('page', '1');
+                    window.location.href = currentUrl.toString();
+                });
+            }
+
+            // Confirm booking actions
+            document.querySelectorAll('form[action*="ConfirmBooking"]').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const property = this.closest('tr').querySelector('.font-medium a')?.textContent?.trim() || 'this booking';
+                    if (!confirm(`Are you sure you want to confirm "${property}"?`)) {
+                        e.preventDefault();
+                    }
+                });
+            });
+
+            document.querySelectorAll('form[action*="CancelBooking"]').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const property = this.closest('tr').querySelector('.font-medium a')?.textContent?.trim() || 'this booking';
+                    if (!confirm(`Are you sure you want to cancel "${property}"?`)) {
+                        e.preventDefault();
+                    }
+                });
+            });
+
+            let debounceTimer;
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => {
+                        if (this.value.trim() === '') {
+                            searchButton.click();
+                        }
+                    }, 500);
+                });
+            }
+        });
+    </script>
+}
