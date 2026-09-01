@@ -1,0 +1,514 @@
+@model Havenly.BLL.ModelVMs.Payment.CheckoutVM
+
+@{
+    ViewData["Title"] = "Checkout & Payment — Havenly";
+}
+
+<div class="container-page py-10 max-w-5xl mx-auto">
+    <!-- Breadcrumb & Header -->
+    <div class="mb-8">
+        <a asp-controller="Booking" asp-action="MyBookings" class="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-primary transition mb-2">
+            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Bookings
+        </a>
+        <h1 class="text-3xl font-bold tracking-tight">Complete your reservation</h1>
+        <p class="text-sm text-muted-foreground mt-1">Review your stay details and select your preferred payment method</p>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-700 flex items-center gap-3">
+            <svg class="size-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    <div class="grid gap-8 lg:grid-cols-12 items-start">
+        <!-- Left: Payment Options & Interactive Form -->
+        <div class="lg:col-span-7 space-y-6">
+            @if (!string.IsNullOrEmpty(Model.PaymobIframeUrl))
+            {
+                <!-- Real Paymob Gateway -->
+                <div class="rounded-3xl border border-border bg-card p-6 shadow-sm">
+                    <div class="flex items-center justify-between pb-4 border-b border-border mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="inline-flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary font-bold text-xs">PM</span>
+                            <div>
+                                <h3 class="font-bold text-base">Paymob Secure Gateway</h3>
+                                <p class="text-xs text-muted-foreground">Cards & Digital Wallets</p>
+                            </div>
+                        </div>
+                        <span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-600">256-bit Encrypted</span>
+                    </div>
+
+                    <iframe src="@Model.PaymobIframeUrl" class="w-full min-h-[520px] rounded-2xl border border-border" frameborder="0"></iframe>
+                </div>
+            }
+            else
+            {
+                <!-- Payment Methods Selector -->
+                <div class="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
+                    <div class="flex items-center justify-between pb-4 border-b border-border">
+                        <div class="flex items-center gap-3">
+                            <div class="inline-flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg">Choose Payment Option</h3>
+                                <p class="text-xs text-muted-foreground">Select card or mobile wallet</p>
+                            </div>
+                        </div>
+                        <span class="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600 uppercase tracking-wider">Secure</span>
+                    </div>
+
+                    <!-- Payment Method Tabs -->
+                    <div class="grid grid-cols-2 gap-3" id="paymentMethodTabs">
+                        <button type="button" id="tabCardBtn" onclick="selectPaymentMethod('card')"
+                                class="flex items-center gap-3 p-4 rounded-2xl border-2 border-primary bg-primary/5 text-left transition">
+                            <div class="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="font-bold text-sm block text-foreground">Visa / Card</span>
+                                <span class="text-xs text-muted-foreground">Credit & Debit Cards</span>
+                            </div>
+                        </button>
+
+                        <button type="button" id="tabWalletBtn" onclick="selectPaymentMethod('wallet')"
+                                class="flex items-center gap-3 p-4 rounded-2xl border border-border bg-card hover:bg-secondary text-left transition">
+                            <div class="size-9 rounded-xl bg-secondary text-foreground flex items-center justify-center flex-shrink-0">
+                                <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="font-bold text-sm block text-foreground">Mobile Wallets</span>
+                                <span class="text-xs text-muted-foreground">Vodafone, Orange, WE</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Payment Form -->
+                    <form asp-controller="Payment" asp-action="ProcessSimulatedPayment" method="post" id="checkoutForm" class="space-y-6">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="paymentId" value="@Model.PaymentId" />
+                        <input type="hidden" name="bookingId" value="@Model.BookingId" />
+                        <input type="hidden" name="paymentType" id="paymentTypeInput" value="card" />
+
+                        <!-- ================= CARD PAYMENT SECTION ================= -->
+                        <div id="cardSection" class="space-y-4">
+                            <!-- Quick Test Card Fill -->
+                            <div class="flex items-center justify-between text-xs bg-secondary/50 p-2.5 rounded-xl border border-border">
+                                <span class="text-muted-foreground font-medium">Quick-fill Test Card:</span>
+                                <div class="flex gap-2">
+                                    <button type="button" onclick="fillTestCard('4242424242424242', '12/28', '123', 'Visa')" class="rounded-lg bg-background border border-border px-2 py-0.5 font-mono font-semibold hover:border-primary text-primary">
+                                        Visa (4242)
+                                    </button>
+                                    <button type="button" onclick="fillTestCard('5555555555554444', '11/27', '456', 'Mastercard')" class="rounded-lg bg-background border border-border px-2 py-0.5 font-mono font-semibold hover:border-primary text-primary">
+                                        Mastercard (5555)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Card Number -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="cardNumber" class="block text-xs font-semibold text-foreground">Card Number</label>
+                                    <span id="cardBrandBadge" class="text-xs font-bold text-muted-foreground">Visa / Mastercard</span>
+                                </div>
+                                <div class="relative">
+                                    <input type="text"
+                                           name="cardNumber"
+                                           id="cardNumber"
+                                           placeholder="4242 4242 4242 4242"
+                                           maxlength="19"
+                                           required
+                                           value="4242 4242 4242 4242"
+                                           class="w-full font-mono text-sm rounded-xl border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary tracking-wider" />
+                                    <div id="luhnFeedback" class="absolute right-3 top-3.5 text-xs font-semibold flex items-center gap-1 text-emerald-600">
+                                        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                        Valid card
+                                    </div>
+                                </div>
+                                <p id="cardErrorText" class="text-xs text-red-600 mt-1 hidden">Invalid card</p>
+                            </div>
+
+                            <!-- Cardholder Name -->
+                            <div>
+                                <label for="cardHolder" class="block text-xs font-semibold text-foreground mb-1.5">Cardholder Name</label>
+                                <input type="text"
+                                       name="cardHolder"
+                                       id="cardHolder"
+                                       placeholder="Full name as printed on card"
+                                       required
+                                       value="@Model.GuestName"
+                                       class="w-full text-sm rounded-xl border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" />
+                            </div>
+
+                            <!-- Expiry & CVV Grid -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="expiryDate" class="block text-xs font-semibold text-foreground mb-1.5">Expires (MM/YY)</label>
+                                    <input type="text"
+                                           name="expiryDate"
+                                           id="expiryDate"
+                                           placeholder="MM/YY"
+                                           maxlength="5"
+                                           required
+                                           value="12/28"
+                                           class="w-full font-mono text-sm rounded-xl border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" />
+                                </div>
+                                <div>
+                                    <label for="cvv" class="block text-xs font-semibold text-foreground mb-1.5">CVV (3-4 digits)</label>
+                                    <input type="password"
+                                           name="cvv"
+                                           id="cvv"
+                                           placeholder="123"
+                                           maxlength="4"
+                                           required
+                                           value="123"
+                                           class="w-full font-mono text-sm rounded-xl border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ================= MOBILE WALLET SECTION ================= -->
+                        <div id="walletSection" class="space-y-4 hidden">
+                            <!-- Quick Test Wallet Fill -->
+                            <div class="flex items-center justify-between text-xs bg-secondary/50 p-2.5 rounded-xl border border-border">
+                                <span class="text-muted-foreground font-medium">Quick-fill Test Wallet:</span>
+                                <button type="button" onclick="fillTestWallet('+201023248391', 'Vodafone Cash')" class="rounded-lg bg-background border border-border px-2.5 py-0.5 font-mono font-semibold hover:border-primary text-primary">
+                                    +201023248391 (Vodafone)
+                                </button>
+                            </div>
+
+                            <!-- Wallet Provider Selection -->
+                            <div>
+                                <label class="block text-xs font-semibold text-foreground mb-2">Select Wallet Provider</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button type="button" onclick="selectWalletProvider('Vodafone Cash')" class="wallet-btn p-3 rounded-xl border border-primary bg-primary/5 text-xs font-bold text-foreground text-center transition" data-provider="Vodafone Cash">
+                                        Vodafone Cash
+                                    </button>
+                                    <button type="button" onclick="selectWalletProvider('Orange Cash')" class="wallet-btn p-3 rounded-xl border border-border bg-background hover:bg-secondary text-xs font-bold text-foreground text-center transition" data-provider="Orange Cash">
+                                        Orange Cash
+                                    </button>
+                                    <button type="button" onclick="selectWalletProvider('Etisalat Cash')" class="wallet-btn p-3 rounded-xl border border-border bg-background hover:bg-secondary text-xs font-bold text-foreground text-center transition" data-provider="Etisalat Cash">
+                                        Etisalat Cash
+                                    </button>
+                                    <button type="button" onclick="selectWalletProvider('WE Pay')" class="wallet-btn p-3 rounded-xl border border-border bg-background hover:bg-secondary text-xs font-bold text-foreground text-center transition" data-provider="WE Pay">
+                                        WE Pay
+                                    </button>
+                                    <button type="button" onclick="selectWalletProvider('InstaPay')" class="wallet-btn p-3 rounded-xl border border-border bg-background hover:bg-secondary text-xs font-bold text-foreground text-center transition col-span-2" data-provider="InstaPay">
+                                        InstaPay
+                                    </button>
+                                </div>
+                                <input type="hidden" name="walletProvider" id="walletProviderInput" value="Vodafone Cash" />
+                            </div>
+
+                            <!-- Wallet Phone Number -->
+                            <div>
+                                <label for="walletPhone" class="block text-xs font-semibold text-foreground mb-1.5">Mobile Wallet Number</label>
+                                <div class="relative">
+                                    <input type="tel"
+                                           name="walletPhone"
+                                           id="walletPhone"
+                                           placeholder="+201023248391"
+                                           value="+201023248391"
+                                           class="w-full font-mono text-sm rounded-xl border border-border bg-background px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary" />
+                                    <span id="walletFeedback" class="absolute right-3 top-3.5 text-xs font-semibold text-emerald-600 flex items-center gap-1">
+                                        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                        Valid wallet
+                                    </span>
+                                </div>
+                                <p id="walletErrorText" class="text-xs text-red-600 mt-1 hidden">Invalid wallet</p>
+                            </div>
+
+                            <!-- Instructions -->
+                            <div class="rounded-xl border border-blue-500/20 bg-blue-500/5 p-3.5 text-xs text-muted-foreground space-y-1">
+                                <p class="font-bold text-blue-600 flex items-center gap-1.5">
+                                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    How mobile wallet payment works:
+                                </p>
+                                <p>1. Click <strong>Pay Now</strong> below.</p>
+                                <p>2. A prompt will be sent to your mobile wallet app.</p>
+                                <p>3. Enter your wallet PIN on your phone to complete payment.</p>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="submitPaymentBtn" class="w-full rounded-2xl bg-primary py-4 text-base font-bold text-primary-foreground shadow-lift hover:bg-primary/90 transition flex items-center justify-center gap-2">
+                            <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span id="submitBtnText">Pay $@Model.TotalAmount.ToString("N2") via Visa / Card</span>
+                        </button>
+                    </form>
+
+                    <div class="text-center space-y-1">
+                        <p class="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                            <svg class="size-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            Secure 256-bit SSL encrypted checkout
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Right: Reservation Summary Card -->
+        <div class="lg:col-span-5">
+            <div class="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-6 sticky top-6">
+                <div class="flex gap-4">
+                    <img src="@Model.PropertyImage" alt="@Model.PropertyName" class="size-20 rounded-2xl object-cover border border-border flex-shrink-0" />
+                    <div>
+                        <h3 class="font-bold text-base leading-tight">@Model.PropertyName</h3>
+                        <p class="text-xs text-muted-foreground mt-1">@Model.Location</p>
+                        <span class="inline-block mt-2 rounded-lg bg-secondary px-2.5 py-0.5 text-xs font-semibold text-foreground">
+                            Reservation #@Model.BookingId
+                        </span>
+                    </div>
+                </div>
+
+                <div class="border-t border-border pt-4 space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-muted-foreground">Dates</span>
+                        <span class="font-semibold">@Model.CheckIn.ToString("MMM d, yyyy") – @Model.CheckOut.ToString("MMM d, yyyy")</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-muted-foreground">Duration</span>
+                        <span class="font-semibold">@Model.Nights night@(Model.Nights > 1 ? "s" : "")</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-muted-foreground">Guest</span>
+                        <span class="font-semibold">@Model.GuestName</span>
+                    </div>
+                </div>
+
+                <div class="border-t border-border pt-4 space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-muted-foreground">$@Model.PricePerNight.ToString("N2") × @Model.Nights night@(Model.Nights > 1 ? "s" : "")</span>
+                        <span>$@Model.TotalAmount.ToString("N2")</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-muted-foreground">Havenly Service Fee</span>
+                        <span class="text-emerald-600 font-medium">Free</span>
+                    </div>
+                    <div class="flex justify-between text-base font-bold border-t border-border pt-3">
+                        <span>Total Due</span>
+                        <span class="text-primary text-xl font-extrabold">$@Model.TotalAmount.ToString("N2")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Card Checksum Validation
+        function isValidLuhn(numberStr) {
+            const cleanStr = numberStr.replace(/\D/g, '');
+            if (cleanStr.length < 13 || cleanStr.length > 19) return false;
+
+            let sum = 0;
+            let alternate = false;
+            for (let i = cleanStr.length - 1; i >= 0; i--) {
+                let n = parseInt(cleanStr.charAt(i), 10);
+                if (alternate) {
+                    n *= 2;
+                    if (n > 9) n -= 9;
+                }
+                sum += n;
+                alternate = !alternate;
+            }
+            return (sum % 10 === 0);
+        }
+
+        // Detect Card Brand
+        function detectCardBrand(numberStr) {
+            const clean = numberStr.replace(/\D/g, '');
+            if (clean.startsWith('4')) return 'Visa';
+            if (clean.startsWith('51') || clean.startsWith('52') || clean.startsWith('53') || clean.startsWith('54') || clean.startsWith('55') || clean.startsWith('22') || clean.startsWith('27')) return 'Mastercard';
+            if (clean.startsWith('34') || clean.startsWith('37')) return 'Amex';
+            if (clean.startsWith('5078') || clean.startsWith('6858')) return 'Meeza';
+            return 'Card';
+        }
+
+        // Validate Mobile Wallet Phone
+        function isValidWallet(phoneStr) {
+            const clean = phoneStr.replace(/[\s\-]/g, '');
+            return /^(\+20|0)?1[0125][0-9]{8}$/.test(clean);
+        }
+
+        // Tab Switching
+        function selectPaymentMethod(type) {
+            const paymentTypeInput = document.getElementById('paymentTypeInput');
+            const cardSection = document.getElementById('cardSection');
+            const walletSection = document.getElementById('walletSection');
+            const tabCardBtn = document.getElementById('tabCardBtn');
+            const tabWalletBtn = document.getElementById('tabWalletBtn');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const amount = "@Model.TotalAmount.ToString("N2")";
+
+            paymentTypeInput.value = type;
+
+            if (type === 'card') {
+                cardSection.classList.remove('hidden');
+                walletSection.classList.add('hidden');
+
+                tabCardBtn.className = "flex items-center gap-3 p-4 rounded-2xl border-2 border-primary bg-primary/5 text-left transition";
+                tabWalletBtn.className = "flex items-center gap-3 p-4 rounded-2xl border border-border bg-card hover:bg-secondary text-left transition";
+
+                submitBtnText.textContent = `Pay $${amount} via Visa / Card`;
+
+                // Set required fields
+                document.getElementById('cardNumber').required = true;
+                document.getElementById('cardHolder').required = true;
+                document.getElementById('expiryDate').required = true;
+                document.getElementById('cvv').required = true;
+                document.getElementById('walletPhone').required = false;
+            } else {
+                cardSection.classList.add('hidden');
+                walletSection.classList.remove('hidden');
+
+                tabWalletBtn.className = "flex items-center gap-3 p-4 rounded-2xl border-2 border-primary bg-primary/5 text-left transition";
+                tabCardBtn.className = "flex items-center gap-3 p-4 rounded-2xl border border-border bg-card hover:bg-secondary text-left transition";
+
+                const provider = document.getElementById('walletProviderInput').value;
+                submitBtnText.textContent = `Pay $${amount} via ${provider}`;
+
+                // Set required fields
+                document.getElementById('cardNumber').required = false;
+                document.getElementById('cardHolder').required = false;
+                document.getElementById('expiryDate').required = false;
+                document.getElementById('cvv').required = false;
+                document.getElementById('walletPhone').required = true;
+            }
+        }
+
+        function selectWalletProvider(providerName) {
+            document.getElementById('walletProviderInput').value = providerName;
+            const amount = "@Model.TotalAmount.ToString("N2")";
+            document.getElementById('submitBtnText').textContent = `Pay $${amount} via ${providerName}`;
+
+            document.querySelectorAll('.wallet-btn').forEach(btn => {
+                if (btn.getAttribute('data-provider') === providerName) {
+                    btn.className = "wallet-btn p-3 rounded-xl border border-primary bg-primary/5 text-xs font-bold text-foreground text-center transition";
+                } else {
+                    btn.className = "wallet-btn p-3 rounded-xl border border-border bg-background hover:bg-secondary text-xs font-bold text-foreground text-center transition";
+                }
+            });
+        }
+
+        function fillTestCard(number, expiry, cvv, brand) {
+            const formatted = number.match(/.{1,4}/g).join(' ');
+            document.getElementById('cardNumber').value = formatted;
+            document.getElementById('expiryDate').value = expiry;
+            document.getElementById('cvv').value = cvv;
+            validateCardLive();
+        }
+
+        function fillTestWallet(phone, provider) {
+            document.getElementById('walletPhone').value = phone;
+            selectWalletProvider(provider);
+            validateWalletLive();
+        }
+
+        function validateCardLive() {
+            const cardInput = document.getElementById('cardNumber');
+            const feedback = document.getElementById('luhnFeedback');
+            const errorText = document.getElementById('cardErrorText');
+            const brandBadge = document.getElementById('cardBrandBadge');
+
+            const val = cardInput.value;
+            const brand = detectCardBrand(val);
+            brandBadge.textContent = brand;
+
+            if (isValidLuhn(val)) {
+                feedback.classList.remove('hidden');
+                feedback.className = "absolute right-3 top-3.5 text-xs font-semibold flex items-center gap-1 text-emerald-600";
+                feedback.innerHTML = '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Valid card';
+                errorText.classList.add('hidden');
+                cardInput.classList.remove('border-red-500');
+            } else {
+                if (val.replace(/\D/g, '').length >= 13) {
+                    feedback.className = "absolute right-3 top-3.5 text-xs font-semibold flex items-center gap-1 text-red-600";
+                    feedback.innerHTML = 'Invalid card';
+                    errorText.classList.remove('hidden');
+                    cardInput.classList.add('border-red-500');
+                } else {
+                    feedback.classList.add('hidden');
+                    errorText.classList.add('hidden');
+                    cardInput.classList.remove('border-red-500');
+                }
+            }
+        }
+
+        function validateWalletLive() {
+            const walletInput = document.getElementById('walletPhone');
+            const feedback = document.getElementById('walletFeedback');
+            const errorText = document.getElementById('walletErrorText');
+
+            const val = walletInput.value;
+            if (isValidWallet(val)) {
+                feedback.classList.remove('hidden');
+                feedback.innerHTML = '<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Valid wallet';
+                errorText.classList.add('hidden');
+                walletInput.classList.remove('border-red-500');
+            } else {
+                if (val.length > 5) {
+                    feedback.classList.add('hidden');
+                    errorText.classList.remove('hidden');
+                    walletInput.classList.add('border-red-500');
+                } else {
+                    feedback.classList.add('hidden');
+                    errorText.classList.add('hidden');
+                    walletInput.classList.remove('border-red-500');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const cardInput = document.getElementById('cardNumber');
+            if (cardInput) {
+                // Auto format 4-digit blocks
+                cardInput.addEventListener('input', function (e) {
+                    let val = e.target.value.replace(/\D/g, '');
+                    let formatted = val.match(/.{1,4}/g)?.join(' ') || val;
+                    e.target.value = formatted;
+                    validateCardLive();
+                });
+            }
+
+            const walletInput = document.getElementById('walletPhone');
+            if (walletInput) {
+                walletInput.addEventListener('input', function () {
+                    validateWalletLive();
+                });
+            }
+
+            // Expiry date auto format MM/YY
+            const expiryInput = document.getElementById('expiryDate');
+            if (expiryInput) {
+                expiryInput.addEventListener('input', function (e) {
+                    let val = e.target.value.replace(/\D/g, '');
+                    if (val.length >= 2) {
+                        e.target.value = val.substring(0, 2) + '/' + val.substring(2, 4);
+                    } else {
+                        e.target.value = val;
+                    }
+                });
+            }
+
+            validateCardLive();
+            validateWalletLive();
+        });
+    </script>
+}

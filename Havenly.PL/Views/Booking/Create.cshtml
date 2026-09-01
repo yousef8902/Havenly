@@ -1,0 +1,128 @@
+@model Havenly.BLL.ModelVMs.BookingRequestVM
+
+@{
+    ViewData["Title"] = $"Confirm Reservation — {Model.PropertyName}";
+    var maxGuests = (int)(ViewBag.MaxGuests ?? 5);
+}
+
+<div class="container-page py-10">
+    <div class="max-w-2xl mx-auto space-y-8">
+        <div>
+            <a href="javascript:history.back()" class="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground mb-4">
+                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to property
+            </a>
+            <h1 class="text-3xl font-bold tracking-tight">Request to book</h1>
+            <p class="text-muted-foreground mt-1">Review your trip details and submit your reservation request.</p>
+        </div>
+
+        <form asp-action="Create" method="post" class="space-y-6">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="ListingID" />
+            <input type="hidden" asp-for="PropertyName" />
+            <input type="hidden" asp-for="PricePerNight" />
+
+            <div asp-validation-summary="ModelOnly" class="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm font-medium text-destructive"></div>
+
+            <!-- Trip Details Card -->
+            <div class="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-6">
+                <div class="border-b border-border pb-4">
+                    <h2 class="text-xl font-bold">@Model.PropertyName</h2>
+                    <p class="text-sm font-semibold text-primary mt-1">$@Model.PricePerNight.ToString("N2") <span class="text-xs font-normal text-muted-foreground">/ night</span></p>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label asp-for="CheckIn" class="block text-sm font-semibold mb-1.5">Check-in</label>
+                        <input asp-for="CheckIn" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" id="checkInInput" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                        <span asp-validation-for="CheckIn" class="text-xs text-destructive mt-1 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="CheckOut" class="block text-sm font-semibold mb-1.5">Check-out</label>
+                        <input asp-for="CheckOut" type="date" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" id="checkOutInput" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                        <span asp-validation-for="CheckOut" class="text-xs text-destructive mt-1 block"></span>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label asp-for="Guests" class="block text-sm font-semibold mb-1.5">Guests</label>
+                        <select asp-for="Guests" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none">
+                            @for (int i = 1; i <= maxGuests; i++)
+                            {
+                                <option value="@i">@i @(i == 1 ? "guest" : "guests")</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Guests" class="text-xs text-destructive mt-1 block"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Breakdown Card -->
+            <div class="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
+                <h3 class="font-bold text-lg">Price details</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between text-muted-foreground">
+                        <span>$<span id="pricePerNightDisplay">@Model.PricePerNight</span> × <span id="nightsCountDisplay">2</span> nights</span>
+                        <span class="font-medium text-foreground" id="subtotalDisplay">$@(Model.PricePerNight * 2)</span>
+                    </div>
+                    <div class="flex justify-between text-muted-foreground">
+                        <span>Cleaning & service fee</span>
+                        <span class="font-medium text-foreground">$0.00</span>
+                    </div>
+                    <div class="border-t border-border pt-3 flex justify-between font-bold text-base text-foreground">
+                        <span>Total (USD)</span>
+                        <span class="text-primary" id="totalDisplay">$@(Model.PricePerNight * 2)</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full rounded-xl bg-primary py-3.5 text-base font-semibold text-primary-foreground shadow hover:bg-primary/90 transition">
+                Confirm and reserve
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const pricePerNight = @Model.PricePerNight;
+        const checkIn = document.getElementById('checkInInput');
+        const checkOut = document.getElementById('checkOutInput');
+        const nightsCount = document.getElementById('nightsCountDisplay');
+        const subtotal = document.getElementById('subtotalDisplay');
+        const total = document.getElementById('totalDisplay');
+
+        function updatePrice() {
+            if (!checkIn.value || !checkOut.value) return;
+            const inDate = new Date(checkIn.value);
+            const outDate = new Date(checkOut.value);
+            const diffTime = outDate - inDate;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays > 0) {
+                nightsCount.textContent = diffDays;
+                const calcTotal = (diffDays * pricePerNight).toFixed(2);
+                subtotal.textContent = `$${calcTotal}`;
+                total.textContent = `$${calcTotal}`;
+            }
+        }
+
+        checkIn.addEventListener('change', function() {
+            if (checkIn.value) {
+                const nextDay = new Date(checkIn.value);
+                nextDay.setDate(nextDay.getDate() + 1);
+                checkOut.min = nextDay.toISOString().split('T')[0];
+                if (new Date(checkOut.value) <= new Date(checkIn.value)) {
+                    checkOut.value = nextDay.toISOString().split('T')[0];
+                }
+            }
+            updatePrice();
+        });
+
+        checkOut.addEventListener('change', updatePrice);
+        updatePrice();
+    </script>
+}

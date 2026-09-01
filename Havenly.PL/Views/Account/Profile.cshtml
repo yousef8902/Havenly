@@ -1,0 +1,144 @@
+@model Havenly.BLL.ModelVMs.Account.UserProfileVM
+
+@{
+    ViewData["Title"] = $"{Model.Name} — Profile & Workspace";
+}
+
+<div class="container-page py-10 space-y-8 max-w-5xl mx-auto">
+    <!-- Profile Banner & Info Header -->
+    <div class="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div class="flex items-center gap-5">
+                <div class="size-20 rounded-full bg-primary/10 text-primary font-bold text-2xl flex items-center justify-center border-2 border-primary/20 flex-shrink-0">
+                    @(string.IsNullOrWhiteSpace(Model.Name) ? "G" : Model.Name[0].ToString().ToUpper())
+                </div>
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">@Model.Name</h1>
+                        <span class="rounded-full bg-primary/10 px-3 py-0.5 text-xs font-semibold text-primary">
+                            @Model.Role
+                        </span>
+                        <span class="rounded-full bg-emerald-500/10 px-3 py-0.5 text-xs font-semibold text-emerald-600">
+                            @Model.Status
+                        </span>
+                    </div>
+                    <p class="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
+                        <svg class="size-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        @Model.Email
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Numbers / Metrics Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total Bookings</p>
+            <div class="text-3xl font-bold text-foreground mt-2">@Model.TotalBookings</div>
+            <p class="text-xs text-muted-foreground mt-1">Stays requested</p>
+        </div>
+
+        <div class="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Upcoming Stays</p>
+            <div class="text-3xl font-bold text-primary mt-2">@Model.UpcomingBookings</div>
+            <p class="text-xs text-muted-foreground mt-1">Confirmed & ready</p>
+        </div>
+
+        <div class="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Saved Stays</p>
+            <div class="text-3xl font-bold text-foreground mt-2">@Model.TotalFavorites</div>
+            <p class="text-xs text-muted-foreground mt-1">In your favorites</p>
+        </div>
+
+        <div class="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Reviews Written</p>
+            <div class="text-3xl font-bold text-foreground mt-2">@Model.TotalReviews</div>
+            <p class="text-xs text-muted-foreground mt-1">Community feedback</p>
+        </div>
+    </div>
+
+    <!-- Quick Shortcuts & Recent Bookings -->
+    <div class="grid md:grid-cols-12 gap-8 items-start">
+        <!-- Quick Actions -->
+        <div class="md:col-span-4 space-y-4">
+            <h2 class="text-lg font-bold">Quick Navigation</h2>
+            <div class="rounded-2xl border border-border bg-card p-2 space-y-1">
+                <a asp-controller="Booking" asp-action="MyBookings" class="flex items-center justify-between p-3 rounded-xl hover:bg-secondary transition text-sm font-medium">
+                    <span class="flex items-center gap-3">
+                        <svg class="size-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        My Bookings
+                    </span>
+                    <span class="text-xs font-bold bg-secondary px-2 py-0.5 rounded-full">@Model.TotalBookings</span>
+                </a>
+
+                <a asp-controller="Favorites" asp-action="Index" class="flex items-center justify-between p-3 rounded-xl hover:bg-secondary transition text-sm font-medium">
+                    <span class="flex items-center gap-3">
+                        <svg class="size-5 text-rose-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                        Saved Favorites
+                    </span>
+                    <span class="text-xs font-bold bg-secondary px-2 py-0.5 rounded-full">@Model.TotalFavorites</span>
+                </a>
+
+                <a asp-controller="Property" asp-action="Index" class="flex items-center justify-between p-3 rounded-xl hover:bg-secondary transition text-sm font-medium">
+                    <span class="flex items-center gap-3">
+                        <svg class="size-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Explore Places
+                    </span>
+                    <svg class="size-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Activity / Bookings -->
+        <div class="md:col-span-8 space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-bold">Recent Stays</h2>
+                <a asp-controller="Booking" asp-action="MyBookings" class="text-xs font-semibold text-primary hover:underline">
+                    View all →
+                </a>
+            </div>
+
+            @if (Model.RecentBookings.Any())
+            {
+                <div class="space-y-3">
+                    @foreach (var b in Model.RecentBookings)
+                    {
+                        <div class="rounded-2xl border border-border bg-card p-4 flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <img src="@b.ImageUrl" alt="@b.Title" class="size-14 rounded-xl object-cover border border-border flex-shrink-0" />
+                                <div>
+                                    <h4 class="font-bold text-sm text-foreground">@b.Title</h4>
+                                    <p class="text-xs text-muted-foreground mt-0.5">@b.City, @b.Country · @b.CheckIn.ToString("MMM d") – @b.CheckOut.ToString("MMM d")</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold @(b.Status == "Approved" ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600")">
+                                    @b.Status
+                                </span>
+                                <div class="font-bold text-sm mt-1">$@b.TotalPrice.ToString("N0")</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground">
+                    <p class="text-sm">No reservations made yet.</p>
+                    <a asp-controller="Search" asp-action="Index" class="inline-block mt-3 text-xs font-bold text-primary hover:underline">
+                        Explore places to stay →
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

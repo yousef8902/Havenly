@@ -1,0 +1,164 @@
+@model Havenly.BLL.ModelVMs.HostPropertyFormVM
+@using Havenly.DAL.Enums
+
+@{
+    ViewData["Title"] = "Add new property — Havenly";
+    Layout = "~/Views/Shared/_WorkspaceLayout.cshtml";
+    ViewData["Workspace"] = "Host dashboard";
+    ViewData["WorkspaceNav"] = "host";
+}
+
+<div class="max-w-4xl space-y-8">
+    <div>
+        <a asp-action="ListProperties" class="inline-flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground mb-4">
+            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to properties
+        </a>
+        <h1 class="text-3xl font-bold">List a new property</h1>
+        <p class="text-muted-foreground mt-1">Provide accurate details so guests can easily find and book your home.</p>
+    </div>
+
+    <form asp-action="CreateProperty" method="post" enctype="multipart/form-data" class="space-y-8">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm font-medium text-destructive"></div>
+
+        <!-- Section 1: Basic Information -->
+        <div class="rounded-2xl border border-border bg-card p-6 space-y-6">
+            <h2 class="text-xl font-semibold border-b border-border pb-3">1. Basic details</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label asp-for="PropertyName" class="block text-sm font-semibold mb-1.5"></label>
+                    <input asp-for="PropertyName" placeholder="e.g. Modern Minimalist Sea View Loft" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <span asp-validation-for="PropertyName" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Category" class="block text-sm font-semibold mb-1.5">Property Category</label>
+                    <select asp-for="Category" required class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none">
+                        <option value="">-- Select a Category --</option>
+                        <option value="City lofts">City lofts</option>
+                        <option value="Countryside">Countryside</option>
+                        <option value="Beachfront">Beachfront</option>
+                        <option value="Cabins">Cabins</option>
+                        <option value="Islands">Islands</option>
+                        <option value="Design homes">Design homes</option>
+                    </select>
+                    <span asp-validation-for="Category" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Description" class="block text-sm font-semibold mb-1.5"></label>
+                    <textarea asp-for="Description" rows="4" placeholder="Describe the space, atmosphere, unique highlights, and neighborhood..." class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none"></textarea>
+                    <span asp-validation-for="Description" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Location -->
+        <div class="rounded-2xl border border-border bg-card p-6 space-y-6">
+            <h2 class="text-xl font-semibold border-b border-border pb-3">2. Location</h2>
+            
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label asp-for="Country" class="block text-sm font-semibold mb-1.5"></label>
+                    <input asp-for="Country" placeholder="e.g. Egypt" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <span asp-validation-for="Country" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="City" class="block text-sm font-semibold mb-1.5"></label>
+                    <input asp-for="City" placeholder="e.g. Alexandria" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <span asp-validation-for="City" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label asp-for="Street" class="block text-sm font-semibold mb-1.5"></label>
+                    <input asp-for="Street" placeholder="e.g. 24 Corniche Road, Stanley" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <span asp-validation-for="Street" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Pricing & Capacity -->
+        <div class="rounded-2xl border border-border bg-card p-6 space-y-6">
+            <h2 class="text-xl font-semibold border-b border-border pb-3">3. Pricing & capacity</h2>
+            
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                    <label asp-for="Price" class="block text-sm font-semibold mb-1.5"></label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-2.5 text-muted-foreground">$</span>
+                        <input asp-for="Price" type="number" step="0.01" class="w-full rounded-xl border border-border bg-background pl-8 pr-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    </div>
+                    <span asp-validation-for="Price" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="NumberOfGuests" class="block text-sm font-semibold mb-1.5"></label>
+                    <input asp-for="NumberOfGuests" type="number" min="1" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <span asp-validation-for="NumberOfGuests" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Capacity" class="block text-sm font-semibold mb-1.5">Beds count</label>
+                    <input asp-for="Capacity" type="number" min="1" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <span asp-validation-for="Capacity" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label asp-for="BathroomCount" class="block text-sm font-semibold mb-1.5"></label>
+                    <input asp-for="BathroomCount" type="number" min="1" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <span asp-validation-for="BathroomCount" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Amenities -->
+        <div class="rounded-2xl border border-border bg-card p-6 space-y-6">
+            <h2 class="text-xl font-semibold border-b border-border pb-3">4. Amenities</h2>
+            
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                @if (Model.AvailableAmenities != null && Model.AvailableAmenities.Any())
+                {
+                    @foreach (var amenity in Model.AvailableAmenities)
+                    {
+                        <label class="flex items-center gap-3 rounded-xl border border-border p-3.5 cursor-pointer transition hover:bg-secondary/40">
+                            <input type="checkbox" name="SelectedAmenityIds" value="@amenity.AmenityId" @(amenity.IsSelected ? "checked" : "") class="rounded border-border text-primary focus:ring-primary size-4" />
+                            <span class="text-sm font-medium">@amenity.Name</span>
+                        </label>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Section 5: Photos Upload -->
+        <div class="rounded-2xl border border-border bg-card p-6 space-y-6">
+            <h2 class="text-xl font-semibold border-b border-border pb-3">5. Property photos</h2>
+            <p class="text-sm text-muted-foreground">Upload clear photos showing different angles, bedrooms, and living spaces (Max 5MB each, JPEG/PNG/WebP).</p>
+
+            <div class="border-2 border-dashed border-border rounded-2xl p-8 text-center bg-secondary/20">
+                <svg class="size-10 mx-auto text-muted-foreground mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <label for="imageFiles" class="cursor-pointer font-semibold text-primary hover:underline">
+                    <span>Click to select multiple images</span>
+                    <input type="file" id="imageFiles" name="imageFiles" multiple accept="image/jpeg,image/png,image/webp" class="sr-only" />
+                </label>
+                <p class="text-xs text-muted-foreground mt-2">PNG, JPG, JPEG or WEBP up to 5MB each</p>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex items-center justify-end gap-4">
+            <a asp-action="ListProperties" class="rounded-xl border border-border px-6 py-3 text-sm font-semibold hover:bg-secondary">
+                Cancel
+            </a>
+            <button type="submit" class="rounded-xl bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90">
+                Submit property for review
+            </button>
+        </div>
+    </form>
+</div>
