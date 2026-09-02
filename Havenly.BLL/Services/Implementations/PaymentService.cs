@@ -187,15 +187,24 @@ namespace Havenly.BLL.Services.Implementations
                 PaidAt = p.PaidAt
             }).OrderByDescending(p => p.CreatedAt).ToList();
 
-            var completedPayments = hostPayments.Where(p => p.Status == PaymentStatus.Completed).ToList();
+            // Only count approved / completed bookings as realized Host Net Earnings
+            var approvedPayments = hostPayments
+                .Where(p => p.Status == PaymentStatus.Completed &&
+                           (p.Booking?.Status == BookingStatus.Approved || p.Booking?.Status == BookingStatus.Completed))
+                .ToList();
+
+            // Pending bookings where payment is completed are awaiting host decision
+            var pendingPayments = hostPayments
+                .Where(p => p.Status == PaymentStatus.Completed && p.Booking?.Status == BookingStatus.Pending)
+                .ToList();
 
             return new HostPayoutsVM
             {
-                TotalGrossRevenue = completedPayments.Sum(p => p.Amount),
-                TotalPlatformFee = completedPayments.Sum(p => p.PlatformFee),
-                TotalNetEarnings = completedPayments.Sum(p => p.HostPayoutAmount),
-                PaidOutEarnings = completedPayments.Where(p => p.IsPaidToHost).Sum(p => p.HostPayoutAmount),
-                PendingPayouts = completedPayments.Where(p => !p.IsPaidToHost).Sum(p => p.HostPayoutAmount),
+                TotalGrossRevenue = approvedPayments.Sum(p => p.Amount),
+                TotalPlatformFee = approvedPayments.Sum(p => p.PlatformFee),
+                TotalNetEarnings = approvedPayments.Sum(p => p.HostPayoutAmount),
+                PaidOutEarnings = approvedPayments.Where(p => p.IsPaidToHost).Sum(p => p.HostPayoutAmount),
+                PendingPayouts = pendingPayments.Sum(p => p.HostPayoutAmount),
                 TotalBookingsCount = hostPayments.Count,
                 PayoutRows = rows
             };

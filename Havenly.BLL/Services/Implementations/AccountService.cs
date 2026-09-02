@@ -331,8 +331,34 @@ namespace Havenly.BLL.Services.Implementations
                     CreatedAt = DateTime.UtcNow.AddDays(-14)
                 }).ToList();
 
-            var allBookings = await _bookingRepo.GetAll().Where(b => b.GuestUserID == userId).ToListAsync();
+            var allBookings = await _bookingRepo.GetAll()
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Address)
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Images)
+                .Where(b => b.GuestUserID == userId)
+                .OrderByDescending(b => b.CheckIn)
+                .ToListAsync();
+
             var completedStays = allBookings.Count(b => b.Status == BookingStatus.Completed || b.Status == BookingStatus.Approved);
+
+            var guestStays = allBookings
+                .Take(4)
+                .Select(b => new PublicGuestStayVM
+                {
+                    BookingId = b.BookingID,
+                    PropertyName = b.Listing?.Property?.PropertyName ?? $"Stay #{b.ListingID}",
+                    City = b.Listing?.Property?.Address?.City ?? string.Empty,
+                    Country = b.Listing?.Property?.Address?.Country ?? "Egypt",
+                    ImageUrl = b.Listing?.Property?.Images?.FirstOrDefault(i => i.IsPrimary == true)?.ImagePath
+                            ?? b.Listing?.Property?.Images?.FirstOrDefault()?.ImagePath
+                            ?? "/images/p1.jpg",
+                    CheckIn = b.CheckIn,
+                    CheckOut = b.CheckOut,
+                    Status = b.Status.ToString()
+                }).ToList();
 
             double avgRating = properties.Any(p => p.NumberOfReviews > 0)
                 ? Math.Round(properties.Where(p => p.NumberOfReviews > 0).Average(p => p.Rating), 2)
@@ -354,8 +380,86 @@ namespace Havenly.BLL.Services.Implementations
                 TotalReviewsReceived = reviewsReceived.Count,
                 AverageHostRating = avgRating,
                 Properties = propertyCards,
+                GuestStays = guestStays,
                 Reviews = reviewsReceived
             };
+        }
+
+        public async Task<(bool Succeeded, string? ErrorMessage)> SendPasswordResetOtpAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return (false, "Please provide an email address.");
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return (false, "No account found with this email address.");
+
+            var otpCode = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+            var expiry = DateTime.UtcNow.AddMinutes(15).ToString("o");
+
+            await _userManager.SetAuthenticationTokenAsync(user, "Havenly", "PasswordResetOTP", otpCode);
+            await _userManager.SetAuthenticationTokenAsync(user, "Havenly", "PasswordResetExpiry", expiry);
+
+            await _emailServices.SendPasswordResetOtpAsync(user.Email!, user.Name, otpCode);
+
+            return (true, null);
+        }
+
+        public async Task<(bool Succeeded, string? Token, string? ErrorMessage)> VerifyPasswordResetOtpAsync(string email, string otpCode)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(otpCode))
+                return (false, null, "Please provide email and verification code.");
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return (false, null, "Account not found.");
+
+            var storedOtp = await _userManager.GetAuthenticationTokenAsync(user, "Havenly", "PasswordResetOTP");
+            var storedExpiryStr = await _userManager.GetAuthenticationTokenAsync(user, "Havenly", "PasswordResetExpiry");
+
+            if (string.IsNullOrEmpty(storedOtp) || storedOtp != otpCode.Trim())
+            {
+                return (false, null, "Invalid verification code. Please check and try again.");
+            }
+
+            if (DateTime.TryParse(storedExpiryStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out var expiryDate))
+            {
+                if (DateTime.UtcNow > expiryDate)
+                {
+                    return (false, null, "Verification code has expired. Please request a new code.");
+                }
+            }
+
+            // Generate official ASP.NET Identity Password Reset Token
+            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            // Clean up OTP tokens
+            await _userManager.RemoveAuthenticationTokenAsync(user, "Havenly", "PasswordResetOTP");
+            await _userManager.RemoveAuthenticationTokenAsync(user, "Havenly", "PasswordResetExpiry");
+
+            return (true, resetToken, null);
+        }
+
+        public async Task<(bool Succeeded, string? ErrorMessage)> ResetPasswordAsync(string email, string token, string newPassword)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(newPassword))
+                return (false, "Invalid request. Please try again.");
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return (false, "Account not found.");
+
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            if (!result.Succeeded)
+            {
+                var error = string.Join(" ", result.Errors.Select(e => e.Description));
+                return (false, error);
+            }
+
+            // Unlock lockout if account was locked
+            await _userManager.SetLockoutEndDateAsync(user, null);
+
+            return (true, null);
         }
     }
 }

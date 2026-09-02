@@ -58,6 +58,7 @@
                         <input asp-for="RememberMe" id="loginRememberMe" type="checkbox" class="rounded border-border text-primary focus:ring-primary size-4" />
                         <span class="text-sm font-medium text-muted-foreground">Remember me</span>
                     </label>
+                    <a href="javascript:void(0)" id="forgotPasswordBtn" onclick="handleForgotPasswordDirect(event)" class="text-sm font-semibold text-primary hover:underline">Forgot password?</a>
                 </div>
 
                 <button type="submit" id="loginSubmitBtn" class="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition flex items-center justify-center gap-2">
@@ -160,5 +161,74 @@
                 form.submit();
             }
         });
+
+        async function handleForgotPasswordDirect(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('loginEmail');
+            const email = emailInput ? emailInput.value.trim() : '';
+            const alertBox = document.getElementById('loginAlert');
+            const errorList = document.getElementById('loginErrorList');
+            const forgotBtn = document.getElementById('forgotPasswordBtn');
+
+            if (!email) {
+                alertBox.classList.remove('hidden');
+                errorList.innerHTML = '<li>Please enter your email in the field above first, then click "Forgot password?".</li>';
+                emailInput?.focus();
+                return;
+            }
+
+            const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+            if (!emailRegex.test(email)) {
+                alertBox.classList.remove('hidden');
+                errorList.innerHTML = '<li>Please enter a valid email address.</li>';
+                emailInput?.focus();
+                return;
+            }
+
+            const originalHtml = forgotBtn.innerHTML;
+            forgotBtn.innerHTML = `
+                <span class="inline-flex items-center gap-1.5 text-primary font-medium">
+                    <svg class="size-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    Sending code...
+                </span>`;
+            forgotBtn.classList.add('pointer-events-none');
+            alertBox.classList.add('hidden');
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                const formData = new FormData();
+                formData.append('Email', email);
+                if (token) formData.append('__RequestVerificationToken', token);
+
+                const response = await fetch('/Account/ForgotPassword', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    forgotBtn.innerHTML = 'Code Sent!';
+                    window.location.href = data.redirectUrl || `/Account/VerifyResetOtp?email=${encodeURIComponent(email)}`;
+                } else {
+                    forgotBtn.innerHTML = originalHtml;
+                    forgotBtn.classList.remove('pointer-events-none');
+                    alertBox.classList.remove('hidden');
+                    const errors = data.errors || [data.message || 'No account found with this email address.'];
+                    errorList.innerHTML = errors.map(err => `<li>${err}</li>`).join('');
+                }
+            } catch (err) {
+                forgotBtn.innerHTML = originalHtml;
+                forgotBtn.classList.remove('pointer-events-none');
+                window.location.href = `/Account/ForgotPassword?email=${encodeURIComponent(email)}`;
+            }
+        }
     </script>
 }

@@ -23,5 +23,11 @@ namespace Havenly.BLL.Services.Abstractions
         Task<(bool Succeeded, string? ErrorMessage)> UpdateProfileAsync(string userId, EditProfileVM model, string? savedAvatarPath = null);
 
         Task<PublicUserProfileVM?> GetPublicProfileAsync(string userId);
+
+        Task<(bool Succeeded, string? ErrorMessage)> SendPasswordResetOtpAsync(string email);
+
+        Task<(bool Succeeded, string? Token, string? ErrorMessage)> VerifyPasswordResetOtpAsync(string email, string otpCode);
+
+        Task<(bool Succeeded, string? ErrorMessage)> ResetPasswordAsync(string email, string token, string newPassword);
     }
 }

@@ -24,8 +24,23 @@ namespace Havenly.BLL.ModelVMs.Account
         // Host Listings (if host)
         public List<PublicPropertyCardVM> Properties { get; set; } = new();
 
+        // Guest Past Stays (if guest)
+        public List<PublicGuestStayVM> GuestStays { get; set; } = new();
+
         // Reviews Received
         public List<PublicUserReviewVM> Reviews { get; set; } = new();
+    }
+
+    public class PublicGuestStayVM
+    {
+        public long BookingId { get; set; }
+        public string PropertyName { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string Country { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = "/images/p1.jpg";
+        public DateTime CheckIn { get; set; }
+        public DateTime CheckOut { get; set; }
+        public string Status { get; set; } = "Completed";
     }
 
     public class PublicPropertyCardVM

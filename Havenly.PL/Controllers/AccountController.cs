@@ -174,6 +174,190 @@ namespace Havenly.PL.Controllers
             return RedirectToAction("VerifyOtp", new { email });
         }
 
+        // GET: /Account/ForgotPassword
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        // POST: /Account/ForgotPassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordVM model)
+        {
+            bool isAjax = IsAjaxRequest();
+
+            if (!ModelState.IsValid)
+            {
+                if (isAjax)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .Where(msg => !string.IsNullOrWhiteSpace(msg))
+                        .ToList();
+                    return Json(new { success = false, message = "Please enter a valid email address.", errors });
+                }
+                return View(model);
+            }
+
+            var (succeeded, errorMessage) = await _accountService.SendPasswordResetOtpAsync(model.Email);
+            if (succeeded)
+            {
+                var redirectUrl = Url.Action("VerifyResetOtp", "Account", new { email = model.Email });
+                if (isAjax)
+                {
+                    return Json(new { success = true, redirectUrl });
+                }
+                return RedirectToAction("VerifyResetOtp", new { email = model.Email });
+            }
+
+            if (isAjax)
+            {
+                return Json(new { success = false, message = errorMessage ?? "Could not send reset code.", errors = new[] { errorMessage ?? "Could not send reset code." } });
+            }
+
+            ModelState.AddModelError(string.Empty, errorMessage ?? "Could not send reset code.");
+            return View(model);
+        }
+
+        // GET: /Account/VerifyResetOtp
+        [HttpGet]
+        public IActionResult VerifyResetOtp(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return RedirectToAction(nameof(ForgotPassword));
+            }
+
+            var model = new VerifyResetOtpVM { Email = email };
+            return View(model);
+        }
+
+        // POST: /Account/VerifyResetOtp
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyResetOtp(VerifyResetOtpVM model)
+        {
+            bool isAjax = IsAjaxRequest();
+
+            if (!ModelState.IsValid)
+            {
+                if (isAjax)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .Where(msg => !string.IsNullOrWhiteSpace(msg))
+                        .ToList();
+                    return Json(new { success = false, message = "Please enter a valid 6-digit code.", errors });
+                }
+                return View(model);
+            }
+
+            var (succeeded, token, errorMessage) = await _accountService.VerifyPasswordResetOtpAsync(model.Email, model.OtpCode);
+            if (succeeded && !string.IsNullOrEmpty(token))
+            {
+                var redirectUrl = Url.Action("ResetPassword", "Account", new { email = model.Email, token = token });
+                if (isAjax)
+                {
+                    return Json(new { success = true, redirectUrl });
+                }
+                return RedirectToAction("ResetPassword", new { email = model.Email, token = token });
+            }
+
+            if (isAjax)
+            {
+                return Json(new { success = false, message = errorMessage ?? "Invalid verification code.", errors = new[] { errorMessage ?? "Invalid verification code." } });
+            }
+
+            ModelState.AddModelError(string.Empty, errorMessage ?? "Invalid verification code.");
+            return View(model);
+        }
+
+        // POST: /Account/ResendResetOtp
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResendResetOtp(string email)
+        {
+            bool isAjax = IsAjaxRequest();
+
+            var (succeeded, errorMessage) = await _accountService.SendPasswordResetOtpAsync(email);
+            if (succeeded)
+            {
+                if (isAjax)
+                {
+                    return Json(new { success = true, message = "A new 6-digit password reset code has been sent to your email." });
+                }
+                TempData["SuccessMessage"] = "A new reset code has been sent.";
+                return RedirectToAction("VerifyResetOtp", new { email });
+            }
+
+            if (isAjax)
+            {
+                return Json(new { success = false, message = errorMessage ?? "Failed to resend reset code." });
+            }
+
+            TempData["ErrorMessage"] = errorMessage ?? "Failed to resend reset code.";
+            return RedirectToAction("VerifyResetOtp", new { email });
+        }
+
+        // GET: /Account/ResetPassword
+        [HttpGet]
+        public IActionResult ResetPassword(string email, string token)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(token))
+            {
+                return RedirectToAction(nameof(ForgotPassword));
+            }
+
+            var model = new ResetPasswordVM { Email = email, Token = token };
+            return View(model);
+        }
+
+        // POST: /Account/ResetPassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordVM model)
+        {
+            bool isAjax = IsAjaxRequest();
+
+            if (!ModelState.IsValid)
+            {
+                if (isAjax)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .Where(msg => !string.IsNullOrWhiteSpace(msg))
+                        .ToList();
+                    return Json(new { success = false, message = "Please check password requirements.", errors });
+                }
+                return View(model);
+            }
+
+            var (succeeded, errorMessage) = await _accountService.ResetPasswordAsync(model.Email, model.Token, model.Password);
+            if (succeeded)
+            {
+                TempData["SuccessMessage"] = "Your password has been reset successfully! Please sign in with your new password.";
+                var redirectUrl = Url.Action("Login", "Account");
+                if (isAjax)
+                {
+                    return Json(new { success = true, redirectUrl });
+                }
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (isAjax)
+            {
+                return Json(new { success = false, message = errorMessage ?? "Failed to reset password.", errors = new[] { errorMessage ?? "Failed to reset password." } });
+            }
+
+            ModelState.AddModelError(string.Empty, errorMessage ?? "Failed to reset password.");
+            return View(model);
+        }
+
         // GET: /Account/Login
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
@@ -449,7 +633,8 @@ namespace Havenly.PL.Controllers
                 totalCompletedStays = model.TotalCompletedStays,
                 totalReviews = model.TotalReviewsReceived,
                 averageRating = model.AverageHostRating,
-                properties = model.Properties.Take(3)
+                properties = model.Properties.Take(3),
+                guestStays = model.GuestStays.Take(3)
             });
         }
 

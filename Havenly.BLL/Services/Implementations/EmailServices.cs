@@ -91,6 +91,27 @@ namespace Havenly.BLL.Services.Implementations
             await SendEmailAsync(toEmail, subject, html, isHtml: true);
         }
 
+        // Password Reset OTP
+        public async Task SendPasswordResetOtpAsync(string toEmail, string userName, string otpCode)
+        {
+            string subject = $"{otpCode} is your Havenly password reset code";
+            string displayName = string.IsNullOrWhiteSpace(userName) ? "there" : userName;
+
+            string contentHtml = $@"
+                <p style=""font-size: 15px; color: #334155; line-height: 1.6; margin-bottom: 24px;"">
+                    We received a request to reset your Havenly account password. Please use the 6-digit verification code below to proceed:
+                </p>
+                <div style=""background-color: #fefce8; border: 2px dashed #ca8a04; border-radius: 14px; padding: 20px; text-align: center; margin: 24px 0;"">
+                    <div style=""font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #854d0e; font-family: monospace;"">{otpCode}</div>
+                </div>
+                <p style=""font-size: 13px; color: #64748b; line-height: 1.5;"">
+                    ⏱️ This code will expire in <strong>15 minutes</strong>. If you did not request a password reset, you can safely ignore this email and your password will remain unchanged.
+                </p>";
+
+            string html = BuildHtmlWrapper("Reset your password", displayName, contentHtml, null, null);
+            await SendEmailAsync(toEmail, subject, html, isHtml: true);
+        }
+
         // Scenario 1: Guest creates booking -> Notify Host
         public async Task SendBookingRequestToHostAsync(
             string hostEmail,

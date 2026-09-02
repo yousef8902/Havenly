@@ -8,8 +8,9 @@ namespace Havenly.BLL.Services.Abstractions
     {
         Task SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true);
 
-        // Account Verification
+        // Account Verification & Password Reset
         Task SendEmailVerificationOtpAsync(string toEmail, string userName, string otpCode);
+        Task SendPasswordResetOtpAsync(string toEmail, string userName, string otpCode);
 
         // Scenario 1: Guest creates booking -> Notify Host
         Task SendBookingRequestToHostAsync(
