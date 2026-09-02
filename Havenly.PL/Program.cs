@@ -1,9 +1,5 @@
 
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-
-
 using AutoMapper;
 using Havenly.BLL.Mappers;
 using Havenly.BLL.Services.Abstractions;
@@ -107,6 +103,9 @@ namespace Havenly.PL
             builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<IPaymobService, PaymobService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+            // Chatbot Service
+            builder.Services.AddScoped<IChatbotService, HuggingFaceChatbotService>();
 
             // AutoMapper
             builder.Services.AddAutoMapper(cfg =>
