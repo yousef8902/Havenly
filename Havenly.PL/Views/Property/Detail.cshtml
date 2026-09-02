@@ -238,7 +238,7 @@
             <div class="rounded-2xl border border-border bg-card p-6 space-y-4">
                 <!-- Price -->
                 <div>
-                    <p class="text-3xl font-bold">$@Model.Price</p>
+                    <p class="text-3xl font-bold">@Model.Price EGP</p>
                     <p class="text-sm text-muted-foreground">per night</p>
                 </div>
 
@@ -291,15 +291,15 @@
                     <div id="priceBreakdown" class="space-y-2 border-t border-b border-border py-4">
                         <div class="flex justify-between text-sm">
                             <span id="nightsLabel">Nights (0)</span>
-                            <span id="subtotalVal">$0</span>
+                            <span id="subtotalVal">0 EGP</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span>Service fee (9%)</span>
-                            <span id="serviceFeeVal">$0</span>
+                            <span id="serviceFeeVal">0 EGP</span>
                         </div>
                         <div class="flex justify-between font-semibold text-foreground text-base pt-1">
                             <span>Total</span>
-                            <span id="totalVal">$0</span>
+                            <span id="totalVal">0 EGP</span>
                         </div>
                     </div>
 
@@ -416,10 +416,10 @@
                         const serviceFee = Math.round(subtotal * 0.09);
                         const total = subtotal + serviceFee;
 
-                        nightsLabel.textContent = `Nights (${nights}) — $${pricePerNight}/night`;
-                        subtotalVal.textContent = `$${subtotal}`;
-                        serviceFeeVal.textContent = `$${serviceFee}`;
-                        totalVal.textContent = `$${total}`;
+                        nightsLabel.textContent = `Nights (${nights}) — ${pricePerNight} EGP/night`;
+                        subtotalVal.textContent = `${subtotal.toLocaleString()} EGP`;
+                        serviceFeeVal.textContent = `${serviceFee.toLocaleString()} EGP`;
+                        totalVal.textContent = `${total.toLocaleString()} EGP`;
 
                         bookButton.disabled = false;
                     }
@@ -427,9 +427,9 @@
 
                 function resetBreakdown() {
                     nightsLabel.textContent = "Nights (0)";
-                    subtotalVal.textContent = "$0";
-                    serviceFeeVal.textContent = "$0";
-                    totalVal.textContent = "$0";
+                    subtotalVal.textContent = "0 EGP";
+                    serviceFeeVal.textContent = "0 EGP";
+                    totalVal.textContent = "0 EGP";
                 }
 
                 checkInInput.addEventListener('change', function() {

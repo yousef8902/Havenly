@@ -91,8 +91,8 @@
                 <div>
                     <label asp-for="Price" class="block text-sm font-semibold mb-1.5"></label>
                     <div class="relative">
-                        <span class="absolute left-3.5 top-2.5 text-muted-foreground">$</span>
-                        <input asp-for="Price" type="number" step="0.01" class="w-full rounded-xl border border-border bg-background pl-8 pr-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                        <input asp-for="Price" type="number" step="1" class="w-full rounded-xl border border-border bg-background pl-4 pr-12 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                        <span class="absolute right-3.5 top-2.5 text-xs font-semibold text-muted-foreground">EGP</span>
                     </div>
                     <span asp-validation-for="Price" class="text-xs text-destructive mt-1 block"></span>
                 </div>

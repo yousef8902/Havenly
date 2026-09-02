@@ -70,11 +70,11 @@
 <div class="grid gap-4 sm:grid-cols-2 mb-6">
     <div class="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <p class="text-sm text-muted-foreground">Total Revenue</p>
-        <p class="text-2xl font-bold text-primary">$@Model.Stats.TotalRevenue.ToString("N2")</p>
+        <p class="text-2xl font-bold text-primary">@Model.Stats.TotalRevenue.ToString("N2") EGP</p>
     </div>
     <div class="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <p class="text-sm text-muted-foreground">Average Booking Value</p>
-        <p class="text-2xl font-bold text-primary">$@Model.Stats.AverageBookingValue.ToString("N2")</p>
+        <p class="text-2xl font-bold text-primary">@Model.Stats.AverageBookingValue.ToString("N2") EGP</p>
     </div>
 </div>
 
@@ -237,7 +237,7 @@
                         <td class="p-4 text-muted-foreground">@booking.HostName</td>
                         <td class="p-4 text-muted-foreground">@booking.CheckIn.ToString("MMM dd, yyyy")</td>
                         <td class="p-4 text-muted-foreground">@booking.CheckOut.ToString("MMM dd, yyyy")</td>
-                        <td class="p-4 text-right font-medium">$@booking.Total.ToString("N2")</td>
+                        <td class="p-4 text-right font-medium">@booking.Total.ToString("N2") EGP</td>
                         <td class="p-4">
                             <span class="inline-flex items-center rounded-full @booking.StatusColor px-2.5 py-0.5 text-xs font-semibold">
                                 @booking.StatusDisplay

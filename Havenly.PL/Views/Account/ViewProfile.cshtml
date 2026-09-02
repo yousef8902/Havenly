@@ -112,7 +112,7 @@
                                         ⭐ @p.Rating.ToString("0.00") <span class="text-muted-foreground">(@p.NumberOfReviews)</span>
                                     </div>
                                     <div class="text-sm font-bold text-primary">
-                                        $@p.Price.ToString("N0") <span class="text-xs font-normal text-muted-foreground">/ night</span>
+                                        @p.Price.ToString("N0") EGP <span class="text-xs font-normal text-muted-foreground">/ night</span>
                                     </div>
                                 </div>
                                 <a asp-controller="Property" asp-action="Detail" asp-route-id="@p.PropertyId" class="block w-full text-center rounded-xl bg-secondary py-2 text-xs font-semibold text-foreground hover:bg-secondary/80 transition">

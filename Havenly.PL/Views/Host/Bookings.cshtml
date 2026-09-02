@@ -78,7 +78,7 @@
                                     <div class="text-xs text-muted-foreground">@((booking.CheckOut - booking.CheckIn).Days) nights</div>
                                 </td>
                                 <td class="px-6 py-4 font-bold text-foreground">
-                                    $@booking.TotalPrice.ToString("N0")
+                                    @booking.TotalPrice.ToString("N0") EGP
                                 </td>
                                 <td class="px-6 py-4">
                                     @switch (booking.Status)

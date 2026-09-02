@@ -248,7 +248,7 @@
                             <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span id="submitBtnText">Pay $@Model.TotalAmount.ToString("N2") via Visa / Card</span>
+                            <span id="submitBtnText">Pay @Model.TotalAmount.ToString("N2") EGP via Visa / Card</span>
                         </button>
                     </form>
 
@@ -293,8 +293,8 @@
 
                 <div class="border-t border-border pt-4 space-y-2">
                     <div class="flex justify-between text-sm">
-                        <span class="text-muted-foreground">$@Model.PricePerNight.ToString("N2") × @Model.Nights night@(Model.Nights > 1 ? "s" : "")</span>
-                        <span>$@Model.TotalAmount.ToString("N2")</span>
+                        <span class="text-muted-foreground">@Model.PricePerNight.ToString("N2") EGP × @Model.Nights night@(Model.Nights > 1 ? "s" : "")</span>
+                        <span>@Model.TotalAmount.ToString("N2") EGP</span>
                     </div>
                     <div class="flex justify-between text-sm">
                         <span class="text-muted-foreground">Havenly Service Fee</span>
@@ -302,7 +302,7 @@
                     </div>
                     <div class="flex justify-between text-base font-bold border-t border-border pt-3">
                         <span>Total Due</span>
-                        <span class="text-primary text-xl font-extrabold">$@Model.TotalAmount.ToString("N2")</span>
+                        <span class="text-primary text-xl font-extrabold">@Model.TotalAmount.ToString("N2") EGP</span>
                     </div>
                 </div>
             </div>
@@ -366,7 +366,7 @@
                 tabCardBtn.className = "flex items-center gap-3 p-4 rounded-2xl border-2 border-primary bg-primary/5 text-left transition";
                 tabWalletBtn.className = "flex items-center gap-3 p-4 rounded-2xl border border-border bg-card hover:bg-secondary text-left transition";
 
-                submitBtnText.textContent = `Pay $${amount} via Visa / Card`;
+                submitBtnText.textContent = `Pay ${amount} EGP via Visa / Card`;
 
                 // Set required fields
                 document.getElementById('cardNumber').required = true;
@@ -382,7 +382,7 @@
                 tabCardBtn.className = "flex items-center gap-3 p-4 rounded-2xl border border-border bg-card hover:bg-secondary text-left transition";
 
                 const provider = document.getElementById('walletProviderInput').value;
-                submitBtnText.textContent = `Pay $${amount} via ${provider}`;
+                submitBtnText.textContent = `Pay ${amount} EGP via ${provider}`;
 
                 // Set required fields
                 document.getElementById('cardNumber').required = false;
@@ -396,7 +396,7 @@
         function selectWalletProvider(providerName) {
             document.getElementById('walletProviderInput').value = providerName;
             const amount = "@Model.TotalAmount.ToString("N2")";
-            document.getElementById('submitBtnText').textContent = `Pay $${amount} via ${providerName}`;
+            document.getElementById('submitBtnText').textContent = `Pay ${amount} EGP via ${providerName}`;
 
             document.querySelectorAll('.wallet-btn').forEach(btn => {
                 if (btn.getAttribute('data-provider') === providerName) {

@@ -1,4 +1,4 @@
-﻿@*
+@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
@@ -174,7 +174,7 @@
                         </td>
                         <td class="p-4 text-muted-foreground">@listing.HostName</td>
                         <td class="p-4 text-muted-foreground">@listing.Location</td>
-                        <td class="p-4 text-right font-medium">$@listing.Price.ToString("N0")</td>
+                        <td class="p-4 text-right font-medium">@listing.Price.ToString("N0") EGP</td>
                         <td class="p-4 text-muted-foreground">@(listing.SubmittedDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
                         <td class="p-4">
                             <span class="inline-flex items-center rounded-full @statusColor px-2.5 py-0.5 text-xs font-semibold">

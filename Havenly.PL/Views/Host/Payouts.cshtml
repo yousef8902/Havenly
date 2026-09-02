@@ -23,29 +23,29 @@
         <!-- Net Earnings (90%) -->
         <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Net Earnings (90%)</p>
-            <div class="text-3xl font-bold text-foreground mt-2">$@Model.TotalNetEarnings.ToString("N2")</div>
+            <div class="text-3xl font-bold text-foreground mt-2">@Model.TotalNetEarnings.ToString("N2") EGP</div>
             <p class="text-xs text-emerald-600 font-medium mt-1">After 10% Havenly fee</p>
         </div>
 
         <!-- Paid Out -->
         <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Disbursed to Bank</p>
-            <div class="text-3xl font-bold text-emerald-600 mt-2">$@Model.PaidOutEarnings.ToString("N2")</div>
+            <div class="text-3xl font-bold text-emerald-600 mt-2">@Model.PaidOutEarnings.ToString("N2") EGP</div>
             <p class="text-xs text-muted-foreground mt-1">Completed payouts</p>
         </div>
 
         <!-- Pending Payout -->
         <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pending Payout</p>
-            <div class="text-3xl font-bold text-yellow-600 mt-2">$@Model.PendingPayouts.ToString("N2")</div>
+            <div class="text-3xl font-bold text-yellow-600 mt-2">@Model.PendingPayouts.ToString("N2") EGP</div>
             <p class="text-xs text-muted-foreground mt-1">Processing disbursement</p>
         </div>
 
         <!-- Gross Volume -->
         <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <p class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Gross Booking Volume</p>
-            <div class="text-3xl font-bold text-foreground mt-2">$@Model.TotalGrossRevenue.ToString("N2")</div>
-            <p class="text-xs text-muted-foreground mt-1">Platform fee: $@Model.TotalPlatformFee.ToString("N2")</p>
+            <div class="text-3xl font-bold text-foreground mt-2">@Model.TotalGrossRevenue.ToString("N2") EGP</div>
+            <p class="text-xs text-muted-foreground mt-1">Platform fee: @Model.TotalPlatformFee.ToString("N2") EGP</p>
         </div>
     </div>
 
@@ -83,13 +83,13 @@
                                     #@row.BookingId
                                 </td>
                                 <td class="px-6 py-4 text-right font-medium text-foreground">
-                                    $@row.GrossAmount.ToString("N2")
+                                    @row.GrossAmount.ToString("N2") EGP
                                 </td>
                                 <td class="px-6 py-4 text-right text-xs text-muted-foreground">
-                                    -$@row.PlatformFee.ToString("N2")
+                                    -@row.PlatformFee.ToString("N2") EGP
                                 </td>
                                 <td class="px-6 py-4 text-right font-bold text-foreground">
-                                    $@row.HostPayout.ToString("N2")
+                                    @row.HostPayout.ToString("N2") EGP
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     @if (row.IsPaidToHost)

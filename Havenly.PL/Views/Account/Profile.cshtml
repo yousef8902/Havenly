@@ -161,7 +161,7 @@
                                 <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold @(b.Status == "Approved" ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600")">
                                     @b.Status
                                 </span>
-                                <div class="font-bold text-sm mt-1">$@b.TotalPrice.ToString("N0")</div>
+                                <div class="font-bold text-sm mt-1">@b.TotalPrice.ToString("N0") EGP</div>
                             </div>
                         </div>
                     }

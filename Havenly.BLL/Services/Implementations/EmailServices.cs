@@ -157,7 +157,7 @@ namespace Havenly.BLL.Services.Implementations
                         </tr>
                         <tr style=""border-top: 1px solid #e2e8f0;"">
                             <td style=""padding: 10px 0 0 0; color: #065f46; font-weight: 700; font-size: 15px;"">Total Payout:</td>
-                            <td style=""padding: 10px 0 0 0; color: #065f46; font-weight: 800; font-size: 16px; text-align: right;"">${totalPrice:N2}</td>
+                            <td style=""padding: 10px 0 0 0; color: #065f46; font-weight: 800; font-size: 16px; text-align: right;"">{totalPrice:N2} EGP</td>
                         </tr>
                     </table>
                 </div>
@@ -221,7 +221,7 @@ namespace Havenly.BLL.Services.Implementations
                             </tr>
                             <tr style=""border-top: 1px solid #bbf7d0;"">
                                 <td style=""padding: 10px 0 0 0; color: #166534; font-weight: 700; font-size: 15px;"">Total Amount:</td>
-                                <td style=""padding: 10px 0 0 0; color: #166534; font-weight: 800; font-size: 16px; text-align: right;"">${totalPrice:N2}</td>
+                                <td style=""padding: 10px 0 0 0; color: #166534; font-weight: 800; font-size: 16px; text-align: right;"">{totalPrice:N2} EGP</td>
                             </tr>
                         </table>
                     </div>
@@ -291,7 +291,7 @@ namespace Havenly.BLL.Services.Implementations
                         </tr>
                         <tr>
                             <td style=""padding: 6px 0; color: #64748b;"">Price / Night:</td>
-                            <td style=""padding: 6px 0; color: #065f46; font-weight: 700; text-align: right;"">${price:N2}</td>
+                            <td style=""padding: 6px 0; color: #065f46; font-weight: 700; text-align: right;"">{price:N2} EGP</td>
                         </tr>
                     </table>
                 </div>
