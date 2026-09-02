@@ -6,6 +6,8 @@ using Havenly.DAL.Repos.Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.Identity;
+
 namespace Havenly.PL.Controllers
 {
     [Authorize(Roles = UserRoles.Admin)]
@@ -17,6 +19,10 @@ namespace Havenly.PL.Controllers
         private readonly IUserManagementService _userManagementService;
         private readonly IBookingRepository _bookingRepository;
         private readonly IPaymentService _paymentService;
+        private readonly IEmailServices _emailServices;
+        private readonly IListingRepository _listingRepository;
+        private readonly IPropertyRepository _propertyRepository;
+        private readonly UserManager<User> _userManager;
 
         public AdminController(
             IListingServices listingService,
@@ -24,7 +30,11 @@ namespace Havenly.PL.Controllers
             IAdminService adminService,
             IUserManagementService userManagementService,
             IBookingRepository bookingRepository,
-            IPaymentService paymentService)
+            IPaymentService paymentService,
+            IEmailServices emailServices,
+            IListingRepository listingRepository,
+            IPropertyRepository propertyRepository,
+            UserManager<User> userManager)
         {
             _listingService = listingService;
             _reportService = reportService;
@@ -32,6 +42,10 @@ namespace Havenly.PL.Controllers
             _userManagementService = userManagementService;
             _bookingRepository = bookingRepository;
             _paymentService = paymentService;
+            _emailServices = emailServices;
+            _listingRepository = listingRepository;
+            _propertyRepository = propertyRepository;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> DashBoard()
@@ -50,6 +64,31 @@ namespace Havenly.PL.Controllers
         {
             var success = await _listingService.ApproveListing(id);
             TempData["Message"] = success ? "Listing approved successfully." : "Listing not found or could not be approved.";
+
+            if (success)
+            {
+                try
+                {
+                    var listing = await _listingRepository.GetById(id);
+                    var property = listing?.Property ?? (listing != null ? await _propertyRepository.GetById(listing.PropertyID) : null);
+                    var host = property?.Owner ?? (property != null ? await _userManager.FindByIdAsync(property.OwnerUserID) : null);
+
+                    if (host != null && !string.IsNullOrEmpty(host.Email))
+                    {
+                        await _emailServices.SendListingDecisionToHostAsync(
+                            host.Email,
+                            host.Name ?? "Host",
+                            property?.PropertyName ?? "Havenly Stay",
+                            true,
+                            property?.PropertyID ?? 0);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[HOST APPROVE NOTICE ERROR] {ex.Message}");
+                }
+            }
+
             var referer = Request.Headers["Referer"].ToString();
             if (!string.IsNullOrEmpty(referer))
             {
@@ -63,6 +102,31 @@ namespace Havenly.PL.Controllers
         {
             var success = await _listingService.DeclineListing(id);
             TempData["Message"] = success ? "Listing declined." : "Listing not found or could not be declined.";
+
+            if (success)
+            {
+                try
+                {
+                    var listing = await _listingRepository.GetById(id);
+                    var property = listing?.Property ?? (listing != null ? await _propertyRepository.GetById(listing.PropertyID) : null);
+                    var host = property?.Owner ?? (property != null ? await _userManager.FindByIdAsync(property.OwnerUserID) : null);
+
+                    if (host != null && !string.IsNullOrEmpty(host.Email))
+                    {
+                        await _emailServices.SendListingDecisionToHostAsync(
+                            host.Email,
+                            host.Name ?? "Host",
+                            property?.PropertyName ?? "Havenly Stay",
+                            false,
+                            property?.PropertyID ?? 0);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[HOST DECLINE NOTICE ERROR] {ex.Message}");
+                }
+            }
+
             var referer = Request.Headers["Referer"].ToString();
             if (!string.IsNullOrEmpty(referer))
             {

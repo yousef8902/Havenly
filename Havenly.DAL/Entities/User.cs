@@ -17,6 +17,14 @@ public class User : IdentityUser
 
     public UserStatus Status { get; set; }
 
+    [StringLength(300)]
+    public string? ProfilePictureUrl { get; set; }
+
+    [StringLength(1000)]
+    public string? Bio { get; set; }
+
+    public DateTime JoinedDate { get; set; } = DateTime.UtcNow;
+
     // Navigation Properties
 
     [InverseProperty("Owner")]

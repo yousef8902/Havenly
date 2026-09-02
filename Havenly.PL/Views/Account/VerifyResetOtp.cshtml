@@ -1,0 +1,255 @@
+@model Havenly.BLL.ModelVMs.Account.VerifyResetOtpVM
+
+@{
+    ViewData["Title"] = "Verify Reset Code — Havenly";
+}
+
+<div class="container-page py-12">
+    <div class="max-w-md mx-auto">
+        <div class="rounded-3xl border border-border bg-card p-8 shadow-lift space-y-6">
+            <div class="text-center space-y-2">
+                <div class="inline-flex size-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 mb-2">
+                    <svg class="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight">Enter reset code</h1>
+                <p class="text-sm text-muted-foreground">
+                    We've sent a 6-digit password reset code to
+                    <span class="font-semibold text-foreground block mt-0.5">@Model.Email</span>
+                </p>
+            </div>
+
+            <!-- Dynamic Alert Box -->
+            <div id="resetOtpAlert" class="@(ViewData.ModelState.IsValid && TempData["ErrorMessage"] == null ? "hidden" : "") rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm font-medium text-destructive">
+                <ul id="resetOtpErrorList" class="space-y-1 list-disc list-inside">
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <li>@TempData["ErrorMessage"]</li>
+                    }
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    }
+                </ul>
+            </div>
+
+            <!-- Success Box (for Resend OTP) -->
+            <div id="resetOtpSuccessAlert" class="@(TempData["SuccessMessage"] == null ? "hidden" : "") rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm font-medium text-emerald-700">
+                <span id="resetOtpSuccessMsg">@(TempData["SuccessMessage"] ?? "Reset code sent!")</span>
+            </div>
+
+            <form id="verifyResetOtpForm" asp-action="VerifyResetOtp" method="post" class="space-y-6">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Email" id="hiddenResetEmail" />
+                <input type="hidden" asp-for="OtpCode" id="hiddenResetOtpCode" />
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground text-center mb-3">
+                        Enter 6-Digit Code
+                    </label>
+
+                    <!-- 6-Box OTP Input -->
+                    <div class="flex justify-center items-center gap-2 sm:gap-3" id="resetOtpBoxContainer">
+                        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="reset-otp-box size-12 sm:size-13 rounded-xl border-2 border-border bg-background text-center text-xl font-bold focus:border-primary focus:outline-none transition" autofocus />
+                        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="reset-otp-box size-12 sm:size-13 rounded-xl border-2 border-border bg-background text-center text-xl font-bold focus:border-primary focus:outline-none transition" />
+                        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="reset-otp-box size-12 sm:size-13 rounded-xl border-2 border-border bg-background text-center text-xl font-bold focus:border-primary focus:outline-none transition" />
+                        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="reset-otp-box size-12 sm:size-13 rounded-xl border-2 border-border bg-background text-center text-xl font-bold focus:border-primary focus:outline-none transition" />
+                        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="reset-otp-box size-12 sm:size-13 rounded-xl border-2 border-border bg-background text-center text-xl font-bold focus:border-primary focus:outline-none transition" />
+                        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="reset-otp-box size-12 sm:size-13 rounded-xl border-2 border-border bg-background text-center text-xl font-bold focus:border-primary focus:outline-none transition" />
+                    </div>
+                </div>
+
+                <button type="submit" id="verifyResetSubmitBtn" class="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition flex items-center justify-center gap-2">
+                    <span id="verifyResetBtnText">Verify Code</span>
+                    <svg id="verifyResetSpinner" class="hidden animate-spin size-4 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Spam / Junk Folder Tip -->
+            <div class="rounded-2xl border border-border/80 bg-secondary/40 p-3.5 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+                <svg class="size-4 shrink-0 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Can't find the email in your inbox? Please check your <strong>Spam</strong>, <strong>Junk</strong>, or <strong>Promotions</strong> folder.</span>
+            </div>
+
+            <div class="border-t border-border pt-4 text-center space-y-3">
+                <div class="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+                    <span>Didn't receive the code?</span>
+                    <button type="button" id="resendResetOtpBtn" onclick="handleResendResetOtp()" class="font-semibold text-primary hover:underline focus:outline-none">
+                        Resend code
+                    </button>
+                </div>
+
+                <div>
+                    <a asp-action="ForgotPassword" class="text-xs text-muted-foreground hover:text-foreground underline">
+                        Entered the wrong email? Use another address
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const resetBoxes = document.querySelectorAll('.reset-otp-box');
+        const hiddenResetOtp = document.getElementById('hiddenResetOtpCode');
+        const verifyResetForm = document.getElementById('verifyResetOtpForm');
+        const alertBox = document.getElementById('resetOtpAlert');
+        const errorList = document.getElementById('resetOtpErrorList');
+        const successBox = document.getElementById('resetOtpSuccessAlert');
+        const successMsg = document.getElementById('resetOtpSuccessMsg');
+        const submitBtn = document.getElementById('verifyResetSubmitBtn');
+        const btnText = document.getElementById('verifyResetBtnText');
+        const spinner = document.getElementById('verifyResetSpinner');
+        const resendBtn = document.getElementById('resendResetOtpBtn');
+
+        resetBoxes.forEach((box, index) => {
+            box.addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (!/^[0-9]$/.test(val)) {
+                    e.target.value = '';
+                    return;
+                }
+                if (val && index < resetBoxes.length - 1) {
+                    resetBoxes[index + 1].focus();
+                }
+                syncResetOtp();
+            });
+
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !box.value && index > 0) {
+                    resetBoxes[index - 1].focus();
+                }
+            });
+
+            box.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = (e.clipboardData || window.clipboardData).getData('text').trim();
+                if (/^[0-9]{6}$/.test(pasteData)) {
+                    pasteData.split('').forEach((char, i) => {
+                        if (resetBoxes[i]) resetBoxes[i].value = char;
+                    });
+                    resetBoxes[resetBoxes.length - 1].focus();
+                    syncResetOtp();
+                }
+            });
+        });
+
+        function syncResetOtp() {
+            let code = '';
+            resetBoxes.forEach(b => code += b.value);
+            hiddenResetOtp.value = code;
+        }
+
+        verifyResetForm?.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            syncResetOtp();
+
+            if (hiddenResetOtp.value.length !== 6) {
+                alertBox.classList.remove('hidden');
+                errorList.innerHTML = '<li>Please enter all 6 digits of the reset code.</li>';
+                return;
+            }
+
+            alertBox.classList.add('hidden');
+            successBox.classList.add('hidden');
+            submitBtn.disabled = true;
+            btnText.textContent = 'Verifying...';
+            spinner.classList.remove('hidden');
+
+            try {
+                const formData = new FormData(verifyResetForm);
+                const response = await fetch(verifyResetForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    btnText.textContent = 'Verified!';
+                    window.location.href = data.redirectUrl || '/Account/Login';
+                } else {
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'Verify Code';
+                    spinner.classList.add('hidden');
+
+                    const errors = data.errors || [data.message || 'Verification failed.'];
+                    errorList.innerHTML = errors.map(err => `<li>${err}</li>`).join('');
+                    alertBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                verifyResetForm.submit();
+            }
+        });
+
+        let countdownInterval;
+        async function handleResendResetOtp() {
+            const email = document.getElementById('hiddenResetEmail').value;
+            if (!email) return;
+
+            resendBtn.disabled = true;
+            resendBtn.classList.add('opacity-50', 'pointer-events-none');
+
+            try {
+                const formData = new FormData();
+                formData.append('email', email);
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                if (token) formData.append('__RequestVerificationToken', token);
+
+                const response = await fetch('/Account/ResendResetOtp', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    successMsg.textContent = data.message || 'A new reset code has been sent to your email!';
+                    successBox.classList.remove('hidden');
+                    alertBox.classList.add('hidden');
+
+                    let seconds = 45;
+                    resendBtn.textContent = `Resend in ${seconds}s`;
+                    countdownInterval = setInterval(() => {
+                        seconds--;
+                        if (seconds <= 0) {
+                            clearInterval(countdownInterval);
+                            resendBtn.disabled = false;
+                            resendBtn.classList.remove('opacity-50', 'pointer-events-none');
+                            resendBtn.textContent = 'Resend code';
+                        } else {
+                            resendBtn.textContent = `Resend in ${seconds}s`;
+                        }
+                    }, 1000);
+                } else {
+                    resendBtn.disabled = false;
+                    resendBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    alertBox.classList.remove('hidden');
+                    errorList.innerHTML = `<li>${data.message || 'Could not resend code.'}</li>`;
+                }
+            } catch (err) {
+                resendBtn.disabled = false;
+                resendBtn.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        }
+    </script>
+}

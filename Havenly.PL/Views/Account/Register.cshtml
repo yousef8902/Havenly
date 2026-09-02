@@ -17,56 +17,77 @@
                 <p class="text-sm text-muted-foreground">Join Havenly to explore or host unique places</p>
             </div>
 
-            @if (!ViewData.ModelState.IsValid)
-            {
-                <div class="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm font-medium text-destructive">
-                    <ul class="space-y-1 list-disc list-inside">
+            <!-- Dynamic AJAX Error / Alert Container -->
+            <div id="registerAlert" class="@(ViewData.ModelState.IsValid ? "hidden" : "") rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm font-medium text-destructive">
+                <ul id="registerErrorList" class="space-y-1 list-disc list-inside">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
                         @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
                         {
                             <li>@error.ErrorMessage</li>
                         }
-                    </ul>
-                </div>
-            }
+                    }
+                </ul>
+            </div>
 
-            <form asp-action="Register" method="post" class="space-y-4">
+            <form id="registerForm" asp-action="Register" method="post" class="space-y-4">
                 @Html.AntiForgeryToken()
 
                 <div>
                     <label asp-for="Name" class="block text-sm font-semibold mb-1.5"></label>
-                    <input asp-for="Name" placeholder="Your full name" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <input asp-for="Name" id="registerName" placeholder="Your full name" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
                     <span asp-validation-for="Name" class="text-xs text-destructive mt-1 block"></span>
                 </div>
 
                 <div>
                     <label asp-for="Email" class="block text-sm font-semibold mb-1.5"></label>
-                    <input asp-for="Email" type="email" placeholder="name@example.com" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <input asp-for="Email" id="registerEmail" type="email" placeholder="name@example.com" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
                     <span asp-validation-for="Email" class="text-xs text-destructive mt-1 block"></span>
                 </div>
 
                 <div>
                     <label asp-for="Password" class="block text-sm font-semibold mb-1.5"></label>
-                    <input asp-for="Password" type="password" placeholder="••••••••" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <div class="relative">
+                        <input asp-for="Password" id="registerPassword" type="password" placeholder="••••••••" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 pr-11 text-sm focus:border-primary focus:outline-none" />
+                        <button type="button" onclick="togglePasswordVisibility('registerPassword', this)" aria-label="Toggle password visibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 focus:outline-none transition">
+                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </button>
+                    </div>
                     <span asp-validation-for="Password" class="text-xs text-destructive mt-1 block"></span>
                 </div>
 
                 <div>
                     <label asp-for="ConfirmPassword" class="block text-sm font-semibold mb-1.5"></label>
-                    <input asp-for="ConfirmPassword" type="password" placeholder="••••••••" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <div class="relative">
+                        <input asp-for="ConfirmPassword" id="registerConfirmPassword" type="password" placeholder="••••••••" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 pr-11 text-sm focus:border-primary focus:outline-none" />
+                        <button type="button" onclick="togglePasswordVisibility('registerConfirmPassword', this)" aria-label="Toggle confirm password visibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 focus:outline-none transition">
+                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </button>
+                    </div>
                     <span asp-validation-for="ConfirmPassword" class="text-xs text-destructive mt-1 block"></span>
                 </div>
 
                 <div>
                     <label asp-for="Role" class="block text-sm font-semibold mb-1.5">I want to</label>
-                    <select asp-for="Role" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none">
+                    <select asp-for="Role" id="registerRole" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none">
                         <option value="Guest">Explore and book stays (Guest)</option>
                         <option value="Host">List and manage my properties (Host)</option>
                     </select>
                     <span asp-validation-for="Role" class="text-xs text-destructive mt-1 block"></span>
                 </div>
 
-                <button type="submit" class="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition">
-                    Create account
+                <button type="submit" id="registerSubmitBtn" class="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition flex items-center justify-center gap-2">
+                    <span id="registerBtnText">Create account</span>
+                    <svg id="registerSpinner" class="hidden animate-spin size-4 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
                 </button>
             </form>
 
@@ -80,4 +101,68 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+
+            btn.innerHTML = isPassword
+                ? `<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/>
+                   </svg>`
+                : `<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                   </svg>`;
+        }
+
+        document.getElementById('registerForm')?.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const form = this;
+            const alertBox = document.getElementById('registerAlert');
+            const errorList = document.getElementById('registerErrorList');
+            const submitBtn = document.getElementById('registerSubmitBtn');
+            const btnText = document.getElementById('registerBtnText');
+            const spinner = document.getElementById('registerSpinner');
+
+            // Hide alert and reset UI state
+            alertBox.classList.add('hidden');
+            errorList.innerHTML = '';
+            submitBtn.disabled = true;
+            btnText.textContent = 'Creating account...';
+            spinner.classList.remove('hidden');
+
+            try {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    btnText.textContent = 'Success!';
+                    window.location.href = data.redirectUrl || '/';
+                } else {
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'Create account';
+                    spinner.classList.add('hidden');
+
+                    const errors = data.errors || [data.message || 'Registration failed.'];
+                    errorList.innerHTML = errors.map(err => `<li>${err}</li>`).join('');
+                    alertBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                form.submit();
+            }
+        });
+    </script>
 }

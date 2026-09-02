@@ -32,7 +32,10 @@ namespace Havenly.BLL.ModelVMs
 
     public class HostVM
     {
+        public string HostId { get; set; } = "";
         public string Name { get; set; } = "";
+        public string AvatarUrl { get; set; } = "";
+        public string Bio { get; set; } = "";
         public string Since { get; set; } = "";
         public bool Superhost { get; set; }
         public int ResponseRate { get; set; }

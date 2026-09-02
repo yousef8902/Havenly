@@ -19,7 +19,7 @@ namespace Havenly.DAL.Database.Seed
             // Seed roles first so they are available when creating users
             await SeedRolesAsync(roleManager);
 
-            // Ensure Category column exists in SQL Server if migration hasn't run yet
+            // Ensure Category column and User Profile columns exist in SQL Server
             try
             {
                 await context.Database.ExecuteSqlRawAsync(
@@ -29,6 +29,30 @@ namespace Havenly.DAL.Database.Seed
                     )
                     BEGIN
                         ALTER TABLE Properties ADD Category NVARCHAR(100) NULL DEFAULT 'Design homes';
+                    END
+                    
+                    IF NOT EXISTS (
+                        SELECT 1 FROM sys.columns 
+                        WHERE object_id = OBJECT_ID('AspNetUsers') AND name = 'ProfilePictureUrl'
+                    )
+                    BEGIN
+                        ALTER TABLE AspNetUsers ADD ProfilePictureUrl NVARCHAR(300) NULL;
+                    END
+
+                    IF NOT EXISTS (
+                        SELECT 1 FROM sys.columns 
+                        WHERE object_id = OBJECT_ID('AspNetUsers') AND name = 'Bio'
+                    )
+                    BEGIN
+                        ALTER TABLE AspNetUsers ADD Bio NVARCHAR(1000) NULL;
+                    END
+
+                    IF NOT EXISTS (
+                        SELECT 1 FROM sys.columns 
+                        WHERE object_id = OBJECT_ID('AspNetUsers') AND name = 'JoinedDate'
+                    )
+                    BEGIN
+                        ALTER TABLE AspNetUsers ADD JoinedDate DATETIME2 NOT NULL DEFAULT GETUTCDATE();
                     END"
                 );
             }
@@ -94,14 +118,14 @@ namespace Havenly.DAL.Database.Seed
         {
             var addresses = new List<Address>
             {
-                new Address { City = "Paros", Country = "Greece", Street = "Naoussa Bay", Latitude = 37.085000m, Longitude = 25.131000m },
-                new Address { City = "Copenhagen", Country = "Denmark", Street = "Nyhavn", Latitude = 55.676100m, Longitude = 12.568300m },
-                new Address { City = "Val d'Orcia", Country = "Italy", Street = "Pienza", Latitude = 43.066700m, Longitude = 11.633300m },
-                new Address { City = "Åre", Country = "Sweden", Street = "Björnänge", Latitude = 63.398000m, Longitude = 13.096000m },
-                new Address { City = "Comporta", Country = "Portugal", Street = "Carvalhal", Latitude = 38.354700m, Longitude = -8.771700m },
-                new Address { City = "Lisbon", Country = "Portugal", Street = "Príncipe Real", Latitude = 38.722300m, Longitude = -9.139300m },
-                new Address { City = "Cotswolds", Country = "United Kingdom", Street = "Stow-on-the-Wold", Latitude = 51.871900m, Longitude = -1.783200m },
-                new Address { City = "Menorca", Country = "Spain", Street = "Binibeca", Latitude = 39.954900m, Longitude = 4.123100m }
+                new Address { City = "El Gouna", Country = "Egypt", Street = "Tawila Island Lagoon, El Gouna", Latitude = 27.3949m, Longitude = 33.6766m },
+                new Address { City = "Dahab", Country = "Egypt", Street = "Lighthouse Reef Bay, Dahab", Latitude = 28.5095m, Longitude = 34.5137m },
+                new Address { City = "Cairo", Country = "Egypt", Street = "Abou El Feda St, Zamalek", Latitude = 30.0626m, Longitude = 31.2197m },
+                new Address { City = "Siwa Oasis", Country = "Egypt", Street = "Aghurmi Salt Lake Valley, Siwa", Latitude = 29.2032m, Longitude = 25.5195m },
+                new Address { City = "North Coast (Sahel)", Country = "Egypt", Street = "Sidi Abdel Rahman Bay, Sahel", Latitude = 30.9575m, Longitude = 28.7180m },
+                new Address { City = "Fayoum", Country = "Egypt", Street = "Tunis Pottery Village, Lake Qarun", Latitude = 29.4140m, Longitude = 30.4900m },
+                new Address { City = "Luxor", Country = "Egypt", Street = "Al-Gharbi Nile West Bank, Luxor", Latitude = 25.7202m, Longitude = 32.6105m },
+                new Address { City = "Aswan", Country = "Egypt", Street = "Elephantine Island, Aswan", Latitude = 24.0889m, Longitude = 32.8998m }
             };
 
             await context.Addresses.AddRangeAsync(addresses);
@@ -168,111 +192,112 @@ namespace Havenly.DAL.Database.Seed
             var users = await context.Users.ToListAsync();
             var userMap = users.ToDictionary(u => u.Name, u => u.Id);
             var addresses = await context.Addresses.ToListAsync();
+            var hostId = userMap.ContainsKey("Test Host") ? userMap["Test Host"] : userMap.Values.First();
 
             var properties = new List<Property>
             {
                 new Property
                 {
-                    PropertyName = "Olive Ridge — Cliffside Villa with Infinity Pool",
-                    Description = "Perched above the Aegean with uninterrupted western views, Olive Ridge is built from local cycladic stone and pale timber.",
-                    Category = "Islands",
-                    NumberOfGuests = 6,
-                    Capacity = 6,
-                    BathroomCount = 3,
-                    Rating = 4.97,
-                    NumberOfReviews = 38,
-                    OwnerUserID = userMap["Elena Marinos"],
-                    AddressID = addresses[0].AddressID
-                },
-                new Property
-                {
-                    PropertyName = "North Loft — Bright Oak Apartment in the Old Town",
-                    Description = "A quiet, light-filled penthouse in a converted 19th-century warehouse near the harbour.",
-                    Category = "City lofts",
-                    NumberOfGuests = 2,
-                    Capacity = 2,
-                    BathroomCount = 1,
-                    Rating = 4.60,
-                    NumberOfReviews = 64,
-                    OwnerUserID = userMap["Mikkel Sørensen"],
-                    AddressID = addresses[1].AddressID
-                },
-                new Property
-                {
-                    PropertyName = "Casa Fiora — Restored Stone Farmhouse",
-                    Description = "Surrounded by olive groves and rows of cypress, Casa Fiora dates from the late 1700s.",
-                    Category = "Countryside",
-                    NumberOfGuests = 8,
-                    Capacity = 8,
-                    BathroomCount = 4,
-                    Rating = 4.95,
-                    NumberOfReviews = 51,
-                    OwnerUserID = userMap["Giulia Ferrari"],
-                    AddressID = addresses[2].AddressID
-                },
-                new Property
-                {
-                    PropertyName = "Pine Hollow — Glass Cabin in the Forest",
-                    Description = "Set in private woodland minutes from the ski slopes and summer hiking trails of Åre.",
-                    Category = "Cabins",
-                    NumberOfGuests = 4,
-                    Capacity = 4,
-                    BathroomCount = 2,
-                    Rating = 4.20,
-                    NumberOfReviews = 27,
-                    OwnerUserID = userMap["Test Host"],
-                    AddressID = addresses[3].AddressID
-                },
-                new Property
-                {
-                    PropertyName = "Salt House — Beachfront Home with Open Terrace",
-                    Description = "A low-slung, whitewashed home set behind the dunes of Praia do Pego.",
+                    PropertyName = "Villa Turquoise — Lagoon Beachfront Villa with Private Jetty",
+                    Description = "Nestled along the crystal-clear lagoons of El Gouna, this open-concept architectural villa features a private heated infinity pool, private lagoon beach access, and spacious sun decks.",
                     Category = "Beachfront",
                     NumberOfGuests = 6,
                     Capacity = 6,
                     BathroomCount = 3,
-                    Rating = 4.80,
-                    NumberOfReviews = 43,
-                    OwnerUserID = userMap["Rui Almeida"],
-                    AddressID = addresses[4].AddressID
+                    Rating = 4.97,
+                    NumberOfReviews = 54,
+                    OwnerUserID = hostId,
+                    AddressID = addresses[0].AddressID
                 },
                 new Property
                 {
-                    PropertyName = "Skyline Nine — Penthouse Terrace above the River",
-                    Description = "High above the Tagus, Skyline Nine combines mid-century Portuguese pieces with contemporary finishes.",
-                    Category = "Design homes",
-                    NumberOfGuests = 2,
-                    Capacity = 2,
-                    BathroomCount = 2,
-                    Rating = 4.70,
-                    NumberOfReviews = 19,
-                    OwnerUserID = userMap["Rui Almeida"],
-                    AddressID = addresses[5].AddressID
-                },
-                new Property
-                {
-                    PropertyName = "Barn Eleven — Converted Hay Barn with Beams",
-                    Description = "A 200-year-old stone barn restored with honeyed Cotswold stone and polished concrete floors.",
-                    Category = "Countryside",
-                    NumberOfGuests = 4,
-                    Capacity = 4,
-                    BathroomCount = 2,
-                    Rating = 4.40,
-                    NumberOfReviews = 32,
-                    OwnerUserID = userMap["Test Host"],
-                    AddressID = addresses[6].AddressID
-                },
-                new Property
-                {
-                    PropertyName = "Cala Blanca — Village House with Blue Shutters",
-                    Description = "Steps from the whitewashed alleys of Binibeca Vell, Cala Blanca is a calm, lime-plastered retreat.",
+                    PropertyName = "Blue Coral Sanctuary — Boho Beach House by the Reef",
+                    Description = "Right on the shores of the Gulf of Aqaba in Dahab, enjoy bohemian interiors with natural palm-leaf ceilings, direct reef snorkeling steps from your patio, and Sinai mountain sunset views.",
                     Category = "Islands",
                     NumberOfGuests = 4,
                     Capacity = 4,
                     BathroomCount = 2,
-                    Rating = 3.85,
-                    NumberOfReviews = 15,
-                    OwnerUserID = userMap["Elena Marinos"],
+                    Rating = 4.88,
+                    NumberOfReviews = 42,
+                    OwnerUserID = hostId,
+                    AddressID = addresses[1].AddressID
+                },
+                new Property
+                {
+                    PropertyName = "The Nile View Loft — Modern Art Deco Penthouse in Zamalek",
+                    Description = "Perched high above leafy Zamalek with sweeping panoramic vistas of the River Nile and Cairo skyline. Designed with heritage parquet floors, contemporary art, and a wrap-around sunset balcony.",
+                    Category = "City lofts",
+                    NumberOfGuests = 3,
+                    Capacity = 3,
+                    BathroomCount = 2,
+                    Rating = 4.92,
+                    NumberOfReviews = 68,
+                    OwnerUserID = hostId,
+                    AddressID = addresses[2].AddressID
+                },
+                new Property
+                {
+                    PropertyName = "Salt Lake Eco-Lodge — Kershef Adobe Chalet in Date Palms",
+                    Description = "Constructed entirely from authentic Siwan Kershef (salt rock and clay) amidst tranquil olive and date palm groves. Features private natural spring plunge pool and starry desert night skies.",
+                    Category = "Cabins",
+                    NumberOfGuests = 4,
+                    Capacity = 4,
+                    BathroomCount = 2,
+                    Rating = 4.95,
+                    NumberOfReviews = 31,
+                    OwnerUserID = hostId,
+                    AddressID = addresses[3].AddressID
+                },
+                new Property
+                {
+                    PropertyName = "The White Sands Manor — Mediterranean Beachfront Haven",
+                    Description = "Overlooking the crystal-clear turquoise waters and white sandy beaches of the North Coast (Sahel). Minimalist Mediterranean lines, expansive outdoor terrace, and private beach cabana.",
+                    Category = "Beachfront",
+                    NumberOfGuests = 8,
+                    Capacity = 8,
+                    BathroomCount = 4,
+                    Rating = 4.98,
+                    NumberOfReviews = 43,
+                    OwnerUserID = hostId,
+                    AddressID = addresses[4].AddressID
+                },
+                new Property
+                {
+                    PropertyName = "Dar El Qamar — Artistic Country Farmhouse near Lake Qarun",
+                    Description = "Located in the famous potters' village of Tunis in Fayoum. Built with dome architecture, limestone walls, lush private gardens, and rooftop views overlooking Lake Qarun and desert dunes.",
+                    Category = "Countryside",
+                    NumberOfGuests = 4,
+                    Capacity = 4,
+                    BathroomCount = 2,
+                    Rating = 4.75,
+                    NumberOfReviews = 29,
+                    OwnerUserID = hostId,
+                    AddressID = addresses[5].AddressID
+                },
+                new Property
+                {
+                    PropertyName = "Al-Qurna Heritage Palace — West Bank Villa with Ancient Views",
+                    Description = "Nestled on the tranquil West Bank of Luxor facing the Theban hills and Valley of the Nobles. Traditional Egyptian courtyard, hand-carved stone arches, and rooftop stargazing over the Nile.",
+                    Category = "Design homes",
+                    NumberOfGuests = 4,
+                    Capacity = 4,
+                    BathroomCount = 2,
+                    Rating = 4.91,
+                    NumberOfReviews = 36,
+                    OwnerUserID = hostId,
+                    AddressID = addresses[6].AddressID
+                },
+                new Property
+                {
+                    PropertyName = "Nubian Sun Villa — Colorful Island Retreat on the Nile",
+                    Description = "Immerse yourself in authentic Nubian warmth and vibrant color palettes on the banks of the First Cataract in Aswan. Traditional vaulted ceilings, breezy terrace, and private felucca landing.",
+                    Category = "Islands",
+                    NumberOfGuests = 5,
+                    Capacity = 5,
+                    BathroomCount = 2,
+                    Rating = 4.89,
+                    NumberOfReviews = 48,
+                    OwnerUserID = hostId,
                     AddressID = addresses[7].AddressID
                 }
             };
@@ -286,14 +311,14 @@ namespace Havenly.DAL.Database.Seed
             var properties = await context.Properties.ToListAsync();
             var metaMap = new Dictionary<string, (double Rating, string Category)>
             {
-                { "Olive Ridge — Cliffside Villa with Infinity Pool", (4.97, "Islands") },
-                { "North Loft — Bright Oak Apartment in the Old Town", (4.60, "City lofts") },
-                { "Casa Fiora — Restored Stone Farmhouse", (4.95, "Countryside") },
-                { "Pine Hollow — Glass Cabin in the Forest", (4.20, "Cabins") },
-                { "Salt House — Beachfront Home with Open Terrace", (4.80, "Beachfront") },
-                { "Skyline Nine — Penthouse Terrace above the River", (4.70, "Design homes") },
-                { "Barn Eleven — Converted Hay Barn with Beams", (4.40, "Countryside") },
-                { "Cala Blanca — Village House with Blue Shutters", (3.85, "Islands") }
+                { "Villa Turquoise — Lagoon Beachfront Villa with Private Jetty", (4.97, "Beachfront") },
+                { "Blue Coral Sanctuary — Boho Beach House by the Reef", (4.88, "Islands") },
+                { "The Nile View Loft — Modern Art Deco Penthouse in Zamalek", (4.92, "City lofts") },
+                { "Salt Lake Eco-Lodge — Kershef Adobe Chalet in Date Palms", (4.95, "Cabins") },
+                { "The White Sands Manor — Mediterranean Beachfront Haven", (4.98, "Beachfront") },
+                { "Dar El Qamar — Artistic Country Farmhouse near Lake Qarun", (4.75, "Countryside") },
+                { "Al-Qurna Heritage Palace — West Bank Villa with Ancient Views", (4.91, "Design homes") },
+                { "Nubian Sun Villa — Colorful Island Retreat on the Nile", (4.89, "Islands") }
             };
 
             bool changed = false;

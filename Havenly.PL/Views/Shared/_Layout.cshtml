@@ -11,7 +11,11 @@
    
     @* <link rel="stylesheet" href="~/css/source.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/ui.css" asp-append-version="true" /> *@
-    <link rel="icon" href="~/favicon.ico" type="image/x-icon" />
+    <link rel="icon" type="image/svg+xml" href="~/favicon.svg" asp-append-version="true" />
+    <link rel="icon" type="image/png" sizes="32x32" href="~/favicon-32x32.png" asp-append-version="true" />
+    <link rel="icon" type="image/png" sizes="16x16" href="~/favicon-16x16.png" asp-append-version="true" />
+    <link rel="apple-touch-icon" sizes="180x180" href="~/apple-touch-icon.png" asp-append-version="true" />
+    <link rel="shortcut icon" href="~/favicon.ico" asp-append-version="true" />
     <!-- Google Font: DM Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -145,6 +149,7 @@
         <partial name="_MobileTabBar" />
     </div>
     <partial name="_Toasts" />
+    <partial name="_ProfileModal" />
     <!-- Chatbot Widget -->
     <partial name="_ChatWidgetPartial" />
     <script src="~/js/site.js" asp-append-version="true"></script>

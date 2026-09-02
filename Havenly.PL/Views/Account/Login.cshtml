@@ -17,42 +17,56 @@
                 <p class="text-sm text-muted-foreground">Sign in to your Havenly account to continue</p>
             </div>
 
-            @if (!ViewData.ModelState.IsValid)
-            {
-                <div class="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm font-medium text-destructive">
-                    <ul class="space-y-1 list-disc list-inside">
+            <!-- Dynamic AJAX Error / Alert Container -->
+            <div id="loginAlert" class="@(ViewData.ModelState.IsValid ? "hidden" : "") rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm font-medium text-destructive">
+                <ul id="loginErrorList" class="space-y-1 list-disc list-inside">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
                         @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
                         {
                             <li>@error.ErrorMessage</li>
                         }
-                    </ul>
-                </div>
-            }
+                    }
+                </ul>
+            </div>
 
-            <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="space-y-4">
+            <form id="loginForm" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="space-y-4">
                 @Html.AntiForgeryToken()
 
                 <div>
                     <label asp-for="Email" class="block text-sm font-semibold mb-1.5"></label>
-                    <input asp-for="Email" type="email" placeholder="name@example.com" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <input asp-for="Email" id="loginEmail" type="email" placeholder="name@example.com" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
                     <span asp-validation-for="Email" class="text-xs text-destructive mt-1 block"></span>
                 </div>
 
                 <div>
                     <label asp-for="Password" class="block text-sm font-semibold mb-1.5"></label>
-                    <input asp-for="Password" type="password" placeholder="••••••••" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none" />
+                    <div class="relative">
+                        <input asp-for="Password" id="loginPassword" type="password" placeholder="••••••••" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 pr-11 text-sm focus:border-primary focus:outline-none" />
+                        <button type="button" onclick="togglePasswordVisibility('loginPassword', this)" aria-label="Toggle password visibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 focus:outline-none transition">
+                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                        </button>
+                    </div>
                     <span asp-validation-for="Password" class="text-xs text-destructive mt-1 block"></span>
                 </div>
 
                 <div class="flex items-center justify-between">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input asp-for="RememberMe" type="checkbox" class="rounded border-border text-primary focus:ring-primary size-4" />
+                        <input asp-for="RememberMe" id="loginRememberMe" type="checkbox" class="rounded border-border text-primary focus:ring-primary size-4" />
                         <span class="text-sm font-medium text-muted-foreground">Remember me</span>
                     </label>
+                    <a href="javascript:void(0)" id="forgotPasswordBtn" onclick="handleForgotPasswordDirect(event)" class="text-sm font-semibold text-primary hover:underline">Forgot password?</a>
                 </div>
 
-                <button type="submit" class="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition">
-                    Log in
+                <button type="submit" id="loginSubmitBtn" class="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition flex items-center justify-center gap-2">
+                    <span id="loginBtnText">Log in</span>
+                    <svg id="loginSpinner" class="hidden animate-spin size-4 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
                 </button>
             </form>
 
@@ -84,4 +98,137 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+
+            btn.innerHTML = isPassword
+                ? `<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/>
+                   </svg>`
+                : `<svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                   </svg>`;
+        }
+
+        document.getElementById('loginForm')?.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const form = this;
+            const alertBox = document.getElementById('loginAlert');
+            const errorList = document.getElementById('loginErrorList');
+            const submitBtn = document.getElementById('loginSubmitBtn');
+            const btnText = document.getElementById('loginBtnText');
+            const spinner = document.getElementById('loginSpinner');
+
+            // Hide alert and reset UI
+            alertBox.classList.add('hidden');
+            errorList.innerHTML = '';
+            submitBtn.disabled = true;
+            btnText.textContent = 'Signing in...';
+            spinner.classList.remove('hidden');
+
+            try {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    btnText.textContent = 'Success!';
+                    window.location.href = data.redirectUrl || '/';
+                } else {
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'Log in';
+                    spinner.classList.add('hidden');
+
+                    const errors = data.errors || [data.message || 'Invalid email or password.'];
+                    errorList.innerHTML = errors.map(err => `<li>${err}</li>`).join('');
+                    alertBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                form.submit();
+            }
+        });
+
+        async function handleForgotPasswordDirect(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('loginEmail');
+            const email = emailInput ? emailInput.value.trim() : '';
+            const alertBox = document.getElementById('loginAlert');
+            const errorList = document.getElementById('loginErrorList');
+            const forgotBtn = document.getElementById('forgotPasswordBtn');
+
+            if (!email) {
+                alertBox.classList.remove('hidden');
+                errorList.innerHTML = '<li>Please enter your email in the field above first, then click "Forgot password?".</li>';
+                emailInput?.focus();
+                return;
+            }
+
+            const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+            if (!emailRegex.test(email)) {
+                alertBox.classList.remove('hidden');
+                errorList.innerHTML = '<li>Please enter a valid email address.</li>';
+                emailInput?.focus();
+                return;
+            }
+
+            const originalHtml = forgotBtn.innerHTML;
+            forgotBtn.innerHTML = `
+                <span class="inline-flex items-center gap-1.5 text-primary font-medium">
+                    <svg class="size-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    Sending code...
+                </span>`;
+            forgotBtn.classList.add('pointer-events-none');
+            alertBox.classList.add('hidden');
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                const formData = new FormData();
+                formData.append('Email', email);
+                if (token) formData.append('__RequestVerificationToken', token);
+
+                const response = await fetch('/Account/ForgotPassword', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    forgotBtn.innerHTML = 'Code Sent!';
+                    window.location.href = data.redirectUrl || `/Account/VerifyResetOtp?email=${encodeURIComponent(email)}`;
+                } else {
+                    forgotBtn.innerHTML = originalHtml;
+                    forgotBtn.classList.remove('pointer-events-none');
+                    alertBox.classList.remove('hidden');
+                    const errors = data.errors || [data.message || 'No account found with this email address.'];
+                    errorList.innerHTML = errors.map(err => `<li>${err}</li>`).join('');
+                }
+            } catch (err) {
+                forgotBtn.innerHTML = originalHtml;
+                forgotBtn.classList.remove('pointer-events-none');
+                window.location.href = `/Account/ForgotPassword?email=${encodeURIComponent(email)}`;
+            }
+        }
+    </script>
 }

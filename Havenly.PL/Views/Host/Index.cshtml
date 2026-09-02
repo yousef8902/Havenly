@@ -92,8 +92,22 @@
                     {
                         <tr class="hover:bg-secondary/30">
                             <td class="px-6 py-4">
-                                <div class="font-medium">@(b.Guest?.Name ?? "Guest")</div>
-                                <div class="text-xs text-muted-foreground">@(b.Guest?.Email ?? "")</div>
+                                <div class="flex items-center gap-3 cursor-pointer group" onclick="openProfileModal('@b.GuestUserID')">
+                                    <div class="size-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-primary/20 flex-shrink-0 overflow-hidden group-hover:scale-105 transition">
+                                        @if (!string.IsNullOrEmpty(b.Guest?.ProfilePictureUrl))
+                                        {
+                                            <img src="@b.Guest.ProfilePictureUrl" alt="@(b.Guest?.Name ?? "Guest")" class="size-full object-cover" />
+                                        }
+                                        else
+                                        {
+                                            <span>@(string.IsNullOrWhiteSpace(b.Guest?.Name) ? "G" : b.Guest.Name[0].ToString().ToUpper())</span>
+                                        }
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-foreground group-hover:text-primary transition">@(b.Guest?.Name ?? "Guest")</div>
+                                        <div class="text-xs text-muted-foreground">@(b.Guest?.Email ?? "")</div>
+                                    </div>
+                                </div>
                             </td>
                             <td class="px-6 py-4 text-sm font-medium">
                                 @(b.Listing?.Property?.PropertyName ?? $"Listing #{b.ListingID}")

@@ -14,13 +14,16 @@ namespace Havenly.BLL.Services.Implementations
     {
         private readonly IPaymentRepository _paymentRepo;
         private readonly IBookingRepository _bookingRepo;
+        private readonly IEmailServices _emailServices;
 
         public PaymentService(
             IPaymentRepository paymentRepo,
-            IBookingRepository bookingRepo)
+            IBookingRepository bookingRepo,
+            IEmailServices emailServices)
         {
             _paymentRepo = paymentRepo;
             _bookingRepo = bookingRepo;
+            _emailServices = emailServices;
         }
 
         public async Task<Payment> CreateOrGetPendingPaymentAsync(long bookingId)
@@ -46,6 +49,7 @@ namespace Havenly.BLL.Services.Implementations
             );
 
             await _paymentRepo.Add(payment);
+            await _paymentRepo.SaveChanges();
             return payment;
         }
 
@@ -58,13 +62,40 @@ namespace Havenly.BLL.Services.Implementations
             _paymentRepo.Update(payment);
             await _paymentRepo.SaveChanges();
 
-            // Update Booking status to Approved
+            // Keep Booking status as Pending so Host must review and Approve/Decline
             var booking = await _bookingRepo.GetById(payment.BookingID);
             if (booking != null)
             {
-                booking.UpdateStatus(BookingStatus.Approved);
+                booking.UpdateStatus(BookingStatus.Pending);
                 _bookingRepo.Update(booking);
                 await _bookingRepo.SaveChanges();
+
+                // Send email notification to Host about the new booking request
+                try
+                {
+                    var host = booking.Listing?.Property?.Owner;
+                    var guest = booking.Guest;
+                    var propertyName = booking.Listing?.Property?.PropertyName ?? $"Property #{booking.Listing?.PropertyID}";
+
+                    if (host != null && !string.IsNullOrEmpty(host.Email))
+                    {
+                        int totalNights = Math.Max(1, (booking.CheckOut.Date - booking.CheckIn.Date).Days);
+                        await _emailServices.SendBookingRequestToHostAsync(
+                            host.Email,
+                            host.Name ?? "Host",
+                            guest?.Name ?? "Guest",
+                            propertyName,
+                            booking.CheckIn,
+                            booking.CheckOut,
+                            booking.TotalPrice,
+                            totalNights,
+                            booking.BookingID);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[PAYMENT HOST NOTIFICATION ERROR] {ex.Message}");
+                }
             }
 
             return true;
@@ -156,15 +187,24 @@ namespace Havenly.BLL.Services.Implementations
                 PaidAt = p.PaidAt
             }).OrderByDescending(p => p.CreatedAt).ToList();
 
-            var completedPayments = hostPayments.Where(p => p.Status == PaymentStatus.Completed).ToList();
+            // Only count approved / completed bookings as realized Host Net Earnings
+            var approvedPayments = hostPayments
+                .Where(p => p.Status == PaymentStatus.Completed &&
+                           (p.Booking?.Status == BookingStatus.Approved || p.Booking?.Status == BookingStatus.Completed))
+                .ToList();
+
+            // Pending bookings where payment is completed are awaiting host decision
+            var pendingPayments = hostPayments
+                .Where(p => p.Status == PaymentStatus.Completed && p.Booking?.Status == BookingStatus.Pending)
+                .ToList();
 
             return new HostPayoutsVM
             {
-                TotalGrossRevenue = completedPayments.Sum(p => p.Amount),
-                TotalPlatformFee = completedPayments.Sum(p => p.PlatformFee),
-                TotalNetEarnings = completedPayments.Sum(p => p.HostPayoutAmount),
-                PaidOutEarnings = completedPayments.Where(p => p.IsPaidToHost).Sum(p => p.HostPayoutAmount),
-                PendingPayouts = completedPayments.Where(p => !p.IsPaidToHost).Sum(p => p.HostPayoutAmount),
+                TotalGrossRevenue = approvedPayments.Sum(p => p.Amount),
+                TotalPlatformFee = approvedPayments.Sum(p => p.PlatformFee),
+                TotalNetEarnings = approvedPayments.Sum(p => p.HostPayoutAmount),
+                PaidOutEarnings = approvedPayments.Where(p => p.IsPaidToHost).Sum(p => p.HostPayoutAmount),
+                PendingPayouts = pendingPayments.Sum(p => p.HostPayoutAmount),
                 TotalBookingsCount = hostPayments.Count,
                 PayoutRows = rows
             };

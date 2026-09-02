@@ -49,8 +49,25 @@
                         {
                             <tr class="hover:bg-secondary/20 transition">
                                 <td class="px-6 py-4">
-                                    <div class="font-semibold">@(booking.Guest?.Name ?? "Guest")</div>
-                                    <div class="text-xs text-muted-foreground">@(booking.Guest?.Email ?? "")</div>
+                                    <div class="flex items-center gap-3 cursor-pointer group" onclick="openProfileModal('@booking.GuestUserID')">
+                                        <div class="size-9 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-primary/20 flex-shrink-0 overflow-hidden group-hover:scale-105 transition">
+                                            @if (!string.IsNullOrEmpty(booking.Guest?.ProfilePictureUrl))
+                                            {
+                                                <img src="@booking.Guest.ProfilePictureUrl" alt="@(booking.Guest?.Name ?? "Guest")" class="size-full object-cover" />
+                                            }
+                                            else
+                                            {
+                                                <span>@(string.IsNullOrWhiteSpace(booking.Guest?.Name) ? "G" : booking.Guest.Name[0].ToString().ToUpper())</span>
+                                            }
+                                        </div>
+                                        <div>
+                                            <div class="font-semibold text-foreground group-hover:text-primary transition flex items-center gap-1.5">
+                                                @(booking.Guest?.Name ?? "Guest")
+                                                <span class="text-[10px] text-muted-foreground group-hover:text-primary font-normal underline">View Profile</span>
+                                            </div>
+                                            <div class="text-xs text-muted-foreground">@(booking.Guest?.Email ?? "")</div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="font-medium line-clamp-1">@(booking.Listing?.Property?.PropertyName ?? "Listing #" + booking.ListingID)</div>

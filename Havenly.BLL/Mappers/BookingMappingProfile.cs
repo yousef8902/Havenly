@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Havenly.BLL.ModelVMs;
 using Havenly.DAL.Entities;
 
@@ -48,6 +48,16 @@ namespace Havenly.BLL.Mappers
                 // Status mapping (convert enum to string)
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src =>
                     src.Status.ToString()))
+
+                // Host information
+                .ForMember(dest => dest.HostName, opt => opt.MapFrom(src =>
+                    src.Listing != null && src.Listing.Property != null && src.Listing.Property.Owner != null
+                        ? src.Listing.Property.Owner.Name
+                        : "Havenly Host"))
+                .ForMember(dest => dest.HostId, opt => opt.MapFrom(src =>
+                    src.Listing != null && src.Listing.Property != null
+                        ? src.Listing.Property.OwnerUserID
+                        : null))
 
                 // Image URL
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
