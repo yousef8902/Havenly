@@ -68,6 +68,13 @@ namespace Havenly.PL
                         options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
                         options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
                         options.CallbackPath = "/signin-google";
+                        options.Events.OnRemoteFailure = context =>
+                        {
+                            // If the user cancels, presses back, or correlation cookie expires, smoothly redirect to Login
+                            context.Response.Redirect("/Account/Login");
+                            context.HandleResponse();
+                            return Task.CompletedTask;
+                        };
                     });
             }
 

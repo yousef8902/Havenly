@@ -16,6 +16,7 @@ namespace Havenly.BLL.Services.Implementations
         private readonly string _fromEmail;
         private readonly string _password;
         private readonly string _displayName;
+        private readonly string _baseUrl;
         private readonly ILogger<EmailServices>? _logger;
 
         public EmailServices(IConfiguration configuration, ILogger<EmailServices>? logger = null)
@@ -26,6 +27,7 @@ namespace Havenly.BLL.Services.Implementations
             _fromEmail = (configuration["EmailSettings:SenderEmail"] ?? "").Trim();
             _password = (configuration["EmailSettings:SenderPassword"] ?? "").Replace(" ", "").Trim();
             _displayName = configuration["EmailSettings:SenderDisplayName"] ?? "Havenly";
+            _baseUrl = (configuration["App:BaseUrl"] ?? configuration["ApplicationUrl"] ?? "https://localhost:7145").TrimEnd('/');
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string body, bool isHtml = true)
@@ -358,9 +360,15 @@ namespace Havenly.BLL.Services.Implementations
         // Shared HTML Email Template Builder
         private string BuildHtmlWrapper(string heading, string recipientGreeting, string innerHtml, string? ctaText, string? ctaUrl)
         {
-            string ctaSection = string.IsNullOrEmpty(ctaText) || string.IsNullOrEmpty(ctaUrl) ? "" : $@"
+            string resolvedUrl = ctaUrl ?? "";
+            if (!string.IsNullOrEmpty(resolvedUrl) && !resolvedUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) && !resolvedUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                resolvedUrl = $"{_baseUrl}/{resolvedUrl.TrimStart('/')}";
+            }
+
+            string ctaSection = string.IsNullOrEmpty(ctaText) || string.IsNullOrEmpty(resolvedUrl) ? "" : $@"
                 <div style=""text-align: center; margin: 28px 0 16px 0;"">
-                    <a href=""{ctaUrl}"" style=""background-color: #065f46; color: #ffffff; padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 2px 8px rgba(6,95,70,0.25);"">
+                    <a href=""{resolvedUrl}"" style=""background-color: #065f46; color: #ffffff; padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 2px 8px rgba(6,95,70,0.25);"">
                         {ctaText}
                     </a>
                 </div>";

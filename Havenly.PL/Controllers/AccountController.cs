@@ -450,6 +450,7 @@ namespace Havenly.PL.Controllers
         {
             var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            properties.Parameters["prompt"] = "select_account";
             return Challenge(properties, provider);
         }
 
@@ -460,8 +461,7 @@ namespace Havenly.PL.Controllers
         {
             if (remoteError != null)
             {
-                ModelState.AddModelError(string.Empty, $"Error from external provider: {remoteError}");
-                return View("Login");
+                return RedirectToAction(nameof(Login));
             }
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
