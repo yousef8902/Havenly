@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Havenly.PL.Controllers
 {
@@ -200,9 +201,105 @@ namespace Havenly.PL.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public IActionResult MemberDetails(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return RedirectToAction(nameof(Members));
+            }
+            return RedirectToAction("ViewProfile", "Account", new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveHost(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["Error"] = "Host not found.";
+                return RedirectToAction(nameof(Members));
+            }
+
+            var success = await _userManagementService.ApproveHost(userId);
+            if (success)
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(user.Email))
+                    {
+                        await _emailServices.SendHostApplicationDecisionAsync(user.Email, user.Name ?? "Host", true);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[EMAIL HOST APPROVE ERROR] {ex.Message}");
+                }
+
+                TempData["Message"] = $"Host {user.Name} has been approved and activated.";
+            }
+            else
+            {
+                TempData["Error"] = "Failed to approve host.";
+            }
+
+            var referer = Request.Headers["Referer"].ToString();
+            return !string.IsNullOrEmpty(referer) ? Redirect(referer) : RedirectToAction(nameof(Members));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectHost(string userId, string? reason = null)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["Error"] = "Host not found.";
+                return RedirectToAction(nameof(Members));
+            }
+
+            var success = await _userManagementService.RejectHost(userId);
+            if (success)
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(user.Email))
+                    {
+                        await _emailServices.SendHostApplicationDecisionAsync(user.Email, user.Name ?? "Host", false, reason);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[EMAIL HOST REJECT ERROR] {ex.Message}");
+                }
+
+                TempData["Message"] = $"Host application for {user.Name} has been declined.";
+            }
+            else
+            {
+                TempData["Error"] = "Failed to decline host application.";
+            }
+
+            var referer = Request.Headers["Referer"].ToString();
+            return !string.IsNullOrEmpty(referer) ? Redirect(referer) : RedirectToAction(nameof(Members));
+        }
+
         public async Task<IActionResult> BookingDetails(long id)
         {
-            var booking = await _bookingRepository.GetById(id);
+            var booking = await _bookingRepository.GetAll()
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Address)
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Images)
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Owner)
+                .Include(b => b.Guest)
+                .FirstOrDefaultAsync(b => b.BookingID == id);
+
             if (booking == null)
             {
                 TempData["Error"] = "Booking not found.";

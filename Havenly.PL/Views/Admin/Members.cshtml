@@ -48,7 +48,7 @@
 }
 
 <!-- Stats Cards -->
-<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 mb-6">
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-6 mb-6">
     <div class="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <p class="text-sm text-muted-foreground">Total Members</p>
         <p class="text-2xl font-bold">@Model.Stats.Total.ToString("N0")</p>
@@ -56,6 +56,10 @@
     <div class="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <p class="text-sm text-muted-foreground">Active</p>
         <p class="text-2xl font-bold text-emerald-600">@Model.Stats.Active.ToString("N0")</p>
+    </div>
+    <div class="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <p class="text-sm text-muted-foreground">Pending Hosts</p>
+        <p class="text-2xl font-bold text-amber-600">@Model.Stats.PendingHosts.ToString("N0")</p>
     </div>
     <div class="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <p class="text-sm text-muted-foreground">Suspended</p>
@@ -82,6 +86,10 @@
         <a href="@Url.Action("Members", new { status = "active", search = Model.Filters.SearchTerm, page = 1 })"
            class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "active" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
             Active
+        </a>
+        <a href="@Url.Action("Members", new { status = "PendingApproval", search = Model.Filters.SearchTerm, page = 1 })"
+           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status?.ToLower() == "pendingapproval" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-amber-300 text-amber-700 bg-amber-50/50 hover:bg-amber-100")">
+            Pending Hosts (@Model.Stats.PendingHosts)
         </a>
         <a href="@Url.Action("Members", new { status = "suspended", search = Model.Filters.SearchTerm, page = 1 })"
            class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "suspended" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
@@ -142,6 +150,7 @@
                     {
                         UserStatus.Active => "bg-emerald-100 text-emerald-800",
                         UserStatus.Suspended => "bg-red-100 text-red-800",
+                        UserStatus.PendingApproval => "bg-amber-100 text-amber-800 border border-amber-300",
                         _ => "bg-gray-100 text-gray-800"
                     };
 
@@ -169,7 +178,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="p-4 text-muted-foreground">@user.Phone</td>
+                        <td class="p-4 text-muted-foreground">@user.Email</td>
                         <td class="p-4">
                             <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
                                 @(user.Role == "Admin" ? "bg-purple-100 text-purple-800" :
@@ -178,7 +187,7 @@
                                 @user.Role
                             </span>
                         </td>
-                        <td class="p-4 text-muted-foreground">@(user.JoinedDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
+                        <td class="p-4 text-muted-foreground">@((user.JoinedDate.HasValue && user.JoinedDate.Value > new DateTime(2000, 1, 1)) ? user.JoinedDate.Value.ToString("MMM dd, yyyy") : "Recently")</td>
                         <td class="p-4 text-center">
                             <span class="inline-flex items-center justify-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
                                 @user.BookingsCount
@@ -190,21 +199,48 @@
                             </span>
                         </td>
                         <td class="p-4 text-right">
-                            <div class="flex justify-end gap-2">
-                                <a href="@Url.Action("MemberDetails", new { id = user.Id })"
-                                   class="inline-flex items-center gap-1 h-8 rounded-lg border border-border bg-background px-3 text-xs font-medium hover:bg-secondary transition">
-                                    View
-                                </a>
-                                <form asp-controller="Admin" asp-action="ToggleUserStatus" method="post" class="inline">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="userId" value="@user.Id" />
-                                    <input type="hidden" name="isActive" value="@(!user.IsActive)" />
-                                    <button type="submit"
-                                            class="h-8 rounded-lg px-3 text-xs font-medium transition
-                                        @(user.IsActive ? "text-muted-foreground hover:bg-destructive/10 hover:text-destructive" : "text-primary hover:bg-primary/10")">
-                                        @(user.IsActive ? "Suspend" : "Reinstate")
-                                    </button>
-                                </form>
+                            <div class="flex justify-end items-center gap-1.5 flex-wrap">
+                                @if (user.Status == UserStatus.PendingApproval)
+                                {
+                                    @if (!string.IsNullOrEmpty(user.VerificationDocumentUrl))
+                                    {
+                                        <a href="@user.VerificationDocumentUrl" target="_blank"
+                                           class="inline-flex items-center gap-1 h-8 rounded-lg border border-primary/40 bg-primary/10 px-2 text-xs font-semibold text-primary hover:bg-primary/20 transition" title="Inspect uploaded ID / Permit">
+                                            <span>📄 ID</span>
+                                        </a>
+                                    }
+                                    <form asp-controller="Admin" asp-action="ApproveHost" method="post" class="inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@user.Id" />
+                                        <button type="submit" class="h-8 rounded-lg bg-emerald-600 px-2.5 text-xs font-semibold text-white hover:bg-emerald-700 transition">
+                                            Approve
+                                        </button>
+                                    </form>
+                                    <form asp-controller="Admin" asp-action="RejectHost" method="post" class="inline" onsubmit="return confirm('Decline this host application?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@user.Id" />
+                                        <button type="submit" class="h-8 rounded-lg px-2 text-xs font-medium text-destructive hover:bg-destructive/10 transition">
+                                            Reject
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Account" asp-action="ViewProfile" asp-route-id="@user.Id" target="_blank"
+                                       class="inline-flex items-center gap-1 h-8 rounded-lg border border-border bg-background px-2.5 text-xs font-medium hover:bg-secondary transition">
+                                        Profile
+                                    </a>
+                                    <form asp-controller="Admin" asp-action="ToggleUserStatus" method="post" class="inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@user.Id" />
+                                        <input type="hidden" name="isActive" value="@(!user.IsActive)" />
+                                        <button type="submit"
+                                                class="h-8 rounded-lg px-2.5 text-xs font-medium transition
+                                            @(user.IsActive ? "text-muted-foreground hover:bg-destructive/10 hover:text-destructive" : "text-primary hover:bg-primary/10")">
+                                            @(user.IsActive ? "Suspend" : "Reinstate")
+                                        </button>
+                                    </form>
+                                }
                             </div>
                         </td>
                     </tr>

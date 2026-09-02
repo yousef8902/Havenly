@@ -30,8 +30,29 @@ public class BookingController : Controller
     }
 
     [HttpGet]
-    public IActionResult Create(long listingId, string propertyName, decimal pricePerNight, int maxGuests)
+    public async Task<IActionResult> Create(long listingId, string propertyName, decimal pricePerNight, int maxGuests)
     {
+        if (User.IsInRole("Admin"))
+        {
+            TempData["Error"] = "Administrators cannot book properties. Please sign in as a guest to make personal reservations.";
+            return RedirectToAction("Detail", "Property", new { id = listingId });
+        }
+
+        string resolvedUserId = _userManager.GetUserId(User);
+        if (!string.IsNullOrEmpty(resolvedUserId))
+        {
+            var listing = await _listingRepository.GetById(listingId);
+            if (listing != null)
+            {
+                var property = await _propertyRepository.GetById(listing.PropertyID);
+                if (property != null && string.Equals(property.OwnerUserID, resolvedUserId, StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["Error"] = "You cannot book your own property.";
+                    return RedirectToAction("Detail", "Property", new { id = property.PropertyID });
+                }
+            }
+        }
+
         var viewModel = new BookingRequestVM
         {
             ListingID = listingId,
@@ -50,12 +71,31 @@ public class BookingController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(BookingRequestVM model)
     {
+        if (User.IsInRole("Admin"))
+        {
+            TempData["Error"] = "Administrators cannot book properties.";
+            return RedirectToAction("Detail", "Property", new { id = model.ListingID });
+        }
+
+        string resolvedUserId = _userManager.GetUserId(User);
+        if (!string.IsNullOrEmpty(resolvedUserId))
+        {
+            var listing = await _listingRepository.GetById(model.ListingID);
+            if (listing != null)
+            {
+                var property = await _propertyRepository.GetById(listing.PropertyID);
+                if (property != null && string.Equals(property.OwnerUserID, resolvedUserId, StringComparison.OrdinalIgnoreCase))
+                {
+                    ModelState.AddModelError(string.Empty, "You cannot book your own property listing.");
+                    return View(model);
+                }
+            }
+        }
+
         if (!ModelState.IsValid)
         {
             return View(model);
         }
-
-        string resolvedUserId = _userManager.GetUserId(User);
 
         var createVm = new BookingCreateVM
         {

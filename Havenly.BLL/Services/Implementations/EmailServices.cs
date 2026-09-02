@@ -357,6 +357,58 @@ namespace Havenly.BLL.Services.Implementations
             await SendEmailAsync(hostEmail, subject, html, isHtml: true);
         }
 
+        public async Task SendHostApplicationDecisionAsync(string hostEmail, string hostName, bool isApproved, string? notes = null)
+        {
+            string displayName = string.IsNullOrWhiteSpace(hostName) ? "Host Partner" : hostName;
+            string subject;
+            string title;
+            string contentHtml;
+            string ctaText;
+            string ctaUrl;
+
+            if (isApproved)
+            {
+                subject = "🎉 Your Havenly Host Account is Approved!";
+                title = "Welcome to Havenly Hosting";
+                contentHtml = $@"
+                    <p style=""font-size: 15px; color: #334155; line-height: 1.6; margin-bottom: 20px;"">
+                        Congratulations! Your host verification document has been reviewed and <strong style=""color: #059669;"">approved</strong> by our administration team.
+                    </p>
+                    <div style=""background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 14px; padding: 18px; margin: 20px 0;"">
+                        <div style=""font-size: 14px; font-weight: 700; color: #166534; margin-bottom: 6px;"">✅ Verified Egyptian Host Status Active</div>
+                        <div style=""font-size: 13px; color: #15803d; line-height: 1.5;"">
+                            You now have complete access to the Havenly Host Workspace. You can publish your properties, receive reservations in Egyptian Pounds (EGP), and start welcoming travelers from across Egypt and around the world.
+                        </div>
+                    </div>
+                    <p style=""font-size: 14px; color: #475569; margin-bottom: 24px;"">
+                        Click the button below to enter your Host Workspace and create your first listing.
+                    </p>";
+                ctaText = "Enter Host Workspace";
+                ctaUrl = "/Host";
+            }
+            else
+            {
+                subject = "Havenly Host Application Update";
+                title = "Host Application Status";
+                contentHtml = $@"
+                    <p style=""font-size: 15px; color: #334155; line-height: 1.6; margin-bottom: 20px;"">
+                        Thank you for your interest in becoming a host on Havenly. After reviewing your verification document, our administration team was unable to approve your application at this time.
+                    </p>
+                    {(string.IsNullOrWhiteSpace(notes) ? "" : $@"
+                    <div style=""background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 14px; padding: 18px; margin: 20px 0; font-size: 14px; color: #991b1b;"">
+                        <strong>Reason provided:</strong> {notes}
+                    </div>")}
+                    <p style=""font-size: 14px; color: #475569; margin-bottom: 24px;"">
+                        If you believe this is a mistake or have an updated government ID / commercial permit, please contact Havenly support.
+                    </p>";
+                ctaText = "Contact Support";
+                ctaUrl = "/Home/Contact";
+            }
+
+            string html = BuildHtmlWrapper(title, displayName, contentHtml, ctaText, ctaUrl);
+            await SendEmailAsync(hostEmail, subject, html, isHtml: true);
+        }
+
         // Shared HTML Email Template Builder
         private string BuildHtmlWrapper(string heading, string recipientGreeting, string innerHtml, string? ctaText, string? ctaUrl)
         {

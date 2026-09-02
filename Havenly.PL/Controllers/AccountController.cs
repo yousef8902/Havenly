@@ -70,6 +70,69 @@ namespace Havenly.PL.Controllers
                 return View(model);
             }
 
+            if (string.Equals(model.Role, UserRoles.Host, StringComparison.OrdinalIgnoreCase))
+            {
+                if (model.VerificationDocument == null || model.VerificationDocument.Length == 0)
+                {
+                    var msg = "Please upload a verification document (National ID, Passport, or Commercial Registration).";
+                    if (isAjax)
+                    {
+                        return Json(new { success = false, message = msg, errors = new[] { msg } });
+                    }
+                    ModelState.AddModelError("VerificationDocument", msg);
+                    return View(model);
+                }
+
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".pdf" };
+                var ext = Path.GetExtension(model.VerificationDocument.FileName).ToLowerInvariant();
+                if (!allowedExtensions.Contains(ext))
+                {
+                    var msg = "Verification document must be a JPG, PNG, or PDF file.";
+                    if (isAjax)
+                    {
+                        return Json(new { success = false, message = msg, errors = new[] { msg } });
+                    }
+                    ModelState.AddModelError("VerificationDocument", msg);
+                    return View(model);
+                }
+
+                if (model.VerificationDocument.Length > 10 * 1024 * 1024)
+                {
+                    var msg = "Verification document size cannot exceed 10 MB.";
+                    if (isAjax)
+                    {
+                        return Json(new { success = false, message = msg, errors = new[] { msg } });
+                    }
+                    ModelState.AddModelError("VerificationDocument", msg);
+                    return View(model);
+                }
+
+                try
+                {
+                    var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "verification_docs");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(model.VerificationDocument.FileName)}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.VerificationDocument.CopyToAsync(stream);
+                    }
+
+                    model.VerificationDocumentUrl = $"/uploads/verification_docs/{uniqueFileName}";
+                }
+                catch (Exception ex)
+                {
+                    var msg = $"Could not save verification document: {ex.Message}";
+                    if (isAjax) return Json(new { success = false, message = msg, errors = new[] { msg } });
+                    ModelState.AddModelError(string.Empty, msg);
+                    return View(model);
+                }
+            }
+
             var result = await _accountService.RegisterAsync(model);
 
             if (result.Succeeded)
@@ -129,21 +192,48 @@ namespace Havenly.PL.Controllers
 
             if (succeeded)
             {
-                var redirectUrl = Url.Action("Index", "Home");
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                var isHostPending = user != null && user.Role == UserRoles.Host && user.Status == UserStatus.PendingApproval;
+
+                var redirectUrl = isHostPending
+                    ? Url.Action("HostPendingApproval", "Account", new { email = model.Email })
+                    : Url.Action("Index", "Home");
+
                 if (isAjax)
                 {
                     return Json(new { success = true, redirectUrl });
                 }
-                return RedirectToAction("Index", "Home");
+                return Redirect(redirectUrl!);
             }
 
             if (isAjax)
             {
-                return Json(new { success = false, message = errorMessage ?? "Invalid code.", errors = new[] { errorMessage ?? "Invalid code." } });
+                return Json(new { success = false, message = errorMessage ?? "Verification failed.", errors = new[] { errorMessage ?? "Verification failed." } });
             }
 
-            ModelState.AddModelError(string.Empty, errorMessage ?? "Invalid verification code.");
+            ModelState.AddModelError(string.Empty, errorMessage ?? "Verification failed.");
             return View(model);
+        }
+
+        // GET: /Account/HostPendingApproval
+        [HttpGet]
+        public async Task<IActionResult> HostPendingApproval(string? email = null)
+        {
+            User? user = null;
+            if (!string.IsNullOrEmpty(email))
+            {
+                user = await _userManager.FindByEmailAsync(email);
+            }
+            else if (User.Identity?.IsAuthenticated == true)
+            {
+                user = await _userManager.GetUserAsync(User);
+            }
+
+            ViewBag.HostName = user?.Name ?? "Host";
+            ViewBag.HostEmail = user?.Email ?? email ?? string.Empty;
+            ViewBag.HasDoc = !string.IsNullOrEmpty(user?.VerificationDocumentUrl);
+
+            return View();
         }
 
         // POST: /Account/ResendOtp
@@ -386,6 +476,21 @@ namespace Havenly.PL.Controllers
                     return Json(new { success = false, message = "Please check the entered credentials.", errors });
                 }
                 return View(model);
+            }
+
+            var pendingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (pendingUser != null && pendingUser.Role == UserRoles.Host && pendingUser.Status == UserStatus.PendingApproval)
+            {
+                var passwordValid = await _userManager.CheckPasswordAsync(pendingUser, model.Password);
+                if (passwordValid)
+                {
+                    var pendingUrl = Url.Action("HostPendingApproval", "Account", new { email = pendingUser.Email });
+                    if (isAjax)
+                    {
+                        return Json(new { success = true, redirectUrl = pendingUrl });
+                    }
+                    return Redirect(pendingUrl!);
+                }
             }
 
             var result = await _accountService.LoginAsync(model);

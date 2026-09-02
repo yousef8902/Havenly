@@ -146,12 +146,15 @@ namespace Havenly.BLL.Services.Implementations
                 FullName = u.Name,
                 Email = u.Email ?? string.Empty,
                 Role = u.Role ?? "Guest",
+                JoinedDate = u.JoinedDate > new DateTime(2000, 1, 1) ? u.JoinedDate : DateTime.UtcNow,
                 Status = u.Status,
                 BookingsCount = u.Bookings?.Count ?? 0,
                 TotalSpent = u.Bookings?
                     .Where(b => b.Status != BookingStatus.Cancelled)
                     .Sum(b => b.TotalPrice) ?? 0,
                 Phone = u.PhoneNumber ?? string.Empty,
+                AvatarUrl = u.ProfilePictureUrl ?? string.Empty,
+                VerificationDocumentUrl = u.VerificationDocumentUrl,
                 IsVerified = u.Status == UserStatus.Active
             }).ToList();
 
@@ -178,6 +181,7 @@ namespace Havenly.BLL.Services.Implementations
                     Total = allUsersList.Count,
                     Active = allUsersList.Count(u => u.Status == UserStatus.Active),
                     Suspended = allUsersList.Count(u => u.Status == UserStatus.Suspended),
+                    PendingHosts = allUsersList.Count(u => u.Status == UserStatus.PendingApproval),
                     Guests = allUsersList.Count(u => string.Equals(u.Role, "Guest", StringComparison.OrdinalIgnoreCase)),
                     Hosts = allUsersList.Count(u => string.Equals(u.Role, "Host", StringComparison.OrdinalIgnoreCase)),
                     Admins = allUsersList.Count(u => string.Equals(u.Role, "Admin", StringComparison.OrdinalIgnoreCase))

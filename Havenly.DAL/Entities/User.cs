@@ -23,6 +23,9 @@ public class User : IdentityUser
     [StringLength(1000)]
     public string? Bio { get; set; }
 
+    [StringLength(500)]
+    public string? VerificationDocumentUrl { get; set; }
+
     public DateTime JoinedDate { get; set; } = DateTime.UtcNow;
 
     // Navigation Properties

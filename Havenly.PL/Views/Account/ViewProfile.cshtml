@@ -130,5 +130,206 @@
                 </div>
             }
         </div>
+
+        <!-- Host Reviews Received -->
+        @if (Model.Reviews.Any())
+        {
+            <div class="space-y-6 pt-4 border-t border-border">
+                <div>
+                    <h2 class="text-xl font-bold">What Guests Say About @Model.Name</h2>
+                    <p class="text-xs text-muted-foreground mt-0.5">Recent feedback from guests who completed stays.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @foreach (var r in Model.Reviews)
+                    {
+                        <div class="rounded-2xl border border-border bg-card p-5 space-y-3 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="size-9 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-xs">
+                                        @(string.IsNullOrWhiteSpace(r.ReviewerName) ? "G" : r.ReviewerName[0].ToString().ToUpper())
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm">@r.ReviewerName</p>
+                                        <p class="text-[11px] text-muted-foreground">Stayed at @r.PropertyName</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center text-amber-500 text-xs font-bold">
+                                    ★ @r.Rating
+                                </div>
+                            </div>
+                            <p class="text-xs text-foreground/80 leading-relaxed italic">
+                                "@r.Comment"
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <!-- Rich Guest / Traveler Profile Section for Hosts & Admins -->
+        <div class="space-y-8">
+            <!-- Traveler Trust & Verification Badges -->
+            <div>
+                <h2 class="text-lg font-bold mb-3 flex items-center gap-2">
+                    <svg class="size-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    Traveler Verification & Standing
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="rounded-2xl border border-border bg-card p-4 space-y-1 shadow-sm">
+                        <div class="flex items-center gap-1.5 text-xs font-semibold @(Model.IsEmailConfirmed ? "text-emerald-700" : "text-amber-700")">
+                            @if (Model.IsEmailConfirmed)
+                            {
+                                <svg class="size-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Verified Email</span>
+                            }
+                            else
+                            {
+                                <span class="size-2 rounded-full bg-amber-500"></span>
+                                <span>Email Pending</span>
+                            }
+                        </div>
+                        <p class="text-xs text-muted-foreground">Registered contact</p>
+                    </div>
+
+                    <div class="rounded-2xl border border-border bg-card p-4 space-y-1 shadow-sm">
+                        <div class="flex items-center gap-1.5 text-xs font-semibold @(Model.IsPhoneConfirmed ? "text-emerald-700" : "text-muted-foreground")">
+                            @if (Model.IsPhoneConfirmed)
+                            {
+                                <svg class="size-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Verified Phone</span>
+                            }
+                            else
+                            {
+                                <span>Phone Not Added</span>
+                            }
+                        </div>
+                        <p class="text-xs text-muted-foreground">Direct host messaging</p>
+                    </div>
+
+                    <div class="rounded-2xl border border-border bg-card p-4 space-y-1 shadow-sm">
+                        <p class="text-xs font-semibold text-primary">@Model.TotalCompletedStays Completed</p>
+                        <p class="text-xs text-muted-foreground">Stays on Havenly</p>
+                    </div>
+
+                    <div class="rounded-2xl border border-border bg-card p-4 space-y-1 shadow-sm">
+                        <p class="text-xs font-semibold text-emerald-700">Good Standing</p>
+                        <p class="text-xs text-muted-foreground">Community trusted</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Past Trips & Stays -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold">Past Trips & Travel History</h2>
+                        <p class="text-xs text-muted-foreground mt-0.5">Properties and destinations @Model.Name has experienced across Egypt.</p>
+                    </div>
+                    @if (Model.GuestStays.Any())
+                    {
+                        <span class="text-xs font-semibold text-muted-foreground">@Model.GuestStays.Count stay(s) recorded</span>
+                    }
+                </div>
+
+                @if (Model.GuestStays.Any())
+                {
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        @foreach (var s in Model.GuestStays)
+                        {
+                            <div class="rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition">
+                                <div class="aspect-[16/9] w-full overflow-hidden bg-muted relative">
+                                    <img src="@s.ImageUrl" alt="@s.PropertyName" class="size-full object-cover" />
+                                    <span class="absolute top-2.5 right-2.5 rounded-full bg-black/60 backdrop-blur-md px-2.5 py-0.5 text-[11px] font-semibold text-white">
+                                        @s.Status
+                                    </span>
+                                </div>
+                                <div class="p-4 space-y-2">
+                                    <h3 class="font-bold text-sm text-foreground line-clamp-1">@s.PropertyName</h3>
+                                    <p class="text-xs text-muted-foreground">@s.City, @s.Country</p>
+                                    <p class="text-[11px] text-muted-foreground pt-1 border-t border-border">
+                                        📅 @s.CheckIn.ToString("MMM d") – @s.CheckOut.ToString("MMM d, yyyy")
+                                    </p>
+                                    @if (s.PropertyId > 0)
+                                    {
+                                        <a asp-controller="Property" asp-action="Detail" asp-route-id="@s.PropertyId" class="mt-2 block w-full text-center rounded-xl bg-secondary py-1.5 text-xs font-semibold text-foreground hover:bg-secondary/80 transition">
+                                            View Stay
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="rounded-2xl border border-dashed border-border bg-muted/20 p-8 text-center space-y-2">
+                        <div class="inline-flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-1">
+                            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-foreground">New Traveler to Havenly</h3>
+                        <p class="text-xs text-muted-foreground max-w-sm mx-auto">
+                            @Model.Name joined in @Model.JoinedDate.ToString("MMMM yyyy") and is excited to start booking handcrafted stays in Egypt.
+                        </p>
+                    </div>
+                }
+            </div>
+
+            <!-- Reviews Left by Guest -->
+            @if (Model.Reviews.Any())
+            {
+                <div class="space-y-4 pt-4 border-t border-border">
+                    <div>
+                        <h2 class="text-xl font-bold">Reviews Written by @Model.Name</h2>
+                        <p class="text-xs text-muted-foreground mt-0.5">Feedback and ratings this guest shared after previous stays.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach (var r in Model.Reviews)
+                        {
+                            <div class="rounded-2xl border border-border bg-card p-5 space-y-3 shadow-sm">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="font-bold text-sm text-foreground">@r.PropertyName</p>
+                                        <p class="text-[11px] text-muted-foreground">Stay Experience</p>
+                                    </div>
+                                    <div class="flex items-center text-amber-500 text-xs font-bold">
+                                        ★ @r.Rating
+                                    </div>
+                                </div>
+                                <p class="text-xs text-foreground/80 leading-relaxed italic">
+                                    "@r.Comment"
+                                </p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Host Hospitality Guidance Callout -->
+            <div class="rounded-2xl border border-primary/20 bg-primary/5 p-5 flex items-start gap-4">
+                <div class="rounded-xl bg-primary/10 p-2 text-primary flex-shrink-0">
+                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="space-y-1 text-xs">
+                    <h4 class="font-bold text-foreground">Hosting @Model.Name</h4>
+                    <p class="text-muted-foreground leading-relaxed">
+                        Hosts can contact guests through Havenly messaging once a reservation is requested. Havenly provides 24/7 support and property protection for all confirmed reservations in Egypt.
+                    </p>
+                </div>
+            </div>
+        </div>
     }
 </div>

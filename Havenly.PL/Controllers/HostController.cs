@@ -43,6 +43,25 @@ namespace Havenly.PL.Controllers
 
         private string GetCurrentUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
 
+        public override async Task OnActionExecutionAsync(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext context, Microsoft.AspNetCore.Mvc.Filters.ActionExecutionDelegate next)
+        {
+            if (!User.IsInRole(UserRoles.Admin))
+            {
+                var userId = GetCurrentUserId();
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    var user = await _userManager.FindByIdAsync(userId);
+                    if (user != null && user.Status == UserStatus.PendingApproval)
+                    {
+                        context.Result = RedirectToAction("HostPendingApproval", "Account", new { email = user.Email });
+                        return;
+                    }
+                }
+            }
+
+            await base.OnActionExecutionAsync(context, next);
+        }
+
         [HttpGet]
         public async Task<IActionResult> Index()
         {

@@ -14,6 +14,8 @@ namespace Havenly.BLL.ModelVMs.Account
         public DateTime JoinedDate { get; set; } = DateTime.UtcNow;
         public string Role { get; set; } = "Guest";
         public string Status { get; set; } = "Active";
+        public bool IsEmailConfirmed { get; set; }
+        public bool IsPhoneConfirmed { get; set; }
 
         // Statistics
         public int TotalProperties { get; set; }
@@ -34,6 +36,7 @@ namespace Havenly.BLL.ModelVMs.Account
     public class PublicGuestStayVM
     {
         public long BookingId { get; set; }
+        public long PropertyId { get; set; }
         public string PropertyName { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
         public string Country { get; set; } = string.Empty;

@@ -1,4 +1,4 @@
-﻿using Havenly.BLL.ModelVMs;
+using Havenly.BLL.ModelVMs;
 using Havenly.BLL.ModelVMs.Admin;
 using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Entities;
@@ -66,6 +66,29 @@ namespace Havenly.BLL.Services.Implementations
             if (!result.Succeeded) return false;
 
             user.Status = UserStatus.Active;
+            await userManager.UpdateAsync(user);
+            return true;
+        }
+
+        public async Task<bool> ApproveHost(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user is null) return false;
+
+            await userManager.SetLockoutEndDateAsync(user, null);
+            user.Status = UserStatus.Active;
+            await userManager.UpdateAsync(user);
+            return true;
+        }
+
+        public async Task<bool> RejectHost(string userId)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user is null) return false;
+
+            user.LockoutEnabled = true;
+            await userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+            user.Status = UserStatus.Suspended;
             await userManager.UpdateAsync(user);
             return true;
         }

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace Havenly.BLL.ModelVMs.Account
 {
@@ -23,5 +24,8 @@ namespace Havenly.BLL.ModelVMs.Account
 
         [Required]
         public string Role { get; set; } = "Guest";
+
+        public IFormFile? VerificationDocument { get; set; }
+        public string? VerificationDocumentUrl { get; set; }
     }
 }

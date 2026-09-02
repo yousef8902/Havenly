@@ -40,9 +40,10 @@ namespace Havenly.BLL.Mappers
                     : new List<string> { "Wi-Fi", "Kitchen", "Air conditioning", "Parking", "TV" }))
 
                 // Owner / Host Details
+                .ForMember(dest => dest.OwnerId, opt => opt.MapFrom(src => src.OwnerUserID ?? (src.Owner != null ? src.Owner.Id : string.Empty)))
                 .ForMember(dest => dest.Host, opt => opt.MapFrom(src => new HostVM
                 {
-                    HostId = src.Owner != null ? src.Owner.Id : string.Empty,
+                    HostId = src.Owner != null ? src.Owner.Id : (src.OwnerUserID ?? string.Empty),
                     Name = src.Owner != null ? src.Owner.Name : "Havenly Host",
                     AvatarUrl = src.Owner != null ? (src.Owner.ProfilePictureUrl ?? string.Empty) : string.Empty,
                     Bio = src.Owner != null ? (src.Owner.Bio ?? string.Empty) : string.Empty,

@@ -153,9 +153,10 @@ namespace Havenly.BLL.ModelVMs
         public decimal TotalSpent { get; set; }
         public string Phone { get; set; } = string.Empty;
         public string AvatarUrl { get; set; } = string.Empty;
+        public string? VerificationDocumentUrl { get; set; }
         public DateTime? LastActive { get; set; }
         public bool IsVerified { get; set; }
-        public string StatusDisplay => Status.ToString();
+        public string StatusDisplay => Status == UserStatus.PendingApproval ? "Pending Approval" : Status.ToString();
         public bool IsActive => Status == UserStatus.Active;
     }
 
@@ -171,6 +172,7 @@ namespace Havenly.BLL.ModelVMs
         public int Total { get; set; }
         public int Active { get; set; }
         public int Suspended { get; set; }
+        public int PendingHosts { get; set; }
         public int Guests { get; set; }
         public int Hosts { get; set; }
         public int Admins { get; set; }

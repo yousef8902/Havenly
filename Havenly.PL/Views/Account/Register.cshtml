@@ -30,7 +30,7 @@
                 </ul>
             </div>
 
-            <form id="registerForm" asp-action="Register" method="post" class="space-y-4">
+            <form id="registerForm" asp-action="Register" method="post" enctype="multipart/form-data" class="space-y-4">
                 @Html.AntiForgeryToken()
 
                 <div>
@@ -75,11 +75,33 @@
 
                 <div>
                     <label asp-for="Role" class="block text-sm font-semibold mb-1.5">I want to</label>
-                    <select asp-for="Role" id="registerRole" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none">
+                    <select asp-for="Role" id="registerRole" onchange="toggleHostVerification(this.value)" class="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm focus:border-primary focus:outline-none">
                         <option value="Guest">Explore and book stays (Guest)</option>
                         <option value="Host">List and manage my properties (Host)</option>
                     </select>
                     <span asp-validation-for="Role" class="text-xs text-destructive mt-1 block"></span>
+                </div>
+
+                <!-- Host Identity / Legal Verification Document -->
+                <div id="hostVerificationContainer" class="hidden rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-4 sm:p-5 space-y-3 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
+                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            <span>Host Identity Verification</span>
+                        </div>
+                        <span class="rounded-full bg-amber-500/10 text-amber-700 font-bold text-[10px] px-2 py-0.5 border border-amber-500/20">Required for Hosts</span>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">
+                            National ID / Passport / Commercial Permit <span class="text-destructive">*</span>
+                        </label>
+                        <input type="file" name="VerificationDocument" id="verificationDocument" accept=".jpg,.jpeg,.png,.pdf" class="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs focus:border-primary focus:outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer" />
+                    </div>
+                    <div class="rounded-xl bg-background/80 border border-border/60 p-3 text-[11px] text-muted-foreground leading-relaxed">
+                        🛡️ <strong>Safety Policy for Egypt:</strong> Hosts must upload a valid National ID, Passport, or Tourism Permit (JPG, PNG, PDF up to 10MB). After completing the email OTP verification, your account will be reviewed by Havenly administrators before listing publication unlocks.
+                    </div>
                 </div>
 
                 <button type="submit" id="registerSubmitBtn" class="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition flex items-center justify-center gap-2">
@@ -99,6 +121,15 @@
     </div>
 </div>
 
+<style>
+    /* Hide browser default password reveal icons so custom toggle works cleanly */
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear,
+    input[type="password"]::-webkit-credentials-auto-fill-button {
+        display: none !important;
+    }
+</style>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
@@ -117,6 +148,23 @@
                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                    </svg>`;
         }
+
+        function toggleHostVerification(role) {
+            const container = document.getElementById('hostVerificationContainer');
+            const docInput = document.getElementById('verificationDocument');
+            if (!container || !docInput) return;
+            if (role === 'Host') {
+                container.classList.remove('hidden');
+                docInput.required = true;
+            } else {
+                container.classList.add('hidden');
+                docInput.required = false;
+                docInput.value = '';
+            }
+        }
+
+        // Initialize on load
+        toggleHostVerification(document.getElementById('registerRole')?.value || 'Guest');
 
         document.getElementById('registerForm')?.addEventListener('submit', async function (e) {
             e.preventDefault();

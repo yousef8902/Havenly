@@ -66,13 +66,18 @@ namespace Havenly.BLL.Services.Implementations
                 ? UserRoles.Host 
                 : UserRoles.Guest;
 
+            var initialStatus = roleToAssign == UserRoles.Host 
+                ? UserStatus.PendingApproval 
+                : UserStatus.Active;
+
             var user = new User
             {
                 Name = model.Name,
                 Email = model.Email,
                 UserName = model.Email,
                 Role = roleToAssign,
-                Status = UserStatus.Active,
+                Status = initialStatus,
+                VerificationDocumentUrl = model.VerificationDocumentUrl,
                 EmailConfirmed = false
             };
 
@@ -161,8 +166,11 @@ namespace Havenly.BLL.Services.Implementations
             await _userManager.RemoveAuthenticationTokenAsync(user, "Havenly", "EmailVerificationOTP");
             await _userManager.RemoveAuthenticationTokenAsync(user, "Havenly", "EmailVerificationExpiry");
 
-            // Sign user in
-            await _signInManager.SignInAsync(user, isPersistent: false);
+            // Sign user in if active
+            if (user.Status != UserStatus.PendingApproval)
+            {
+                await _signInManager.SignInAsync(user, isPersistent: false);
+            }
 
             return (true, null);
         }
@@ -296,7 +304,7 @@ namespace Havenly.BLL.Services.Implementations
         public async Task<PublicUserProfileVM?> GetPublicProfileAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) return null;
+            if (user == null || user.Status == UserStatus.PendingApproval) return null;
 
             var properties = (await _propertyRepo.GetByOwner(userId)).ToList();
             var propertyCards = properties.Select(p => new PublicPropertyCardVM
@@ -345,10 +353,11 @@ namespace Havenly.BLL.Services.Implementations
             var completedStays = allBookings.Count(b => b.Status == BookingStatus.Completed || b.Status == BookingStatus.Approved);
 
             var guestStays = allBookings
-                .Take(4)
+                .Take(6)
                 .Select(b => new PublicGuestStayVM
                 {
                     BookingId = b.BookingID,
+                    PropertyId = b.Listing?.Property?.PropertyID ?? 0,
                     PropertyName = b.Listing?.Property?.PropertyName ?? $"Stay #{b.ListingID}",
                     City = b.Listing?.Property?.Address?.City ?? string.Empty,
                     Country = b.Listing?.Property?.Address?.Country ?? "Egypt",
@@ -359,6 +368,28 @@ namespace Havenly.BLL.Services.Implementations
                     CheckOut = b.CheckOut,
                     Status = b.Status.ToString()
                 }).ToList();
+
+            List<PublicUserReviewVM> displayReviews;
+            if (string.Equals(user.Role, UserRoles.Host, StringComparison.OrdinalIgnoreCase))
+            {
+                displayReviews = reviewsReceived;
+            }
+            else
+            {
+                displayReviews = allReviews
+                    .Where(r => r.UserID == userId)
+                    .OrderByDescending(r => r.ReviewID)
+                    .Take(6)
+                    .Select(r => new PublicUserReviewVM
+                    {
+                        ReviewerName = user.Name ?? "Traveler",
+                        ReviewerAvatar = user.ProfilePictureUrl,
+                        PropertyName = r.Property?.PropertyName ?? "Egypt Stay",
+                        Rating = r.Rating,
+                        Comment = r.Comment ?? string.Empty,
+                        CreatedAt = DateTime.UtcNow.AddDays(-10)
+                    }).ToList();
+            }
 
             double avgRating = properties.Any(p => p.NumberOfReviews > 0)
                 ? Math.Round(properties.Where(p => p.NumberOfReviews > 0).Average(p => p.Rating), 2)
@@ -375,13 +406,15 @@ namespace Havenly.BLL.Services.Implementations
                 JoinedDate = user.JoinedDate,
                 Role = user.Role,
                 Status = user.Status.ToString(),
+                IsEmailConfirmed = user.EmailConfirmed,
+                IsPhoneConfirmed = !string.IsNullOrEmpty(user.PhoneNumber),
                 TotalProperties = properties.Count,
                 TotalCompletedStays = completedStays,
                 TotalReviewsReceived = reviewsReceived.Count,
                 AverageHostRating = avgRating,
                 Properties = propertyCards,
                 GuestStays = guestStays,
-                Reviews = reviewsReceived
+                Reviews = displayReviews
             };
         }
 

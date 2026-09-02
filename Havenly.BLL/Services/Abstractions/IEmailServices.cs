@@ -57,6 +57,13 @@ namespace Havenly.BLL.Services.Abstractions
             bool isApproved,
             long propertyId);
 
+        // Scenario 5: Admin approves/declines host registration application
+        Task SendHostApplicationDecisionAsync(
+            string hostEmail,
+            string hostName,
+            bool isApproved,
+            string? notes = null);
+
         // Legacy helper overloads
         Task SendEmailRequestbookingToHost(string toEmail, Booking booking);
         Task ReciveEmailRequestbookingFromHost(string toEmail, Booking booking);

@@ -3,6 +3,7 @@ namespace Havenly.BLL.ModelVMs
     public class PropertyDetailsVM
     {
         public string Id { get; set; } = "";
+        public string OwnerId { get; set; } = "";
         public long ListingID { get; set; } 
         public string Title { get; set; } = "";
         public string City { get; set; } = "";

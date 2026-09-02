@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Havenly.BLL.ModelVMs;
 using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Entities;
@@ -14,11 +14,19 @@ namespace Havenly.BLL.Services.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IListingRepository _listingRepository;
+        private readonly IPropertyRepository _propertyRepository;
 
-        public BookingService(IUnitOfWork unitOfWork, IMapper mapper)
+        public BookingService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            IListingRepository listingRepository,
+            IPropertyRepository propertyRepository)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _listingRepository = listingRepository;
+            _propertyRepository = propertyRepository;
         }
 
         // Checks date overlap 
@@ -69,6 +77,20 @@ namespace Havenly.BLL.Services.Implementations
                     Success = false,
                     Message = "The selected dates are no longer available. Please choose different dates."
                 };
+            }
+
+            var listing = await _listingRepository.GetById(dto.ListingID);
+            if (listing != null)
+            {
+                var property = await _propertyRepository.GetById(listing.PropertyID);
+                if (property != null && string.Equals(property.OwnerUserID, dto.GuestUserID, StringComparison.OrdinalIgnoreCase))
+                {
+                    return new BookingResultVM
+                    {
+                        Success = false,
+                        Message = "Hosts cannot make reservations for their own properties."
+                    };
+                }
             }
 
             // calc total nights and total price
