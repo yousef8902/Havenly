@@ -29,7 +29,6 @@ namespace Havenly.PL.Controllers
         /// <param name="cancellationToken">Cancellation token for the operation.</param>
         /// <returns>A ChatResponseDto with the chatbot's response or error information.</returns>
         [HttpPost("send-message")]
-        [ValidateAntiForgeryToken]
         public async Task<ActionResult<ChatResponseDto>> SendMessage(
             [FromBody] ChatRequestDto request,
             CancellationToken cancellationToken)

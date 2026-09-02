@@ -167,21 +167,6 @@
 
         let isOpen = false;
 
-        // Get anti-forgery token
-        function getAntiForgeryToken() {
-            // Try to get from meta tag first
-            let token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
-            if (!token) {
-                // Fallback: try to extract from hidden input in form
-                token = document.querySelector('form input[name="__RequestVerificationToken"]')?.value;
-            }
-            if (!token) {
-                // Last resort: try common meta tag locations
-                token = document.querySelector('meta[name="csrf-token"]')?.content;
-            }
-            return token || '';
-        }
-
         // Toggle chat widget visibility
         function toggleChat() {
             isOpen = !isOpen;
@@ -261,8 +246,7 @@
                 const response = await fetch('/api/chat/send-message', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': getAntiForgeryToken()
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         message: message,
@@ -286,7 +270,11 @@
             } catch (error) {
                 removeLoadingIndicator();
                 console.error('Error sending message:', error);
-                addMessage('Sorry, I encountered an error. Please try again later.', false, true);
+                let errorMsg = 'Sorry, I encountered an error. Please try again later.';
+                if (error.message) {
+                    errorMsg = error.message;
+                }
+                addMessage(errorMsg, false, true);
             } finally {
                 sendBtn.disabled = false;
                 chatInput.focus();

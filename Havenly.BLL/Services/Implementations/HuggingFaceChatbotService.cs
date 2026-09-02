@@ -93,6 +93,9 @@ If you don't know something, offer to connect them with a human agent.";
 
                     client.Timeout = TimeSpan.FromSeconds(_timeoutSeconds);
 
+                    // Log the request details for debugging
+                    _logger.LogInformation("Sending request to Hugging Face API. Model: {Model}, Endpoint: {Endpoint}", _model, _apiEndpoint);
+
                     // Send POST request to Hugging Face API
                     var response = await client.PostAsJsonAsync(
                         _apiEndpoint,
@@ -110,7 +113,7 @@ If you don't know something, offer to connect them with a human agent.";
                         return new ChatResponseDto
                         {
                             Success = false,
-                            Error = $"API request failed with status {response.StatusCode}. Please try again later.",
+                            Error = $"API error (Status {response.StatusCode}): {errorContent}",
                             Message = string.Empty
                         };
                     }

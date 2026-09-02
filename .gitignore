@@ -65,3 +65,5 @@ nunit-*.xml
 /TestHavenly
 /Havenly.DAL/Migrations
 Havenly.BLL.Tests
+
+**/appsettings.Development.json
