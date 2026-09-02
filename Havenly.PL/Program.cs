@@ -94,6 +94,7 @@ namespace Havenly.PL
 
             // Business Services
             builder.Services.AddHttpClient();
+            builder.Services.AddScoped<IEmailServices, EmailServices>();
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddScoped<IPropertyService, PropertyService>();

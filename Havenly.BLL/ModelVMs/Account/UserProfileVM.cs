@@ -9,6 +9,10 @@ namespace Havenly.BLL.ModelVMs.Account
         public string UserId { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; }
+        public string? ProfilePictureUrl { get; set; }
+        public string? Bio { get; set; }
+        public DateTime JoinedDate { get; set; } = DateTime.UtcNow;
         public string Role { get; set; } = "Guest";
         public string Status { get; set; } = "Active";
         public int TotalBookings { get; set; }

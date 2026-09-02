@@ -6,7 +6,9 @@ using Havenly.DAL.Entities;
 using Havenly.DAL.Enums;
 using Havenly.DAL.Repos.Abstractions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Havenly.PL.Controllers
 {
@@ -18,19 +20,25 @@ namespace Havenly.PL.Controllers
         private readonly IBookingRepository _bookingRepository;
         private readonly IPaymentService _paymentService;
         private readonly IWebHostEnvironment _environment;
+        private readonly IEmailServices _emailServices;
+        private readonly UserManager<User> _userManager;
 
         public HostController(
             IPropertyServices propertyServices,
             IAmenityRepository amenityRepository,
             IBookingRepository bookingRepository,
             IPaymentService paymentService,
-            IWebHostEnvironment environment)
+            IWebHostEnvironment environment,
+            IEmailServices emailServices,
+            UserManager<User> userManager)
         {
             _propertyServices = propertyServices;
             _amenityRepository = amenityRepository;
             _bookingRepository = bookingRepository;
             _paymentService = paymentService;
             _environment = environment;
+            _emailServices = emailServices;
+            _userManager = userManager;
         }
 
         private string GetCurrentUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
@@ -52,7 +60,13 @@ namespace Havenly.PL.Controllers
             ViewBag.PendingPayouts = payoutsData.PendingPayouts;
 
             var propertyIds = properties.Select(p => p.PropertyID).ToHashSet();
-            var allBookings = _bookingRepository.GetAll().ToList();
+            var allBookings = await _bookingRepository.GetAll()
+                .Include(b => b.Guest)
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Address)
+                .ToListAsync();
+
             var hostBookings = allBookings
                 .Where(b => b.Listing != null && propertyIds.Contains(b.Listing.PropertyID))
                 .OrderByDescending(b => b.CheckIn)
@@ -188,6 +202,35 @@ namespace Havenly.PL.Controllers
                 {
                     await _propertyServices.AddPropertyImages(property.PropertyID, userId, savedImages);
                 }
+            }
+
+            // Notify Admins of new listing
+            try
+            {
+                var hostUser = await _userManager.FindByIdAsync(userId);
+                var admins = await _userManager.GetUsersInRoleAsync(UserRoles.Admin);
+                var adminEmails = admins.Select(a => a.Email).Where(e => !string.IsNullOrEmpty(e)).Distinct().ToList();
+                if (!adminEmails.Any())
+                {
+                    adminEmails.Add("admin@test.com");
+                }
+
+                foreach (var adminEmail in adminEmails)
+                {
+                    await _emailServices.SendListingSubmittedToAdminAsync(
+                        adminEmail!,
+                        hostUser?.Name ?? "Host",
+                        hostUser?.Email ?? "N/A",
+                        model.PropertyName,
+                        model.Category,
+                        $"{model.City}, {model.Country}",
+                        model.Price,
+                        property.PropertyID);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ADMIN NOTIFICATION ERROR] {ex.Message}");
             }
 
             TempData["SuccessMessage"] = "Property submitted successfully! It is currently pending review by an admin.";
@@ -353,7 +396,13 @@ namespace Havenly.PL.Controllers
             var properties = (await _propertyServices.GetPropertiesByOwner(userId)).ToList();
             var propertyIds = properties.Select(p => p.PropertyID).ToHashSet();
 
-            var allBookings = _bookingRepository.GetAll().ToList();
+            var allBookings = await _bookingRepository.GetAll()
+                .Include(b => b.Guest)
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Address)
+                .ToListAsync();
+
             var hostBookings = allBookings
                 .Where(b => b.Listing != null && propertyIds.Contains(b.Listing.PropertyID))
                 .OrderByDescending(b => b.CheckIn)
@@ -370,7 +419,13 @@ namespace Havenly.PL.Controllers
             var properties = (await _propertyServices.GetPropertiesByOwner(userId)).ToList();
             var propertyIds = properties.Select(p => p.PropertyID).ToHashSet();
 
-            var booking = await _bookingRepository.GetById(id);
+            var booking = await _bookingRepository.GetAll()
+                .Include(b => b.Guest)
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Address)
+                .FirstOrDefaultAsync(b => b.BookingID == id);
+
             if (booking == null || booking.Listing == null || !propertyIds.Contains(booking.Listing.PropertyID))
             {
                 TempData["ErrorMessage"] = "Booking not found or you do not have permission to manage this booking.";
@@ -380,6 +435,34 @@ namespace Havenly.PL.Controllers
             booking.UpdateStatus(BookingStatus.Approved);
             _bookingRepository.Update(booking);
             await _bookingRepository.SaveChanges();
+
+            // Send confirmation email to Guest
+            try
+            {
+                var guest = booking.Guest ?? await _userManager.FindByIdAsync(booking.GuestUserID);
+                var host = await _userManager.FindByIdAsync(userId);
+                var prop = properties.FirstOrDefault(p => p.PropertyID == booking.Listing.PropertyID) ?? booking.Listing.Property;
+
+                if (guest != null && !string.IsNullOrEmpty(guest.Email))
+                {
+                    await _emailServices.SendBookingStatusToGuestAsync(
+                        guest.Email,
+                        guest.Name ?? "Guest",
+                        host?.Name ?? "Host",
+                        prop?.PropertyName ?? "Havenly Stay",
+                        booking.CheckIn,
+                        booking.CheckOut,
+                        booking.TotalPrice,
+                        prop?.Address?.City ?? "",
+                        prop?.Address?.Country ?? "",
+                        true,
+                        booking.BookingID);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GUEST ACCEPT NOTICE ERROR] {ex.Message}");
+            }
 
             TempData["SuccessMessage"] = $"Booking #{id} has been accepted and approved.";
             return RedirectToAction(nameof(Bookings));
@@ -393,7 +476,13 @@ namespace Havenly.PL.Controllers
             var properties = (await _propertyServices.GetPropertiesByOwner(userId)).ToList();
             var propertyIds = properties.Select(p => p.PropertyID).ToHashSet();
 
-            var booking = await _bookingRepository.GetById(id);
+            var booking = await _bookingRepository.GetAll()
+                .Include(b => b.Guest)
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Address)
+                .FirstOrDefaultAsync(b => b.BookingID == id);
+
             if (booking == null || booking.Listing == null || !propertyIds.Contains(booking.Listing.PropertyID))
             {
                 TempData["ErrorMessage"] = "Booking not found or you do not have permission to manage this booking.";
@@ -403,6 +492,34 @@ namespace Havenly.PL.Controllers
             booking.UpdateStatus(BookingStatus.Rejected);
             _bookingRepository.Update(booking);
             await _bookingRepository.SaveChanges();
+
+            // Send rejection email to Guest
+            try
+            {
+                var guest = booking.Guest ?? await _userManager.FindByIdAsync(booking.GuestUserID);
+                var host = await _userManager.FindByIdAsync(userId);
+                var prop = properties.FirstOrDefault(p => p.PropertyID == booking.Listing.PropertyID) ?? booking.Listing.Property;
+
+                if (guest != null && !string.IsNullOrEmpty(guest.Email))
+                {
+                    await _emailServices.SendBookingStatusToGuestAsync(
+                        guest.Email,
+                        guest.Name ?? "Guest",
+                        host?.Name ?? "Host",
+                        prop?.PropertyName ?? "Havenly Stay",
+                        booking.CheckIn,
+                        booking.CheckOut,
+                        booking.TotalPrice,
+                        prop?.Address?.City ?? "",
+                        prop?.Address?.Country ?? "",
+                        false,
+                        booking.BookingID);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GUEST REJECT NOTICE ERROR] {ex.Message}");
+            }
 
             TempData["SuccessMessage"] = $"Booking #{id} has been rejected.";
             return RedirectToAction(nameof(Bookings));

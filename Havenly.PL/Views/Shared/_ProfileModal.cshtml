@@ -1,0 +1,201 @@
+<!-- Interactive User/Host Profile Quick-View Modal -->
+<div id="userProfileModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeProfileModal()"></div>
+
+    <!-- Modal Card -->
+    <div class="relative w-full max-w-lg rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-2xl z-10 space-y-6 max-h-[90vh] overflow-y-auto">
+        <!-- Close button -->
+        <button type="button" onclick="closeProfileModal()" class="absolute top-5 right-5 rounded-full p-2 text-muted-foreground hover:bg-secondary hover:text-foreground transition">
+            <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <!-- Loading Spinner -->
+        <div id="profileModalLoading" class="py-12 flex flex-col items-center justify-center gap-3 text-muted-foreground">
+            <svg class="size-8 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+            <p class="text-xs font-semibold">Loading profile details...</p>
+        </div>
+
+        <!-- Content (Hidden while loading) -->
+        <div id="profileModalContent" class="hidden space-y-6">
+            <!-- Header with Avatar and Basic Info -->
+            <div class="flex items-center gap-5">
+                <div class="relative size-20 rounded-full bg-secondary border-2 border-primary/20 overflow-hidden flex-shrink-0 flex items-center justify-center text-2xl font-bold text-primary shadow-sm">
+                    <img id="pmAvatar" src="" alt="Profile photo" class="size-full object-cover hidden" />
+                    <span id="pmAvatarFallback">G</span>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h3 id="pmName" class="text-xl font-bold tracking-tight text-foreground">User Name</h3>
+                        <span id="pmRoleBadge" class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">Guest</span>
+                        <span id="pmRatingBadge" class="hidden rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-700">⭐ 5.00</span>
+                    </div>
+                    <p id="pmJoined" class="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Member since 2026
+                    </p>
+                </div>
+            </div>
+
+            <!-- Contact & Verified Badges -->
+            <div class="rounded-2xl border border-border bg-secondary/30 p-4 space-y-2 text-xs">
+                <div class="flex items-center justify-between text-muted-foreground">
+                    <span class="flex items-center gap-1.5">
+                        <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        Email:
+                    </span>
+                    <span id="pmEmail" class="font-medium text-foreground">email@example.com</span>
+                </div>
+                <div id="pmPhoneRow" class="flex items-center justify-between text-muted-foreground">
+                    <span class="flex items-center gap-1.5">
+                        <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                        Phone:
+                    </span>
+                    <span id="pmPhone" class="font-medium text-foreground">+20 100 123 4567</span>
+                </div>
+            </div>
+
+            <!-- Bio -->
+            <div id="pmBioContainer" class="space-y-1.5">
+                <h4 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">About</h4>
+                <p id="pmBio" class="text-sm text-foreground/90 leading-relaxed bg-background p-3.5 rounded-2xl border border-border"></p>
+            </div>
+
+            <!-- Host Properties Preview (if host) -->
+            <div id="pmHostPropertiesContainer" class="space-y-3 hidden">
+                <h4 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Featured Listings</h4>
+                <div id="pmHostPropertiesList" class="space-y-2"></div>
+            </div>
+
+            <!-- Footer / Full Profile Link -->
+            <div class="flex items-center justify-between pt-4 border-t border-border">
+                <button type="button" onclick="closeProfileModal()" class="text-xs font-semibold text-muted-foreground hover:text-foreground">
+                    Close
+                </button>
+                <a id="pmFullProfileBtn" href="#" class="rounded-xl bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground shadow hover:bg-primary/90 transition">
+                    View Full Profile →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function openProfileModal(userId) {
+    if (!userId) return;
+    
+    const modal = document.getElementById('userProfileModal');
+    const loading = document.getElementById('profileModalLoading');
+    const content = document.getElementById('profileModalContent');
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    loading.classList.remove('hidden');
+    content.classList.add('hidden');
+    
+    try {
+        const response = await fetch(`/Account/GetProfileSummary?id=${encodeURIComponent(userId)}`);
+        if (!response.ok) {
+            alert('Could not load user profile.');
+            closeProfileModal();
+            return;
+        }
+        
+        const data = await response.json();
+        
+        document.getElementById('pmName').textContent = data.name || 'User';
+        document.getElementById('pmRoleBadge').textContent = data.role || 'Guest';
+        document.getElementById('pmJoined').innerHTML = `<svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Member since ${data.joinedDate || '2026'}`;
+        document.getElementById('pmEmail').textContent = data.email || 'N/A';
+        
+        // Phone
+        const phoneRow = document.getElementById('pmPhoneRow');
+        if (data.phoneNumber) {
+            document.getElementById('pmPhone').textContent = data.phoneNumber;
+            phoneRow.classList.remove('hidden');
+        } else {
+            phoneRow.classList.add('hidden');
+        }
+        
+        // Avatar
+        const avatarImg = document.getElementById('pmAvatar');
+        const fallback = document.getElementById('pmAvatarFallback');
+        if (data.profilePictureUrl) {
+            avatarImg.src = data.profilePictureUrl;
+            avatarImg.classList.remove('hidden');
+            fallback.classList.add('hidden');
+        } else {
+            avatarImg.classList.add('hidden');
+            fallback.textContent = (data.name ? data.name[0] : 'U').toUpperCase();
+            fallback.classList.remove('hidden');
+        }
+        
+        // Bio
+        const bioContainer = document.getElementById('pmBioContainer');
+        const bioText = document.getElementById('pmBio');
+        if (data.bio && data.bio.trim().length > 0) {
+            bioText.textContent = data.bio;
+            bioContainer.classList.remove('hidden');
+        } else {
+            bioContainer.classList.add('hidden');
+        }
+        
+        // Rating & Properties (if host)
+        const ratingBadge = document.getElementById('pmRatingBadge');
+        const propContainer = document.getElementById('pmHostPropertiesContainer');
+        const propList = document.getElementById('pmHostPropertiesList');
+        
+        if (data.role === 'Host') {
+            ratingBadge.textContent = `⭐ ${(data.averageRating || 5.0).toFixed(2)} Host`;
+            ratingBadge.classList.remove('hidden');
+            
+            if (data.properties && data.properties.length > 0) {
+                propList.innerHTML = data.properties.map(p => `
+                    <div class="flex items-center justify-between p-2.5 rounded-xl border border-border bg-background">
+                        <div class="flex items-center gap-3">
+                            <img src="${p.imageUrl}" class="size-10 rounded-lg object-cover" />
+                            <div>
+                                <h5 class="font-semibold text-xs text-foreground line-clamp-1">${p.propertyName}</h5>
+                                <p class="text-[11px] text-muted-foreground">${p.city}, ${p.country}</p>
+                            </div>
+                        </div>
+                        <div class="font-bold text-xs text-primary">$${p.price}/nt</div>
+                    </div>
+                `).join('');
+                propContainer.classList.remove('hidden');
+            } else {
+                propContainer.classList.add('hidden');
+            }
+        } else {
+            ratingBadge.classList.add('hidden');
+            propContainer.classList.add('hidden');
+        }
+        
+        document.getElementById('pmFullProfileBtn').href = `/Account/ViewProfile/${encodeURIComponent(data.userId)}`;
+        
+        loading.classList.add('hidden');
+        content.classList.remove('hidden');
+    } catch (err) {
+        console.error('Error loading profile:', err);
+        alert('An error occurred while loading profile.');
+        closeProfileModal();
+    }
+}
+
+function closeProfileModal() {
+    const modal = document.getElementById('userProfileModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+</script>

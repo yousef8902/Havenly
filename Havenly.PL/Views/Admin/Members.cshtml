@@ -1,4 +1,4 @@
-﻿@*
+@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
@@ -147,19 +147,19 @@
 
                     <tr class="hover:bg-muted/50 transition member-row">
                         <td class="p-4 font-medium">
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-3 cursor-pointer group" onclick="openProfileModal('@user.Id')">
                                 @if (!string.IsNullOrEmpty(user.AvatarUrl))
                                 {
-                                    <img src="@user.AvatarUrl" alt="@user.FullName" class="size-8 rounded-full object-cover" />
+                                    <img src="@user.AvatarUrl" alt="@user.FullName" class="size-8 rounded-full object-cover group-hover:scale-105 transition" />
                                 }
                                 else
                                 {
-                                    <div class="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
+                                    <div class="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm group-hover:scale-105 transition">
                                         @initials
                                     </div>
                                 }
                                 <div>
-                                    <span class="font-medium">@user.FullName</span>
+                                    <span class="font-medium text-foreground group-hover:text-primary transition">@user.FullName</span>
                                     @if (user.IsVerified)
                                     {
                                         <svg class="size-4 inline-block text-primary" fill="currentColor" viewBox="0 0 20 20">

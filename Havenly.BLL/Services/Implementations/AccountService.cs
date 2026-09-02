@@ -1,8 +1,16 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
+using Havenly.BLL.ModelVMs;
 using Havenly.BLL.ModelVMs.Account;
 using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Entities;
 using Havenly.DAL.Enums;
+using Havenly.DAL.Repos.Abstractions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Havenly.BLL.Services.Implementations
 {
@@ -10,13 +18,28 @@ namespace Havenly.BLL.Services.Implementations
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly IEmailServices _emailServices;
+        private readonly IBookingRepository _bookingRepo;
+        private readonly IPropertyRepository _propertyRepo;
+        private readonly IFavoriteRepository _favoriteRepo;
+        private readonly IReviewRepository _reviewRepo;
 
         public AccountService(
             UserManager<User> userManager,
-            SignInManager<User> signInManager)
+            SignInManager<User> signInManager,
+            IEmailServices emailServices,
+            IBookingRepository bookingRepo,
+            IPropertyRepository propertyRepo,
+            IFavoriteRepository favoriteRepo,
+            IReviewRepository reviewRepo)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailServices = emailServices;
+            _bookingRepo = bookingRepo;
+            _propertyRepo = propertyRepo;
+            _favoriteRepo = favoriteRepo;
+            _reviewRepo = reviewRepo;
         }
 
         public async Task<IdentityResult> RegisterAsync(RegisterVM model)
@@ -25,12 +48,18 @@ namespace Havenly.BLL.Services.Implementations
 
             if (existingUser != null)
             {
-                return IdentityResult.Failed(
-                    new IdentityError
-                    {
-                        Code = "DuplicateEmail",
-                        Description = "Email is already registered."
-                    });
+                if (existingUser.EmailConfirmed)
+                {
+                    return IdentityResult.Failed(
+                        new IdentityError
+                        {
+                            Code = "DuplicateEmail",
+                            Description = "Email is already registered."
+                        });
+                }
+
+                // If user was never confirmed, clean up the stale record so they can re-register freshly
+                await _userManager.DeleteAsync(existingUser);
             }
 
             var roleToAssign = string.Equals(model.Role, UserRoles.Host, StringComparison.OrdinalIgnoreCase) 
@@ -43,7 +72,8 @@ namespace Havenly.BLL.Services.Implementations
                 Email = model.Email,
                 UserName = model.Email,
                 Role = roleToAssign,
-                Status = UserStatus.Active
+                Status = UserStatus.Active,
+                EmailConfirmed = false
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -59,11 +89,32 @@ namespace Havenly.BLL.Services.Implementations
                 return roleResult;
             }
 
+            // Generate 6-digit numeric OTP code
+            var otpCode = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+            var expiry = DateTime.UtcNow.AddMinutes(15).ToString("o");
+
+            await _userManager.SetAuthenticationTokenAsync(user, "Havenly", "EmailVerificationOTP", otpCode);
+            await _userManager.SetAuthenticationTokenAsync(user, "Havenly", "EmailVerificationExpiry", expiry);
+
+            // Send confirmation email asynchronously
+            await _emailServices.SendEmailVerificationOtpAsync(user.Email!, user.Name, otpCode);
+
             return IdentityResult.Success;
         }
 
         public async Task<SignInResult> LoginAsync(LoginVM model)
         {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user != null && !user.EmailConfirmed)
+            {
+                // Check password validity first
+                var passwordValid = await _userManager.CheckPasswordAsync(user, model.Password);
+                if (passwordValid)
+                {
+                    return SignInResult.NotAllowed;
+                }
+            }
+
             return await _signInManager.PasswordSignInAsync(
                 model.Email,
                 model.Password,
@@ -71,9 +122,240 @@ namespace Havenly.BLL.Services.Implementations
                 lockoutOnFailure: true);
         }
 
+        public async Task<(bool Succeeded, string? ErrorMessage)> VerifyOtpAsync(string email, string otpCode)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(otpCode))
+                return (false, "Please provide email and verification code.");
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return (false, "Account not found.");
+
+            if (user.EmailConfirmed)
+            {
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return (true, null);
+            }
+
+            var storedOtp = await _userManager.GetAuthenticationTokenAsync(user, "Havenly", "EmailVerificationOTP");
+            var storedExpiryStr = await _userManager.GetAuthenticationTokenAsync(user, "Havenly", "EmailVerificationExpiry");
+
+            if (string.IsNullOrEmpty(storedOtp) || storedOtp != otpCode.Trim())
+            {
+                return (false, "Invalid verification code. Please check and try again.");
+            }
+
+            if (DateTime.TryParse(storedExpiryStr, null, System.Globalization.DateTimeStyles.RoundtripKind, out var expiryDate))
+            {
+                if (DateTime.UtcNow > expiryDate)
+                {
+                    return (false, "Verification code has expired. Please request a new code.");
+                }
+            }
+
+            // Mark email confirmed
+            user.EmailConfirmed = true;
+            await _userManager.UpdateAsync(user);
+
+            // Clean up tokens
+            await _userManager.RemoveAuthenticationTokenAsync(user, "Havenly", "EmailVerificationOTP");
+            await _userManager.RemoveAuthenticationTokenAsync(user, "Havenly", "EmailVerificationExpiry");
+
+            // Sign user in
+            await _signInManager.SignInAsync(user, isPersistent: false);
+
+            return (true, null);
+        }
+
+        public async Task<(bool Succeeded, string? ErrorMessage)> ResendOtpAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return (false, "Please provide an email address.");
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return (false, "Account not found.");
+
+            if (user.EmailConfirmed)
+                return (false, "This email is already verified.");
+
+            var otpCode = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
+            var expiry = DateTime.UtcNow.AddMinutes(15).ToString("o");
+
+            await _userManager.SetAuthenticationTokenAsync(user, "Havenly", "EmailVerificationOTP", otpCode);
+            await _userManager.SetAuthenticationTokenAsync(user, "Havenly", "EmailVerificationExpiry", expiry);
+
+            await _emailServices.SendEmailVerificationOtpAsync(user.Email!, user.Name, otpCode);
+
+            return (true, null);
+        }
+
         public async Task LogoutAsync()
         {
             await _signInManager.SignOutAsync();
+        }
+
+        public async Task<UserProfileVM?> GetUserProfileAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return null;
+
+            var bookings = await _bookingRepo.GetAll()
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Address)
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Images)
+                .Where(b => b.GuestUserID == userId)
+                .OrderByDescending(b => b.CheckIn)
+                .ToListAsync();
+
+            var totalFavorites = await _favoriteRepo.GetAll();
+            var userFavoritesCount = totalFavorites.Count(f => f.UserID == userId);
+
+            var totalReviews = await _reviewRepo.GetAll();
+            var userReviewsCount = totalReviews.Count(r => r.UserID == userId);
+
+            var recentBookingsVm = bookings.Take(5).Select(b => new BookingDetailsVM
+            {
+                BookingId = b.BookingID,
+                PropertyId = b.Listing?.PropertyID ?? 0,
+                Title = b.Listing?.Property?.PropertyName ?? $"Property #{b.ListingID}",
+                City = b.Listing?.Property?.Address?.City ?? string.Empty,
+                Country = b.Listing?.Property?.Address?.Country ?? string.Empty,
+                ImageUrl = b.Listing?.Property?.Images?.FirstOrDefault(img => img.IsPrimary == true)?.ImagePath 
+                        ?? b.Listing?.Property?.Images?.FirstOrDefault()?.ImagePath 
+                        ?? "/images/p1.jpg",
+                CheckIn = b.CheckIn,
+                CheckOut = b.CheckOut,
+                Guests = b.Listing?.Property?.NumberOfGuests ?? 1,
+                TotalPrice = b.TotalPrice,
+                Status = b.Status.ToString()
+            }).ToList();
+
+            return new UserProfileVM
+            {
+                UserId = user.Id,
+                Name = user.Name,
+                Email = user.Email ?? string.Empty,
+                PhoneNumber = user.PhoneNumber,
+                ProfilePictureUrl = user.ProfilePictureUrl,
+                Bio = user.Bio,
+                JoinedDate = user.JoinedDate,
+                Role = user.Role,
+                Status = user.Status.ToString(),
+                TotalBookings = bookings.Count,
+                UpcomingBookings = bookings.Count(b => b.Status == BookingStatus.Approved && b.CheckIn >= DateTime.Today),
+                CompletedBookings = bookings.Count(b => b.Status == BookingStatus.Completed || (b.Status == BookingStatus.Approved && b.CheckOut < DateTime.Today)),
+                TotalFavorites = userFavoritesCount,
+                TotalReviews = userReviewsCount,
+                RecentBookings = recentBookingsVm
+            };
+        }
+
+        public async Task<EditProfileVM?> GetEditProfileAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return null;
+
+            return new EditProfileVM
+            {
+                UserId = user.Id,
+                Name = user.Name,
+                Email = user.Email ?? string.Empty,
+                PhoneNumber = user.PhoneNumber,
+                Bio = user.Bio,
+                CurrentProfilePictureUrl = user.ProfilePictureUrl
+            };
+        }
+
+        public async Task<(bool Succeeded, string? ErrorMessage)> UpdateProfileAsync(string userId, EditProfileVM model, string? savedAvatarPath = null)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return (false, "User not found.");
+
+            user.Name = model.Name;
+            user.PhoneNumber = model.PhoneNumber;
+            user.Bio = model.Bio;
+
+            if (!string.IsNullOrEmpty(savedAvatarPath))
+            {
+                user.ProfilePictureUrl = savedAvatarPath;
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return (false, string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
+
+            return (true, null);
+        }
+
+        public async Task<PublicUserProfileVM?> GetPublicProfileAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return null;
+
+            var properties = (await _propertyRepo.GetByOwner(userId)).ToList();
+            var propertyCards = properties.Select(p => new PublicPropertyCardVM
+            {
+                PropertyId = p.PropertyID,
+                ListingId = p.Listing?.ListingID ?? 0,
+                PropertyName = p.PropertyName,
+                Category = p.Category ?? "Design homes",
+                City = p.Address?.City ?? string.Empty,
+                Country = p.Address?.Country ?? string.Empty,
+                Price = p.Listing?.Price ?? 0,
+                Rating = p.Rating,
+                NumberOfReviews = (int)p.NumberOfReviews,
+                ImageUrl = p.Images?.FirstOrDefault(i => i.IsPrimary == true)?.ImagePath
+                        ?? p.Images?.FirstOrDefault()?.ImagePath
+                        ?? "/images/p1.jpg"
+            }).ToList();
+
+            var propIds = properties.Select(p => p.PropertyID).ToHashSet();
+            var allReviews = await _reviewRepo.GetAll();
+            var reviewsReceived = allReviews
+                .Where(r => propIds.Contains(r.PropertyID))
+                .OrderByDescending(r => r.ReviewID)
+                .Take(6)
+                .Select(r => new PublicUserReviewVM
+                {
+                    ReviewerName = r.User?.Name ?? "Guest",
+                    ReviewerAvatar = r.User?.ProfilePictureUrl,
+                    PropertyName = r.Property?.PropertyName ?? "Stay",
+                    Rating = r.Rating,
+                    Comment = r.Comment ?? string.Empty,
+                    CreatedAt = DateTime.UtcNow.AddDays(-14)
+                }).ToList();
+
+            var allBookings = await _bookingRepo.GetAll().Where(b => b.GuestUserID == userId).ToListAsync();
+            var completedStays = allBookings.Count(b => b.Status == BookingStatus.Completed || b.Status == BookingStatus.Approved);
+
+            double avgRating = properties.Any(p => p.NumberOfReviews > 0)
+                ? Math.Round(properties.Where(p => p.NumberOfReviews > 0).Average(p => p.Rating), 2)
+                : 5.0;
+
+            return new PublicUserProfileVM
+            {
+                UserId = user.Id,
+                Name = user.Name,
+                Email = user.Email ?? string.Empty,
+                PhoneNumber = user.PhoneNumber,
+                ProfilePictureUrl = user.ProfilePictureUrl,
+                Bio = user.Bio,
+                JoinedDate = user.JoinedDate,
+                Role = user.Role,
+                Status = user.Status.ToString(),
+                TotalProperties = properties.Count,
+                TotalCompletedStays = completedStays,
+                TotalReviewsReceived = reviewsReceived.Count,
+                AverageHostRating = avgRating,
+                Properties = propertyCards,
+                Reviews = reviewsReceived
+            };
         }
     }
 }

@@ -42,9 +42,12 @@ namespace Havenly.BLL.Mappers
                 // Owner / Host Details
                 .ForMember(dest => dest.Host, opt => opt.MapFrom(src => new HostVM
                 {
-                    Name = src.Owner != null ?src.Owner.Name : "Havenly Host",
-                    //Since = src.Owner != null ? src.Owner.CreatedAt.Year.ToString() : "2024",
-                    
+                    HostId = src.Owner != null ? src.Owner.Id : string.Empty,
+                    Name = src.Owner != null ? src.Owner.Name : "Havenly Host",
+                    AvatarUrl = src.Owner != null ? (src.Owner.ProfilePictureUrl ?? string.Empty) : string.Empty,
+                    Bio = src.Owner != null ? (src.Owner.Bio ?? string.Empty) : string.Empty,
+                    Since = src.Owner != null ? src.Owner.JoinedDate.ToString("MMMM yyyy") : "2026",
+                    Superhost = true,
                     ResponseRate = 98
                 }))
 

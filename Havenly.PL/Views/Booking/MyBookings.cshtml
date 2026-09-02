@@ -56,7 +56,17 @@
                                 <a asp-controller="Property" asp-action="Detail" asp-route-id="@booking.PropertyId" class="font-semibold hover:text-primary">
                                     @booking.Title
                                 </a>
-                                <p class="text-sm text-muted-foreground">@booking.City, @booking.Country</p>
+                                <div class="flex items-center gap-3 text-sm text-muted-foreground">
+                                    <span>@booking.City, @booking.Country</span>
+                                    @if (!string.IsNullOrEmpty(booking.HostName) && !string.IsNullOrEmpty(booking.HostId))
+                                    {
+                                        <span>•</span>
+                                        <button type="button" onclick="openProfileModal('@booking.HostId')" class="font-medium text-primary hover:underline flex items-center gap-1">
+                                            <span>Hosted by @booking.HostName</span>
+                                            <span class="text-xs">↗</span>
+                                        </button>
+                                    }
+                                </div>
 
                                 <div class="flex flex-wrap gap-4 pt-2 text-sm text-muted-foreground">
                                     <div class="flex items-center gap-1">

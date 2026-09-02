@@ -1,0 +1,259 @@
+@model Havenly.BLL.ModelVMs.Account.VerifyOtpVM
+
+@{
+    ViewData["Title"] = "Verify your email — Havenly";
+}
+
+<div class="container-page py-12">
+    <div class="max-w-md mx-auto">
+        <div class="rounded-3xl border border-border bg-card p-8 shadow-lift space-y-6">
+            <div class="text-center space-y-2">
+                <div class="inline-flex size-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 mb-2">
+                    <svg class="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight">Verify your email</h1>
+                <p class="text-sm text-muted-foreground">
+                    We've sent a 6-digit verification code to
+                    <span class="font-semibold text-foreground block mt-0.5">@Model.Email</span>
+                </p>
+            </div>
+
+            <!-- Dynamic Alert Box -->
+            <div id="otpAlert" class="@(ViewData.ModelState.IsValid && TempData["ErrorMessage"] == null ? "hidden" : "") rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm font-medium text-destructive">
+                <ul id="otpErrorList" class="space-y-1 list-disc list-inside">
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <li>@TempData["ErrorMessage"]</li>
+                    }
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    }
+                </ul>
+            </div>
+
+            <!-- Success Box (for Resend OTP) -->
+            <div id="otpSuccessAlert" class="@(TempData["SuccessMessage"] == null ? "hidden" : "") rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm font-medium text-emerald-700">
+                <span id="otpSuccessMsg">@(TempData["SuccessMessage"] ?? "Verification code sent!")</span>
+            </div>
+
+            <form id="verifyOtpForm" asp-action="VerifyOtp" method="post" class="space-y-6">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Email" id="hiddenEmail" />
+                <input type="hidden" asp-for="OtpCode" id="hiddenOtpCode" />
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-muted-foreground text-center mb-3">
+                        Enter 6-Digit Code
+                    </label>
+
+                    <!-- 6-Box OTP Input -->
+                    <div class="flex justify-center items-center gap-2 sm:gap-3" id="otpBoxContainer">
+                        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="otp-box size-12 sm:size-13 rounded-xl border-2 border-border bg-background text-center text-xl font-bold focus:border-primary focus:outline-none transition" autofocus />
+                        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="otp-box size-12 sm:size-13 rounded-xl border-2 border-border bg-background text-center text-xl font-bold focus:border-primary focus:outline-none transition" />
+                        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="otp-box size-12 sm:size-13 rounded-xl border-2 border-border bg-background text-center text-xl font-bold focus:border-primary focus:outline-none transition" />
+                        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="otp-box size-12 sm:size-13 rounded-xl border-2 border-border bg-background text-center text-xl font-bold focus:border-primary focus:outline-none transition" />
+                        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="otp-box size-12 sm:size-13 rounded-xl border-2 border-border bg-background text-center text-xl font-bold focus:border-primary focus:outline-none transition" />
+                        <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" class="otp-box size-12 sm:size-13 rounded-xl border-2 border-border bg-background text-center text-xl font-bold focus:border-primary focus:outline-none transition" />
+                    </div>
+                </div>
+
+                <button type="submit" id="verifySubmitBtn" class="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition flex items-center justify-center gap-2">
+                    <span id="verifyBtnText">Confirm & Continue</span>
+                    <svg id="verifySpinner" class="hidden animate-spin size-4 text-primary-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Spam / Junk Folder Tip -->
+            <div class="rounded-2xl border border-border/80 bg-secondary/40 p-3.5 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+                <svg class="size-4 shrink-0 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Can't find the email in your inbox? Please check your <strong>Spam</strong>, <strong>Junk</strong>, or <strong>Promotions</strong> folder.</span>
+            </div>
+
+            <div class="border-t border-border pt-4 text-center space-y-3">
+                <div class="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+                    <span>Didn't receive the code?</span>
+                    <button type="button" id="resendOtpBtn" onclick="handleResendOtp()" class="font-semibold text-primary hover:underline focus:outline-none">
+                        Resend code
+                    </button>
+                </div>
+
+                <div>
+                    <a asp-action="Register" class="text-xs text-muted-foreground hover:text-foreground underline">
+                        Entered the wrong email? Use another address
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const otpBoxes = document.querySelectorAll('.otp-box');
+        const hiddenOtp = document.getElementById('hiddenOtpCode');
+        const verifyForm = document.getElementById('verifyOtpForm');
+        const alertBox = document.getElementById('otpAlert');
+        const errorList = document.getElementById('otpErrorList');
+        const successBox = document.getElementById('otpSuccessAlert');
+        const successMsg = document.getElementById('otpSuccessMsg');
+        const submitBtn = document.getElementById('verifySubmitBtn');
+        const btnText = document.getElementById('verifyBtnText');
+        const spinner = document.getElementById('verifySpinner');
+        const resendBtn = document.getElementById('resendOtpBtn');
+
+        // OTP inputs interaction (Auto advance, Backspace, Paste)
+        otpBoxes.forEach((box, index) => {
+            box.addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (!/^[0-9]$/.test(val)) {
+                    e.target.value = '';
+                    return;
+                }
+                if (val && index < otpBoxes.length - 1) {
+                    otpBoxes[index + 1].focus();
+                }
+                syncOtpCode();
+            });
+
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !box.value && index > 0) {
+                    otpBoxes[index - 1].focus();
+                }
+            });
+
+            box.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = (e.clipboardData || window.clipboardData).getData('text').trim();
+                if (/^[0-9]{6}$/.test(pasteData)) {
+                    pasteData.split('').forEach((char, i) => {
+                        if (otpBoxes[i]) otpBoxes[i].value = char;
+                    });
+                    otpBoxes[otpBoxes.length - 1].focus();
+                    syncOtpCode();
+                }
+            });
+        });
+
+        function syncOtpCode() {
+            let code = '';
+            otpBoxes.forEach(b => code += b.value);
+            hiddenOtp.value = code;
+        }
+
+        // AJAX Form Submit
+        verifyForm?.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            syncOtpCode();
+
+            if (hiddenOtp.value.length !== 6) {
+                alertBox.classList.remove('hidden');
+                errorList.innerHTML = '<li>Please enter all 6 digits of the verification code.</li>';
+                return;
+            }
+
+            alertBox.classList.add('hidden');
+            successBox.classList.add('hidden');
+            submitBtn.disabled = true;
+            btnText.textContent = 'Verifying...';
+            spinner.classList.remove('hidden');
+
+            try {
+                const formData = new FormData(verifyForm);
+                const response = await fetch(verifyForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    btnText.textContent = 'Verified!';
+                    window.location.href = data.redirectUrl || '/';
+                } else {
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'Confirm & Continue';
+                    spinner.classList.add('hidden');
+
+                    const errors = data.errors || [data.message || 'Verification failed.'];
+                    errorList.innerHTML = errors.map(err => `<li>${err}</li>`).join('');
+                    alertBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                verifyForm.submit();
+            }
+        });
+
+        // AJAX Resend OTP
+        let countdownInterval;
+        async function handleResendOtp() {
+            const email = document.getElementById('hiddenEmail').value;
+            if (!email) return;
+
+            resendBtn.disabled = true;
+            resendBtn.classList.add('opacity-50', 'pointer-events-none');
+
+            try {
+                const formData = new FormData();
+                formData.append('email', email);
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                if (token) formData.append('__RequestVerificationToken', token);
+
+                const response = await fetch('/Account/ResendOtp', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    successMsg.textContent = data.message || 'A new code has been sent to your email!';
+                    successBox.classList.remove('hidden');
+                    alertBox.classList.add('hidden');
+
+                    // Start 45s cooldown
+                    let seconds = 45;
+                    resendBtn.textContent = `Resend in ${seconds}s`;
+                    countdownInterval = setInterval(() => {
+                        seconds--;
+                        if (seconds <= 0) {
+                            clearInterval(countdownInterval);
+                            resendBtn.disabled = false;
+                            resendBtn.classList.remove('opacity-50', 'pointer-events-none');
+                            resendBtn.textContent = 'Resend code';
+                        } else {
+                            resendBtn.textContent = `Resend in ${seconds}s`;
+                        }
+                    }, 1000);
+                } else {
+                    resendBtn.disabled = false;
+                    resendBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    alertBox.classList.remove('hidden');
+                    errorList.innerHTML = `<li>${data.message || 'Could not resend code.'}</li>`;
+                }
+            } catch (err) {
+                resendBtn.disabled = false;
+                resendBtn.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        }
+    </script>
+}

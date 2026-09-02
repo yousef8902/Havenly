@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Havenly.DAL.Entities;
 using Havenly.DAL.Enums;
 using Havenly.DAL.Repos.Abstractions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,6 +22,7 @@ namespace Havenly.PL.Controllers
         private readonly IBookingService _bookingService;
         private readonly IFavoriteRepository _favoriteRepository;
         private readonly IReviewRepository _reviewRepository;
+        private readonly IWebHostEnvironment _environment;
 
         public AccountController(
             IAccountService accountService,
@@ -27,7 +30,8 @@ namespace Havenly.PL.Controllers
             UserManager<User> userManager,
             IBookingService bookingService,
             IFavoriteRepository favoriteRepository,
-            IReviewRepository reviewRepository)
+            IReviewRepository reviewRepository,
+            IWebHostEnvironment environment)
         {
             _accountService = accountService;
             _signInManager = signInManager;
@@ -35,6 +39,7 @@ namespace Havenly.PL.Controllers
             _bookingService = bookingService;
             _favoriteRepository = favoriteRepository;
             _reviewRepository = reviewRepository;
+            _environment = environment;
         }
 
         // GET: /Account/Register
@@ -49,8 +54,19 @@ namespace Havenly.PL.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterVM model)
         {
+            bool isAjax = IsAjaxRequest();
+
             if (!ModelState.IsValid)
             {
+                if (isAjax)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .Where(msg => !string.IsNullOrWhiteSpace(msg))
+                        .ToList();
+                    return Json(new { success = false, message = "Please correct the highlighted errors.", errors });
+                }
                 return View(model);
             }
 
@@ -58,7 +74,18 @@ namespace Havenly.PL.Controllers
 
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Home");
+                var redirectUrl = Url.Action("VerifyOtp", "Account", new { email = model.Email });
+                if (isAjax)
+                {
+                    return Json(new { success = true, redirectUrl });
+                }
+                return RedirectToAction("VerifyOtp", new { email = model.Email });
+            }
+
+            var regErrors = result.Errors.Select(e => e.Description).ToList();
+            if (isAjax)
+            {
+                return Json(new { success = false, message = "Registration failed.", errors = regErrors });
             }
 
             foreach (var error in result.Errors)
@@ -67,6 +94,84 @@ namespace Havenly.PL.Controllers
             }
 
             return View(model);
+        }
+
+        // GET: /Account/VerifyOtp
+        [HttpGet]
+        public IActionResult VerifyOtp(string? email = null)
+        {
+            var model = new VerifyOtpVM { Email = email ?? string.Empty };
+            return View(model);
+        }
+
+        // POST: /Account/VerifyOtp
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyOtp(VerifyOtpVM model)
+        {
+            bool isAjax = IsAjaxRequest();
+
+            if (!ModelState.IsValid)
+            {
+                if (isAjax)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .Where(msg => !string.IsNullOrWhiteSpace(msg))
+                        .ToList();
+                    return Json(new { success = false, message = "Please enter a valid 6-digit code.", errors });
+                }
+                return View(model);
+            }
+
+            var (succeeded, errorMessage) = await _accountService.VerifyOtpAsync(model.Email, model.OtpCode);
+
+            if (succeeded)
+            {
+                var redirectUrl = Url.Action("Index", "Home");
+                if (isAjax)
+                {
+                    return Json(new { success = true, redirectUrl });
+                }
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (isAjax)
+            {
+                return Json(new { success = false, message = errorMessage ?? "Invalid code.", errors = new[] { errorMessage ?? "Invalid code." } });
+            }
+
+            ModelState.AddModelError(string.Empty, errorMessage ?? "Invalid verification code.");
+            return View(model);
+        }
+
+        // POST: /Account/ResendOtp
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResendOtp(string email)
+        {
+            bool isAjax = IsAjaxRequest();
+
+            var (succeeded, errorMessage) = await _accountService.ResendOtpAsync(email);
+
+            if (succeeded)
+            {
+                if (isAjax)
+                {
+                    return Json(new { success = true, message = "A new 6-digit verification code has been sent to your email." });
+                }
+                TempData["SuccessMessage"] = "A new verification code has been sent.";
+                return RedirectToAction("VerifyOtp", new { email });
+            }
+
+            if (isAjax)
+            {
+                return Json(new { success = false, message = errorMessage ?? "Failed to resend code." });
+            }
+
+            TempData["ErrorMessage"] = errorMessage ?? "Failed to resend code.";
+            return RedirectToAction("VerifyOtp", new { email });
         }
 
         // GET: /Account/Login
@@ -83,9 +188,19 @@ namespace Havenly.PL.Controllers
         public async Task<IActionResult> Login(LoginVM model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
+            bool isAjax = IsAjaxRequest();
 
             if (!ModelState.IsValid)
             {
+                if (isAjax)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .Where(msg => !string.IsNullOrWhiteSpace(msg))
+                        .ToList();
+                    return Json(new { success = false, message = "Please check the entered credentials.", errors });
+                }
                 return View(model);
             }
 
@@ -93,32 +208,54 @@ namespace Havenly.PL.Controllers
 
             if (result.Succeeded)
             {
+                var redirectUrl = !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)
+                    ? returnUrl
+                    : Url.Action("Index", "Home");
+
+                if (isAjax)
+                {
+                    return Json(new { success = true, redirectUrl });
+                }
                 return RedirectToLocal(returnUrl);
             }
 
             if (result.IsLockedOut)
             {
-                ModelState.AddModelError(
-                    string.Empty,
-                    "Your account is temporarily locked. Please try again later.");
-
+                var lockMsg = "Your account is temporarily locked. Please try again later.";
+                if (isAjax)
+                {
+                    return Json(new { success = false, message = lockMsg, errors = new[] { lockMsg } });
+                }
+                ModelState.AddModelError(string.Empty, lockMsg);
                 return View(model);
             }
 
             if (result.IsNotAllowed)
             {
-                ModelState.AddModelError(
-                    string.Empty,
-                    "You are not allowed to sign in.");
-
-                return View(model);
+                var notAllowedMsg = "Please verify your email address to continue.";
+                var verifyUrl = Url.Action("VerifyOtp", "Account", new { email = model.Email });
+                if (isAjax)
+                {
+                    return Json(new { success = false, requiresVerification = true, redirectUrl = verifyUrl, message = notAllowedMsg, errors = new[] { notAllowedMsg } });
+                }
+                return RedirectToAction("VerifyOtp", new { email = model.Email });
             }
 
-            ModelState.AddModelError(
-                string.Empty,
-                "Invalid email or password.");
+            // Generic error message: do not reveal whether email or password was wrong
+            var genericError = "Invalid email or password.";
+            if (isAjax)
+            {
+                return Json(new { success = false, message = genericError, errors = new[] { genericError } });
+            }
 
+            ModelState.AddModelError(string.Empty, genericError);
             return View(model);
+        }
+
+        private bool IsAjaxRequest()
+        {
+            return Request.Headers["X-Requested-With"] == "XMLHttpRequest" ||
+                   Request.Headers.Accept.ToString().Contains("application/json");
         }
 
         // POST: /Account/ExternalLogin
@@ -210,29 +347,110 @@ namespace Havenly.PL.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
-            var bookings = (await _bookingService.GetBookingsByUserAsync(user.Id)).ToList();
-            var favorites = await _favoriteRepository.Find(f => f.UserID == user.Id);
-            var reviews = await _reviewRepository.Find(r => r.UserID == user.Id);
-
-            var roles = await _userManager.GetRolesAsync(user);
-            var primaryRole = roles.FirstOrDefault() ?? user.Role ?? "Guest";
-
-            var model = new UserProfileVM
+            var model = await _accountService.GetUserProfileAsync(user.Id);
+            if (model == null)
             {
-                UserId = user.Id,
-                Name = user.Name ?? "Guest User",
-                Email = user.Email ?? string.Empty,
-                Role = primaryRole,
-                Status = user.Status.ToString(),
-                TotalBookings = bookings.Count,
-                UpcomingBookings = bookings.Count(b => b.Status == "Approved"),
-                CompletedBookings = bookings.Count(b => b.Status == "Completed"),
-                TotalFavorites = favorites.Count(),
-                TotalReviews = reviews.Count(),
-                RecentBookings = bookings.Take(3).ToList()
-            };
+                return RedirectToAction(nameof(Login));
+            }
 
             return View(model);
+        }
+
+        // GET: /Account/EditProfile
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> EditProfile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction(nameof(Login));
+
+            var model = await _accountService.GetEditProfileAsync(user.Id);
+            return View(model);
+        }
+
+        // POST: /Account/EditProfile
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProfile(EditProfileVM model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction(nameof(Login));
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            string? savedAvatarPath = null;
+            if (model.ProfilePictureFile != null && model.ProfilePictureFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "avatars");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+                var ext = Path.GetExtension(model.ProfilePictureFile.FileName).ToLowerInvariant();
+                if (allowedExtensions.Contains(ext) && model.ProfilePictureFile.Length <= 5 * 1024 * 1024)
+                {
+                    var uniqueFileName = $"{Guid.NewGuid()}{ext}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.ProfilePictureFile.CopyToAsync(stream);
+                    }
+                    savedAvatarPath = $"/uploads/avatars/{uniqueFileName}";
+                }
+            }
+
+            var (success, error) = await _accountService.UpdateProfileAsync(user.Id, model, savedAvatarPath);
+            if (!success)
+            {
+                ModelState.AddModelError(string.Empty, error ?? "Unable to update profile.");
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Profile updated successfully!";
+            return RedirectToAction(nameof(Profile));
+        }
+
+        // GET: /Account/ViewProfile/{id}
+        [HttpGet]
+        public async Task<IActionResult> ViewProfile(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id)) return NotFound();
+
+            var model = await _accountService.GetPublicProfileAsync(id);
+            if (model == null) return NotFound();
+
+            return View(model);
+        }
+
+        // GET: /Account/GetProfileSummary/{id} (JSON endpoint for quick modal preview)
+        [HttpGet]
+        public async Task<IActionResult> GetProfileSummary(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id)) return BadRequest();
+
+            var model = await _accountService.GetPublicProfileAsync(id);
+            if (model == null) return NotFound();
+
+            return Json(new
+            {
+                userId = model.UserId,
+                name = model.Name,
+                email = model.Email,
+                phoneNumber = model.PhoneNumber,
+                profilePictureUrl = model.ProfilePictureUrl,
+                bio = model.Bio,
+                role = model.Role,
+                status = model.Status,
+                joinedDate = model.JoinedDate.ToString("MMMM yyyy"),
+                totalProperties = model.TotalProperties,
+                totalCompletedStays = model.TotalCompletedStays,
+                totalReviews = model.TotalReviewsReceived,
+                averageRating = model.AverageHostRating,
+                properties = model.Properties.Take(3)
+            });
         }
 
         // POST: /Account/Logout

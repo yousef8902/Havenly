@@ -1,4 +1,4 @@
-﻿
+using System.Threading.Tasks;
 using Havenly.BLL.ModelVMs.Account;
 using Microsoft.AspNetCore.Identity;
 
@@ -10,7 +10,18 @@ namespace Havenly.BLL.Services.Abstractions
 
         Task<SignInResult> LoginAsync(LoginVM model);
 
+        Task<(bool Succeeded, string? ErrorMessage)> VerifyOtpAsync(string email, string otpCode);
+
+        Task<(bool Succeeded, string? ErrorMessage)> ResendOtpAsync(string email);
+
         Task LogoutAsync();
+
+        Task<UserProfileVM?> GetUserProfileAsync(string userId);
+
+        Task<EditProfileVM?> GetEditProfileAsync(string userId);
+
+        Task<(bool Succeeded, string? ErrorMessage)> UpdateProfileAsync(string userId, EditProfileVM model, string? savedAvatarPath = null);
+
+        Task<PublicUserProfileVM?> GetPublicProfileAsync(string userId);
     }
 }
-
