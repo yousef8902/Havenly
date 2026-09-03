@@ -144,6 +144,9 @@ namespace Havenly.DAL.Migrations
                     b.Property<DateTime>("CheckOut")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("GuestUserID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");

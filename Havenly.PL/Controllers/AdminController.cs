@@ -54,9 +54,18 @@ namespace Havenly.PL.Controllers
             var vm = new AdminDashboardVM
             {
                 Stats = await _reportService.GetPlatformStats(),
+
                 PendingListings = await _listingService.GetPendingListings(),
-                MembersResult = await _adminService.GetMembersDataAsync(null, null, 1, 5)
+
+                MembersResult = await _adminService.GetMembersDataAsync(
+                    null,
+                    null,
+                    1,
+                    5),
+
+                MonthlyStats = await _reportService.GetMonthlyStats()
             };
+
             return View("Index", vm);
         }
 

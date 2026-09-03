@@ -6,8 +6,13 @@ namespace Havenly.BLL.ModelVMs
     public class AdminDashboardVM
     {
         public PlatformStatsVM Stats { get; set; }
-        public IEnumerable<PendingListing> PendingListings { get; set; }
 
-        public AdminMembersVM? MembersResult { get; set; }//mariam
+        public IEnumerable<PendingListing> PendingListings { get; set; }
+            = Enumerable.Empty<PendingListing>();
+
+        public AdminMembersVM? MembersResult { get; set; }
+
+        public MonthlyStatsVM MonthlyStats { get; set; }
+            = new MonthlyStatsVM();
     }
 }

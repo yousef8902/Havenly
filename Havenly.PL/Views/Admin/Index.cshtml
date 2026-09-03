@@ -1,3 +1,4 @@
+
 @model Havenly.BLL.ModelVMs.AdminDashboardVM
 
 @{
@@ -5,7 +6,7 @@
     ViewData["Description"] = "Moderate listings, manage member accounts and monitor platform growth across Havenly.";
     Layout = "~/Views/Shared/_WorkspaceLayout.cshtml";
     ViewData["WorkspaceNav"] = "admin";
-    ViewData["Workspace"] = "Admin console";
+    ViewData["Workspace"] = "Omar Khalil · Administrator";
     ViewData["WorkspaceRole"] = "Omar Khalil · Administrator";
 }
 
@@ -24,121 +25,322 @@
 
 <!-- Stat Cards Grid -->
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+    <!-- Members -->
     <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div class="flex items-center justify-between pb-2">
             <p class="text-sm font-medium text-muted-foreground">Members</p>
-            <svg class="size-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.856-3.488M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 0a2 2 0 11-4 0 2 2 0 014 0zM7 20H2v-2a3 3 0 015.856-3.488M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+
+            <svg class="size-4 text-muted-foreground"
+                 fill="none"
+                 stroke="currentColor"
+                 viewBox="0 0 24 24"
+                 width="16"
+                 height="16">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17 20h5v-2a3 3 0 00-5.856-3.488M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 0a2 2 0 11-4 0 2 2 0 014 0zM7 20H2v-2a3 3 0 015.856-3.488M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
         </div>
-        <div class="text-3xl font-bold">@(Model?.Stats?.MemberCount.ToString("N0") ?? "0")</div>
-        <p class="text-xs text-muted-foreground mt-1">Guests, hosts and staff</p>
+
+        <div class="text-3xl font-bold">
+            @(Model?.Stats?.MemberCount.ToString("N0") ?? "0")
+        </div>
+
+        <p class="text-xs text-muted-foreground mt-1">
+            Guests, hosts and staff
+        </p>
     </div>
 
+
+    <!-- Listings -->
     <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div class="flex items-center justify-between pb-2">
             <p class="text-sm font-medium text-muted-foreground">Listings</p>
-            <svg class="size-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+
+            <svg class="size-4 text-muted-foreground"
+                 fill="none"
+                 stroke="currentColor"
+                 viewBox="0 0 24 24"
+                 width="16"
+                 height="16">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
         </div>
-        <div class="text-3xl font-bold">@(Model?.Stats?.ListingCount.ToString("N0") ?? "0")</div>
-        <p class="text-xs text-muted-foreground mt-1">Live and in review</p>
+
+        <div class="text-3xl font-bold">
+            @(Model?.Stats?.ListingCount.ToString("N0") ?? "0")
+        </div>
+
+        <p class="text-xs text-muted-foreground mt-1">
+            Live and in review
+        </p>
     </div>
 
+
+    <!-- Gross Bookings -->
     <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div class="flex items-center justify-between pb-2">
             <p class="text-sm font-medium text-muted-foreground">Gross bookings</p>
-            <svg class="size-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+
+            <svg class="size-4 text-muted-foreground"
+                 fill="none"
+                 stroke="currentColor"
+                 viewBox="0 0 24 24"
+                 width="16"
+                 height="16">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         </div>
-        <div class="text-3xl font-bold">@(Model?.Stats?.GrossBookings.ToString("N2") ?? "0.00") EGP</div>
-        <p class="text-xs text-muted-foreground mt-1">Excludes cancellations</p>
+
+        <div class="text-3xl font-bold">
+            @(Model?.Stats?.GrossBookings.ToString("N2") ?? "0.00") EGP
+        </div>
+
+        <p class="text-xs text-muted-foreground mt-1">
+            Excludes cancellations
+        </p>
     </div>
 
+
+    <!-- Pending Review -->
     <div class="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div class="flex items-center justify-between pb-2">
             <p class="text-sm font-medium text-muted-foreground">Pending review</p>
-            <svg class="size-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+
+            <svg class="size-4 text-muted-foreground"
+                 fill="none"
+                 stroke="currentColor"
+                 viewBox="0 0 24 24"
+                 width="16"
+                 height="16">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7" />
             </svg>
         </div>
-        <div class="text-3xl font-bold">@(Model?.Stats?.PendingReviewCount.ToString("N0") ?? "0")</div>
-        <p class="text-xs text-muted-foreground mt-1">Awaiting moderation</p>
+
+        <div class="text-3xl font-bold">
+            @(Model?.Stats?.PendingReviewCount.ToString("N0") ?? "0")
+        </div>
+
+        <p class="text-xs text-muted-foreground mt-1">
+            Awaiting moderation
+        </p>
     </div>
+
 </div>
 
-<!-- Bookings vs Signups Chart Section -->
-<section class="mt-8 rounded-2xl border border-border bg-card p-6 shadow-sm">
-    <h2 class="text-xl font-bold">Bookings vs. signups</h2>
-    <div class="mt-6 flex h-44 items-end gap-4">
-        @{
-            // Use real data if available, otherwise fallback to sample
-            // var monthlyData = Model?.MonthlyStats ?? new List<MonthlyStat>();
-            // var maxValue = monthlyData.Any()
-            //     ? monthlyData.Max(m => Math.Max(m.Bookings, m.Signups))
-            //     : 100;
 
-            // if (monthlyData.Any())
-            // {
-            //     foreach (var m in monthlyData)
-            //     {
-            //         var bookingsHeight = maxValue > 0 ? (m.Bookings / (double)maxValue) * 100 : 0;
-            //         var signupsHeight = maxValue > 0 ? (m.Signups / (double)maxValue) * 100 : 0;
-            //         <div class="flex flex-1 flex-col items-center gap-2 h-full justify-end">
-            //             <div class="flex h-full w-full items-end justify-center gap-1">
-            //                 <div class="w-1/3 rounded-t bg-primary" style="height: @(bookingsHeight)%; min-height: 2px;"></div>
-            //                 <div class="w-1/3 rounded-t bg-accent" style="height: @(signupsHeight)%; min-height: 2px;"></div>
-            //             </div>
-            //             <span class="text-xs text-muted-foreground">@m.Month</span>
-            //         </div>
-            //     }
-            // }
-            // else
-            {
-                // Fallback sample data
-                var sampleMonths = new[] { ("Jan", 60, 40), ("Feb", 80, 55), ("Mar", 45, 30), ("Apr", 90, 70), ("May", 75, 60), ("Jun", 100, 85) };
-                foreach (var m in sampleMonths)
-                {
-                    <div class="flex flex-1 flex-col items-center gap-2 h-full justify-end">
-                        <div class="flex h-full w-full items-end justify-center gap-1">
-                            <div class="w-1/3 rounded-t bg-primary" style="height: @(m.Item2)%; min-height: 2px;"></div>
-                            <div class="w-1/3 rounded-t bg-accent" style="height: @(m.Item3)%; min-height: 2px;"></div>
-                        </div>
-                        <span class="text-xs text-muted-foreground">@m.Item1</span>
-                    </div>
-                }
-            }
+<!-- Bookings vs Signups Chart -->
+<section class="mt-8 rounded-2xl border border-border bg-card p-6 shadow-sm">
+
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+        <div>
+            <h2 class="text-xl font-bold">
+                Bookings vs. signups
+            </h2>
+
+            <p class="mt-1 text-sm text-muted-foreground">
+                Platform activity over the last 12 months
+            </p>
+        </div>
+
+        <!-- Legend -->
+        <div class="flex items-center gap-4 text-xs text-muted-foreground">
+
+            <span class="flex items-center gap-2">
+                <span class="size-3 rounded-sm bg-primary"
+                      style="width:12px;height:12px;">
+                </span>
+                Bookings
+            </span>
+
+            <span class="flex items-center gap-2">
+                <span class="size-3 rounded-sm bg-accent"
+                      style="width:12px;height:12px;">
+                </span>
+                Signups
+            </span>
+
+        </div>
+
+    </div>
+
+
+    @{
+        var monthlyStats = Model?.MonthlyStats;
+
+        var months = monthlyStats?.Months ?? new List<string>();
+
+        var bookings = monthlyStats?.Bookings ?? new List<int>();
+
+        var signups = monthlyStats?.Signups ?? new List<int>();
+
+        var maxValue = 0;
+
+        if (bookings.Any())
+        {
+            maxValue = Math.Max(maxValue, bookings.Max());
         }
-    </div>
-    <div class="mt-4 flex gap-4 text-xs text-muted-foreground">
-        <span class="flex items-center gap-2"><span class="size-3 rounded bg-primary" style="width:12px;height:12px;"></span> Bookings</span>
-        <span class="flex items-center gap-2"><span class="size-3 rounded bg-accent" style="width:12px;height:12px;background-color:#f59e0b;"></span> Signups</span>
-    </div>
+
+        if (signups.Any())
+        {
+            maxValue = Math.Max(maxValue, signups.Max());
+        }
+    }
+
+
+    @if (months.Any())
+    {
+        <div class="mt-8 flex h-64 items-end gap-2 sm:gap-4">
+
+            @for (int i = 0; i < months.Count; i++)
+            {
+                var bookingValue =
+                    i < bookings.Count ? bookings[i] : 0;
+
+                var signupValue =
+                    i < signups.Count ? signups[i] : 0;
+
+                var bookingHeight =
+                    maxValue > 0
+                        ? (bookingValue / (double)maxValue) * 100
+                        : 0;
+
+                var signupHeight =
+                    maxValue > 0
+                        ? (signupValue / (double)maxValue) * 100
+                        : 0;
+
+
+                <!-- Month -->
+                <div class="flex h-full flex-1 flex-col items-center justify-end gap-2">
+
+                    <!-- Bars -->
+                    <div class="flex h-full w-full items-end justify-center gap-1">
+
+
+                        <!-- Bookings -->
+                        <div class="group relative flex h-full w-1/3 items-end justify-center">
+
+                            <div class="w-full rounded-t-md bg-primary transition-all duration-300 hover:opacity-80"
+                                 style="height:@(bookingHeight)%; min-height:@(bookingValue > 0 ? "4px" : "0");">
+
+                                @if (bookingValue > 0)
+                                {
+                                    <span class="absolute bottom-full left-1/2 mb-1 hidden
+                                        -translate-x-1/2 whitespace-nowrap
+                                        rounded-md bg-foreground
+                                        px-2 py-1 text-xs text-background
+                                        group-hover:block">
+                                        @bookingValue bookings
+                                    </span>
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Signups -->
+                        <div class="group relative flex h-full w-1/3 items-end justify-center">
+
+                            <div class="w-full rounded-t-md bg-accent transition-all duration-300 hover:opacity-80"
+                                 style="height:@(signupHeight)%; min-height:@(signupValue > 0 ? "4px" : "0");">
+
+                                @if (signupValue > 0)
+                                {
+                                    <span class="absolute bottom-full left-1/2 mb-1 hidden
+                                        -translate-x-1/2 whitespace-nowrap
+                                        rounded-md bg-foreground
+                                        px-2 py-1 text-xs text-background
+                                        group-hover:block">
+                                        @signupValue signups
+                                    </span>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Month Label -->
+                    <span class="text-xs text-muted-foreground">
+                        @months[i]
+                    </span>
+
+                </div>
+            }
+
+        </div>
+    }
+    else
+    {
+        <div class="mt-8 flex h-48 items-center justify-center">
+
+            <p class="text-sm text-muted-foreground">
+                No monthly statistics available.
+            </p>
+
+        </div>
+    }
+
 </section>
+
 
 <!-- Tabs & Moderation Queue Table -->
 @{
     var queryTab = Context.Request.Query["tab"].ToString();
-    var tab = string.IsNullOrWhiteSpace(queryTab) ? "listings" : queryTab;
+
+    var tab = string.IsNullOrWhiteSpace(queryTab)
+        ? "listings"
+        : queryTab;
 }
 
+
 <div class="mt-8">
+
+    <!-- Tabs -->
     <div class="flex gap-2 border-b border-border pb-2">
-        <a href="?tab=listings" class="px-4 py-2 font-medium border-b-2 text-sm transition @(tab == "listings" ? "border-primary text-foreground font-semibold" : "border-transparent text-muted-foreground hover:text-foreground")">
+
+        <a href="?tab=listings"
+           class="px-4 py-2 font-medium border-b-2 text-sm transition @(tab == "listings"
+                          ? "border-primary text-foreground font-semibold"
+                          : "border-transparent text-muted-foreground hover:text-foreground")">
             Listings
         </a>
-        <a href="?tab=members" class="px-4 py-2 font-medium border-b-2 text-sm transition @(tab == "members" ? "border-primary text-foreground font-semibold" : "border-transparent text-muted-foreground hover:text-foreground")">
+
+        <a href="?tab=members"
+           class="px-4 py-2 font-medium border-b-2 text-sm transition @(tab == "members"
+                          ? "border-primary text-foreground font-semibold"
+                          : "border-transparent text-muted-foreground hover:text-foreground")">
             Members
         </a>
+
     </div>
+
 
     @if (tab == "listings")
     {
+        <!-- Listings Table -->
         <div class="mt-6 overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
+
             <table class="w-full text-sm text-left">
+
                 <thead class="border-b border-border bg-muted/40 text-muted-foreground">
+
                     <tr>
                         <th class="p-4 font-medium">Property</th>
                         <th class="p-4 font-medium">Host</th>
@@ -146,71 +348,147 @@
                         <th class="p-4 font-medium">Status</th>
                         <th class="p-4 font-medium text-right">Moderation</th>
                     </tr>
+
                 </thead>
+
+
                 <tbody class="divide-y divide-border">
-                    @if (Model?.PendingListings != null && Model.PendingListings.Any())
+
+                    @if (Model?.PendingListings != null &&
+                         Model.PendingListings.Any())
                     {
                         @foreach (var p in Model.PendingListings)
                         {
                             <tr class="hover:bg-muted/50 transition">
+
                                 <td class="p-4 font-medium">
-                                    <a asp-controller="Property" asp-action="Detail" asp-route-id="@p.ListingId" class="hover:underline text-foreground">
+
+                                    <a asp-controller="Property"
+                                       asp-action="Detail"
+                                       asp-route-id="@p.ListingId"
+                                       class="hover:underline text-foreground">
                                         @p.PropertyName
                                     </a>
+
                                 </td>
+
                                 <td class="p-4 text-muted-foreground">
                                     @p.HostName
                                 </td>
+
                                 <td class="p-4 text-muted-foreground">
                                     @(p.SubmittedDate?.ToString("MMM dd, yyyy") ?? "N/A")
                                 </td>
+
                                 <td class="p-4">
-                                    <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-800">
+
+                                    <span class="inline-flex items-center rounded-full
+                                        bg-yellow-100 px-2.5 py-0.5
+                                        text-xs font-semibold text-yellow-800">
                                         Pending
                                     </span>
+
                                 </td>
+
                                 <td class="p-4 text-right">
+
                                     <div class="flex justify-end gap-2">
-                                        <form asp-controller="Admin" asp-action="Approve" method="post" class="inline">
+
+                                        <!-- Approve -->
+                                        <form asp-controller="Admin"
+                                              asp-action="Approve"
+                                              method="post"
+                                              class="inline">
+
                                             @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@p.ListingId" />
-                                            <button type="submit" class="inline-flex items-center gap-1 h-8 rounded-lg border border-border bg-background px-3 text-xs font-medium hover:bg-secondary transition">
+
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="@p.ListingId" />
+
+                                            <button type="submit"
+                                                    class="inline-flex items-center gap-1
+                                                h-8 rounded-lg border border-border
+                                                bg-background px-3 text-xs
+                                                font-medium hover:bg-secondary
+                                                transition">
                                                 Approve
                                             </button>
+
                                         </form>
 
-                                        <form asp-controller="Admin" asp-action="Decline" method="post" class="inline">
+
+                                        <!-- Reject -->
+                                        <form asp-controller="Admin"
+                                              asp-action="Decline"
+                                              method="post"
+                                              class="inline">
+
                                             @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@p.ListingId" />
-                                            <button type="submit" class="inline-flex items-center gap-1 h-8 rounded-lg border border-transparent px-3 text-xs font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition">
+
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="@p.ListingId" />
+
+                                            <button type="submit"
+                                                    class="inline-flex items-center gap-1
+                                                h-8 rounded-lg border
+                                                border-transparent px-3
+                                                text-xs font-medium
+                                                text-muted-foreground
+                                                hover:bg-destructive/10
+                                                hover:text-destructive
+                                                transition">
                                                 Reject
                                             </button>
+
                                         </form>
+
                                     </div>
+
                                 </td>
+
                             </tr>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="5" class="p-8 text-center text-muted-foreground">
+
+                            <td colspan="5"
+                                class="p-8 text-center text-muted-foreground">
                                 No listings awaiting moderation.
                             </td>
+
                         </tr>
                     }
+
                 </tbody>
+
             </table>
+
         </div>
     }
     else
     {
+        <!-- Members -->
         <div class="mt-6 space-y-4">
-            <input type="text" id="searchMembers" placeholder="Search members by name, email or role" class="h-11 w-full max-w-sm rounded-xl border border-border bg-background px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+
+            <input type="text"
+                   id="searchMembers"
+                   placeholder="Search members by name, email or role"
+                   class="h-11 w-full max-w-sm rounded-xl border border-border
+            bg-background px-4 text-sm
+            focus:outline-none focus:ring-2 focus:ring-primary" />
+
 
             <div class="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
-                <table class="w-full text-sm text-left" id="membersTable">
+
+                <table class="w-full text-sm text-left"
+                       id="membersTable">
+
                     <thead class="border-b border-border bg-muted/40 text-muted-foreground">
+
                         <tr>
                             <th class="p-4 font-medium">Name</th>
                             <th class="p-4 font-medium">Email</th>
@@ -220,97 +498,221 @@
                             <th class="p-4 font-medium">Status</th>
                             <th class="p-4 font-medium text-right">Action</th>
                         </tr>
+
                     </thead>
+
+
                     <tbody class="divide-y divide-border">
+
                         @{
-                            var members = Model?.MembersResult?.Members ?? new List<MemberItem>();
+                            var members =
+                                Model?.MembersResult?.Members
+                                ?? new List<MemberItem>();
                         }
-                        @if (members.Any()){
-                            @foreach (var user in Model?.MembersResult?.Members)
+
+
+                        @if (members.Any())
+                        {
+                            @foreach (var user in members)
                             {
                                 var statusColor = user.Status switch
                                 {
-                                    UserStatus.Active => "bg-emerald-100 text-emerald-800",
-                                    UserStatus.Suspended => "bg-red-100 text-red-800",
-                                    _ => "bg-gray-100 text-gray-800"
+                                    UserStatus.Active =>
+                                        "bg-emerald-100 text-emerald-800",
+
+                                    UserStatus.Suspended =>
+                                        "bg-red-100 text-red-800",
+
+                                    _ =>
+                                        "bg-gray-100 text-gray-800"
                                 };
+
+
                                 <tr class="hover:bg-muted/50 transition member-row">
+
+                                    <!-- Name -->
                                     <td class="p-4 font-medium">
+
                                         <div class="flex items-center gap-2">
-                                            <div class="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
+
+                                            <div class="size-8 rounded-full
+                                                bg-primary/10
+                                                flex items-center justify-center
+                                                text-primary font-semibold text-sm">
+
                                                 @{
                                                     var initials = "U";
+
                                                     if (!string.IsNullOrEmpty(user.FullName))
                                                     {
-                                                        var parts = user.FullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                                                        var parts = user.FullName
+                                                            .Trim()
+                                                            .Split(' ',
+                                                                StringSplitOptions.RemoveEmptyEntries);
+
                                                         if (parts.Length == 1)
                                                         {
-                                                            initials = parts[0][0].ToString().ToUpper();
+                                                            initials =
+                                                                parts[0][0]
+                                                                    .ToString()
+                                                                    .ToUpper();
                                                         }
                                                         else if (parts.Length > 1)
                                                         {
-                                                            initials = $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+                                                            initials =
+                                                                $"{parts[0][0]}{parts[^1][0]}"
+                                                                    .ToUpper();
                                                         }
                                                     }
                                                 }
+
                                                 @initials
+
                                             </div>
+
                                             @user.FullName
+
                                         </div>
+
                                     </td>
-                                    <td class="p-4 text-muted-foreground">@user.Phone</td>
-                                    @* <td class="p-4">@user.Role</td> *@
-                                    <td class="p-4 text-muted-foreground">@(user.JoinedDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
-                                    <td class="p-4 text-center">@user.BookingsCount</td>
+
+
+                                    <!-- Email -->
+                                    <td class="p-4 text-muted-foreground">
+                                        @user.Email
+                                    </td>
+
+
+                                    <!-- Role -->
+                                    <td class="p-4 text-muted-foreground">
+                                        @user.Role
+                                    </td>
+
+
+                                    <!-- Joined -->
+                                    <td class="p-4 text-muted-foreground">
+                                        @(user.JoinedDate?.ToString("MMM dd, yyyy") ?? "N/A")
+                                    </td>
+
+
+                                    <!-- Bookings -->
+                                    <td class="p-4 text-center">
+                                        @user.BookingsCount
+                                    </td>
+
+
+                                    <!-- Status -->
                                     <td class="p-4">
-                                        <span class="inline-flex items-center rounded-full @statusColor px-2.5 py-0.5 text-xs font-semibold">
+
+                                        <span class="inline-flex items-center rounded-full
+                                            @statusColor
+                                            px-2.5 py-0.5
+                                            text-xs font-semibold">
                                             @user.StatusDisplay
                                         </span>
+
                                     </td>
+
+
+                                    <!-- Action -->
                                     <td class="p-4 text-right">
-                                        <form asp-controller="Admin" asp-action="ToggleUserStatus" method="post" class="inline">
+
+                                        <form asp-controller="Admin"
+                                              asp-action="ToggleUserStatus"
+                                              method="post"
+                                              class="inline">
+
                                             @Html.AntiForgeryToken()
-                                            <input type="hidden" name="userId" value="@user.Id" />
-                                            <input type="hidden" name="isActive" value="@(!user.IsActive)" />
-                                            <button type="submit" class="h-8 rounded-lg px-3 text-xs font-medium @(user.IsActive ? "text-muted-foreground hover:bg-destructive/10 hover:text-destructive" : "text-primary hover:bg-primary/10") transition">
-                                                @(user.IsActive ? "Suspend" : "Reinstate")
+
+                                            <input type="hidden"
+                                                   name="userId"
+                                                   value="@user.Id" />
+
+                                            <input type="hidden"
+                                                   name="isActive"
+                                                   value="@(!user.IsActive)" />
+
+                                            <button type="submit"
+                                                    class="h-8 rounded-lg px-3
+                                                text-xs font-medium
+                                                @(user.IsActive
+                                                    ? "text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                                                    : "text-primary hover:bg-primary/10")
+                                                transition">
+
+                                                @(user.IsActive
+                                                    ? "Suspend"
+                                                    : "Reinstate")
+
                                             </button>
+
                                         </form>
+
                                     </td>
+
                                 </tr>
                             }
                         }
                         else
                         {
                             <tr>
-                                <td colspan="7" class="p-8 text-center text-muted-foreground">
+
+                                <td colspan="7"
+                                    class="p-8 text-center text-muted-foreground">
                                     No members found.
                                 </td>
+
                             </tr>
                         }
+
                     </tbody>
+
                 </table>
+
             </div>
+
         </div>
     }
+
 </div>
 
+
 @section Scripts {
+
     <script>
+
         // Member search functionality
         document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchMembers');
+
+            const searchInput =
+                document.getElementById('searchMembers');
+
             if (searchInput) {
+
                 searchInput.addEventListener('input', function() {
-                    const query = this.value.toLowerCase();
-                    const rows = document.querySelectorAll('.member-row');
+
+                    const query =
+                        this.value.toLowerCase();
+
+                    const rows =
+                        document.querySelectorAll('.member-row');
 
                     rows.forEach(row => {
-                        const text = row.textContent.toLowerCase();
-                        row.style.display = text.includes(query) ? '' : 'none';
+
+                        const text =
+                            row.textContent.toLowerCase();
+
+                        row.style.display =
+                            text.includes(query) ? '' : 'none';
+
                     });
+
                 });
+
             }
+
         });
+
     </script>
 }
+

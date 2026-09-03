@@ -18,6 +18,8 @@ namespace Havenly.PL
     {
         public static async Task Main(string[] args)
         {
+
+           
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container
@@ -30,7 +32,8 @@ namespace Havenly.PL
                 )
                 .ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning))
             );
-
+            var conn = builder.Configuration.GetConnectionString("DefaultConnection");
+            Console.WriteLine(conn);
             // ASP.NET Core Identity
             builder.Services.AddIdentity<User, IdentityRole>(options =>
             {
