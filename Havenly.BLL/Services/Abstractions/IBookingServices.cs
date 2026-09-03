@@ -1,4 +1,4 @@
-﻿using Havenly.BLL.ModelVMs;
+using Havenly.BLL.ModelVMs;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,5 +13,6 @@ namespace Havenly.BLL.Services.Abstractions
         Task<IEnumerable<BookingDetailsVM>> GetBookingsByUserAsync(string userId);
        
         Task<bool> CancelBookingAsync(long bookingId,string guestUserId);
+        Task<int> ProcessAutomaticCheckoutsAsync();
     }
 }

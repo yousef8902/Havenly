@@ -59,6 +59,22 @@ namespace Havenly.DAL.Repos.Implementations
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); return null; }
         }
 
+        public async Task<Review?> GetDetailById(long id)
+        {
+            try
+            {
+                return await context.Reviews
+                    .Include(r => r.User)
+                    .Include(r => r.Property)
+                    .FirstOrDefaultAsync(r => r.ReviewID == id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error:" + ex.Message);
+                return null;
+            }
+        }
+
         public void Update(Review entity)
         {
             try

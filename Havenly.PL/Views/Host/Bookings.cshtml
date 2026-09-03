@@ -128,6 +128,58 @@
                                             </form>
                                         </div>
                                     }
+                                    else if (booking.Status == BookingStatus.Approved)
+                                    {
+                                        <div class="flex items-center justify-end gap-2">
+                                            <form asp-controller="Host" asp-action="CompleteStay" asp-route-id="@booking.BookingID" method="post" class="inline" onsubmit="return confirm('Mark this stay completed and send a review invitation to @(booking.Guest?.Name ?? "the guest")?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-700 transition" title="Mark stay completed and send review invitation">
+                                                    <span>🏁 End Stay</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else if (booking.Status == BookingStatus.Completed)
+                                    {
+                                        var guestReview = booking.Listing?.Property?.Reviews?
+                                            .FirstOrDefault(r => r.UserID == booking.GuestUserID);
+
+                                        <div class="flex flex-col items-end gap-1.5">
+                                            @if (guestReview != null)
+                                            {
+                                                <div class="flex items-center gap-1.5 text-xs">
+                                                    <span class="text-amber-500 font-bold">★ @guestReview.Rating/5</span>
+                                                    <span class="text-muted-foreground truncate max-w-[150px]" title="@guestReview.Comment">"@guestReview.Comment"</span>
+                                                </div>
+                                                @if (string.IsNullOrEmpty(guestReview.HostResponse))
+                                                {
+                                                    <a asp-controller="Reviews" asp-action="Respond" asp-route-reviewId="@guestReview.ReviewID"
+                                                       class="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow hover:bg-primary/90 transition">
+                                                        <span>💬 Reply to Review</span>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[11px] font-semibold">
+                                                            ✓ Replied
+                                                        </span>
+                                                        <a asp-controller="Reviews" asp-action="Respond" asp-route-reviewId="@guestReview.ReviewID"
+                                                           class="text-xs text-primary hover:underline">
+                                                            Edit Reply
+                                                        </a>
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <span class="text-xs text-muted-foreground">Awaiting guest review</span>
+                                                <a asp-controller="Property" asp-action="Detail" asp-route-id="@booking.Listing?.PropertyID" class="text-xs font-medium text-primary hover:underline">
+                                                    View Listing
+                                                </a>
+                                            }
+                                        </div>
+                                    }
                                     else
                                     {
                                         <span class="text-xs text-muted-foreground">No actions</span>

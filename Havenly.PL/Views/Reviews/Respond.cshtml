@@ -1,0 +1,112 @@
+@model Havenly.BLL.ModelVMs.ReviewRespondVM
+
+@{
+    ViewData["Title"] = $"Reply to Review — {Model.PropertyName}";
+}
+
+<div class="container-page py-10 max-w-2xl mx-auto space-y-8">
+    <!-- Header -->
+    <div class="text-center space-y-2">
+        <span class="rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-semibold uppercase tracking-wider">
+            Host Hospitality Reply
+        </span>
+        <h1 class="text-3xl font-bold tracking-tight">Respond to Guest Review</h1>
+        <p class="text-sm text-muted-foreground">Your response will appear publicly beneath @Model.GuestName's review on your listing page</p>
+    </div>
+
+    <!-- Original Review Card -->
+    <div class="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-border pb-3">
+            <div class="flex items-center gap-3">
+                <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                    @Model.GuestName.FirstOrDefault()
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-foreground">@Model.GuestName</h3>
+                    <p class="text-xs text-muted-foreground">Stay at @Model.PropertyName</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-1 text-amber-400 text-lg">
+                @for (int i = 0; i < Model.Rating; i++)
+                {
+                    <span>★</span>
+                }
+                @for (int i = Model.Rating; i < 5; i++)
+                {
+                    <span class="text-muted">★</span>
+                }
+            </div>
+        </div>
+
+        <div class="rounded-2xl bg-muted/40 p-4 text-sm text-foreground italic leading-relaxed">
+            "@Model.GuestComment"
+        </div>
+    </div>
+
+    <!-- Response Form -->
+    <div class="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-lift space-y-6">
+        <form asp-controller="Reviews" asp-action="Respond" method="post" class="space-y-6" id="respondForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="ReviewId" />
+            <input type="hidden" asp-for="PropertyId" />
+            <input type="hidden" asp-for="PropertyName" />
+            <input type="hidden" asp-for="GuestName" />
+            <input type="hidden" asp-for="Rating" />
+            <input type="hidden" asp-for="GuestComment" />
+
+            <!-- Validation Errors -->
+            <div asp-validation-summary="ModelOnly" class="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive"></div>
+
+            <!-- Response Textarea -->
+            <div class="space-y-1.5">
+                <div class="flex justify-between items-center">
+                    <label asp-for="Response" class="block text-sm font-semibold">
+                        Your Official Response <span class="text-destructive">*</span>
+                    </label>
+                    <span id="charCount" class="text-[11px] text-muted-foreground">0 / 1000</span>
+                </div>
+                <textarea asp-for="Response" id="hostResponseText" rows="5" maxlength="1000"
+                          placeholder="Thank @Model.GuestName for their stay, address any feedback constructively, and welcome them back next time they visit Egypt..."
+                          class="w-full rounded-2xl border border-border bg-background p-4 text-sm focus:border-primary focus:outline-none leading-relaxed transition"></textarea>
+                <span asp-validation-for="Response" class="text-xs text-destructive block"></span>
+            </div>
+
+            <!-- Guidance for Host Replies -->
+            <div class="rounded-2xl border border-border bg-muted/40 p-4 space-y-1.5 text-xs text-muted-foreground leading-relaxed">
+                <p class="font-semibold text-foreground flex items-center gap-1.5">
+                    <span>🛡️ Best Practices for Host Responses</span>
+                </p>
+                <ul class="list-disc list-inside space-y-1 text-[11px]">
+                    <li>Keep your tone polite, warm, and professional.</li>
+                    <li>Thank the traveler for choosing your property.</li>
+                    <li>If any concern was mentioned, explain how you addressed it for future guests.</li>
+                </ul>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <button type="submit" class="flex-1 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 transition">
+                    Publish Official Response
+                </button>
+                <a asp-controller="Property" asp-action="Detail" asp-route-id="@Model.PropertyId" class="rounded-xl border border-border bg-background py-3 px-6 text-sm font-medium text-center hover:bg-secondary transition">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const responseText = document.getElementById('hostResponseText');
+        const charCount = document.getElementById('charCount');
+        if (responseText && charCount) {
+            function updateCount() {
+                charCount.textContent = `${responseText.value.length} / 1000`;
+            }
+            responseText.addEventListener('input', updateCount);
+            updateCount();
+        }
+    </script>
+}

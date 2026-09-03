@@ -115,6 +115,9 @@ namespace Havenly.PL
             // Chatbot Service
             builder.Services.AddScoped<IChatbotService, HuggingFaceChatbotService>();
 
+            // Background Services
+            builder.Services.AddHostedService<Havenly.PL.BackgroundServices.BookingCompletionBackgroundService>();
+
             // AutoMapper
             builder.Services.AddAutoMapper(cfg =>
             {

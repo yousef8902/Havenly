@@ -157,9 +157,10 @@ public class BookingController : Controller
     [HttpGet]
     public async Task<IActionResult> MyBookings()
     {
-             string resolvedUserId = _userManager.GetUserId(User);
+        await _bookingService.ProcessAutomaticCheckoutsAsync();
+        string resolvedUserId = _userManager.GetUserId(User);
       
-         var bookings = await _bookingService.GetBookingsByUserAsync(resolvedUserId);
+        var bookings = await _bookingService.GetBookingsByUserAsync(resolvedUserId);
 
    
         var viewModel = new BookingsPageVM

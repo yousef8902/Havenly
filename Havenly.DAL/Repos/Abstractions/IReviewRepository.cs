@@ -16,6 +16,7 @@ namespace Havenly.DAL.Repos.Abstractions
         void Update(Review entity);
         void Delete(Review entity);
         Task<bool> RespondToReview(long id, string response);
+        Task<Review?> GetDetailById(long id);
         Task<int> SaveChanges();
 
     }

@@ -18,6 +18,8 @@ namespace Havenly.PL.Controllers
         private readonly IPropertyServices _propertyServices;
         private readonly IAmenityRepository _amenityRepository;
         private readonly IBookingRepository _bookingRepository;
+        private readonly IBookingService _bookingService;
+        private readonly IReviewRepository _reviewRepository;
         private readonly IPaymentService _paymentService;
         private readonly IWebHostEnvironment _environment;
         private readonly IEmailServices _emailServices;
@@ -27,6 +29,8 @@ namespace Havenly.PL.Controllers
             IPropertyServices propertyServices,
             IAmenityRepository amenityRepository,
             IBookingRepository bookingRepository,
+            IBookingService bookingService,
+            IReviewRepository reviewRepository,
             IPaymentService paymentService,
             IWebHostEnvironment environment,
             IEmailServices emailServices,
@@ -35,6 +39,8 @@ namespace Havenly.PL.Controllers
             _propertyServices = propertyServices;
             _amenityRepository = amenityRepository;
             _bookingRepository = bookingRepository;
+            _bookingService = bookingService;
+            _reviewRepository = reviewRepository;
             _paymentService = paymentService;
             _environment = environment;
             _emailServices = emailServices;
@@ -93,6 +99,10 @@ namespace Havenly.PL.Controllers
                 .ToList();
 
             ViewBag.RecentBookings = hostBookings;
+
+            var unrepliedReviews = (await _reviewRepository.Find(r => propertyIds.Contains(r.PropertyID) && string.IsNullOrEmpty(r.HostResponse))).ToList();
+            ViewBag.UnrepliedReviewsCount = unrepliedReviews.Count;
+
             return View();
         }
 
@@ -411,6 +421,8 @@ namespace Havenly.PL.Controllers
         [HttpGet]
         public async Task<IActionResult> Bookings()
         {
+            await _bookingService.ProcessAutomaticCheckoutsAsync();
+
             var userId = GetCurrentUserId();
             var properties = (await _propertyServices.GetPropertiesByOwner(userId)).ToList();
             var propertyIds = properties.Select(p => p.PropertyID).ToHashSet();
@@ -420,6 +432,9 @@ namespace Havenly.PL.Controllers
                 .Include(b => b.Listing)
                     .ThenInclude(l => l.Property)
                         .ThenInclude(p => p.Address)
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Reviews)
                 .ToListAsync();
 
             var hostBookings = allBookings
@@ -541,6 +556,58 @@ namespace Havenly.PL.Controllers
             }
 
             TempData["SuccessMessage"] = $"Booking #{id} has been rejected.";
+            return RedirectToAction(nameof(Bookings));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompleteStay(long id)
+        {
+            var hostUserId = GetCurrentUserId();
+            var booking = await _bookingRepository.GetAll()
+                .Include(b => b.Guest)
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                .FirstOrDefaultAsync(b => b.BookingID == id);
+
+            if (booking == null || booking.Listing?.Property?.OwnerUserID != hostUserId)
+            {
+                TempData["ErrorMessage"] = "Booking not found or you do not have permission to manage this reservation.";
+                return RedirectToAction(nameof(Bookings));
+            }
+
+            if (booking.Status != BookingStatus.Approved)
+            {
+                TempData["ErrorMessage"] = "Only approved stays can be completed.";
+                return RedirectToAction(nameof(Bookings));
+            }
+
+            booking.UpdateStatus(BookingStatus.Completed);
+            await _bookingRepository.SaveChanges();
+
+            // Send automated review invitation to the guest
+            try
+            {
+                if (booking.Guest != null && !string.IsNullOrEmpty(booking.Guest.Email))
+                {
+                    var hostUser = await _userManager.FindByIdAsync(hostUserId);
+                    var hostName = hostUser?.Name ?? "Your Host";
+                    var propName = booking.Listing?.Property?.PropertyName ?? "your stay";
+
+                    await _emailServices.SendReviewInvitationToGuestAsync(
+                        booking.Guest.Email,
+                        booking.Guest.Name ?? "Traveler",
+                        hostName,
+                        propName,
+                        booking.BookingID);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[REVIEW INVITATION EMAIL ERROR] {ex.Message}");
+            }
+
+            TempData["SuccessMessage"] = $"Stay #{id} has been marked as Completed! An email invitation has been sent to the guest to rate and review their stay.";
             return RedirectToAction(nameof(Bookings));
         }
 

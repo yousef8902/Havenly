@@ -450,10 +450,11 @@ namespace Havenly.PL.Controllers
 
         // GET: /Account/Login
         [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
+        public IActionResult Login(string? returnUrl = null, string? email = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            return View();
+            var model = new LoginVM { Email = email ?? string.Empty };
+            return View(model);
         }
 
         // POST: /Account/Login

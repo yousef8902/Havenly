@@ -117,11 +117,11 @@
                                             </button>
                                         </form>
                                     }
-                                    @if (booking.Status == "Completed")
+                                    @if (booking.Status == "Completed" || (booking.Status == "Approved" && booking.CheckOut <= DateTime.Today))
                                     {
-                                        <a asp-controller="Reviews" asp-action="Create" asp-route-propertyId="@booking.PropertyId" asp-route-bookingId="@booking.BookingId"
-                                           class="rounded-lg bg-primary px-3 py-1 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-                                            Review
+                                        <a asp-controller="Reviews" asp-action="Create" asp-route-bookingId="@booking.BookingId"
+                                           class="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition shadow-sm">
+                                            <span>⭐ Write Review</span>
                                         </a>
                                     }
                                 </div>

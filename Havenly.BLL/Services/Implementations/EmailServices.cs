@@ -409,6 +409,75 @@ namespace Havenly.BLL.Services.Implementations
             await SendEmailAsync(hostEmail, subject, html, isHtml: true);
         }
 
+        // Scenario 6: Stay completed -> Invite guest to review
+        public async Task SendReviewInvitationToGuestAsync(
+            string guestEmail,
+            string guestName,
+            string hostName,
+            string propertyName,
+            long bookingId)
+        {
+            string displayName = string.IsNullOrWhiteSpace(guestName) ? "Traveler" : guestName;
+            string subject = $"How was your stay at {propertyName}? Leave a review on Havenly";
+            string title = "How was your stay? ⭐";
+
+            string contentHtml = $@"
+                <p style=""font-size: 15px; color: #334155; line-height: 1.6; margin-bottom: 20px;"">
+                    Your recent stay at <strong>{propertyName}</strong> hosted by <strong>{hostName}</strong> has ended. We hope you had a wonderful and memorable experience!
+                </p>
+                <div style=""background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; margin: 20px 0; text-align: center;"">
+                    <p style=""font-size: 14px; color: #475569; margin: 0 0 10px 0;"">Rate your experience with {hostName}:</p>
+                    <div style=""font-size: 24px; color: #f59e0b; margin-bottom: 8px;"">★★★★★</div>
+                    <p style=""font-size: 12px; color: #64748b; margin: 0;"">Share helpful feedback about cleanliness, check-in, amenities, and hospitality.</p>
+                </div>
+                <p style=""font-size: 14px; color: #475569; margin-bottom: 24px;"">
+                    Your honest feedback helps your host improve their hospitality and guides other travelers across Egypt when choosing their stays.
+                </p>";
+
+            string ctaText = "Leave a Review";
+            string ctaUrl = $"/Reviews/Create?bookingId={bookingId}";
+
+            string html = BuildHtmlWrapper(title, displayName, contentHtml, ctaText, ctaUrl);
+            await SendEmailAsync(guestEmail, subject, html, isHtml: true);
+        }
+
+        // Scenario 7: Review submitted -> Notify host & allow reply
+        public async Task SendReviewNotificationToHostAsync(
+            string hostEmail,
+            string hostName,
+            string guestName,
+            string propertyName,
+            int rating,
+            string comment,
+            long reviewId)
+        {
+            string displayName = string.IsNullOrWhiteSpace(hostName) ? "Host" : hostName;
+            string subject = $"New {rating}-star guest review on your listing \"{propertyName}\"";
+            string title = "New Review Received! 🌟";
+
+            string stars = new string('★', Math.Clamp(rating, 1, 5)) + new string('☆', Math.Max(0, 5 - rating));
+
+            string contentHtml = $@"
+                <p style=""font-size: 15px; color: #334155; line-height: 1.6; margin-bottom: 20px;"">
+                    Guest <strong>{guestName}</strong> just submitted a review for their stay at <strong>{propertyName}</strong>.
+                </p>
+                <div style=""background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; margin: 20px 0;"">
+                    <div style=""font-size: 20px; color: #f59e0b; margin-bottom: 8px;"">{stars} <span style=""font-size: 14px; color: #334155; font-weight: 700;"">({rating}/5)</span></div>
+                    <p style=""font-size: 14px; color: #1e293b; font-style: italic; margin: 0; line-height: 1.6;"">
+                        ""{comment}""
+                    </p>
+                </div>
+                <p style=""font-size: 14px; color: #475569; margin-bottom: 24px;"">
+                    Responding to guest reviews is one of the best ways to build trust with future guests on Havenly. You can write an official host response that will be visible to everyone on your listing page.
+                </p>";
+
+            string ctaText = "Reply to Review";
+            string ctaUrl = $"/Reviews/Respond?reviewId={reviewId}";
+
+            string html = BuildHtmlWrapper(title, displayName, contentHtml, ctaText, ctaUrl);
+            await SendEmailAsync(hostEmail, subject, html, isHtml: true);
+        }
+
         // Shared HTML Email Template Builder
         private string BuildHtmlWrapper(string heading, string recipientGreeting, string innerHtml, string? ctaText, string? ctaUrl)
         {

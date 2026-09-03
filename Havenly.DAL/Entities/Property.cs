@@ -67,10 +67,11 @@ public class Property
         Category = string.IsNullOrWhiteSpace(category) ? "Design homes" : category;
     }
 
-    public void UpdateReview(double Rating)
+    public void UpdateReview(double newRating)
     {
+        var totalRatingSum = (this.Rating * this.NumberOfReviews) + newRating;
         this.NumberOfReviews++;
-        this.Rating = (this.Rating + Rating) / this.NumberOfReviews;
+        this.Rating = Math.Round(totalRatingSum / this.NumberOfReviews, 2);
     }
 
     public void Delete()

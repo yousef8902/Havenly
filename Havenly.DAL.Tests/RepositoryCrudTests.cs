@@ -166,6 +166,43 @@ namespace Havenly.DAL.Tests
         }
 
         [Fact]
+        public async Task Review_Respond_And_GetDetailById_Works()
+        {
+            var dbName = Guid.NewGuid().ToString();
+            using var context = CreateContext(dbName);
+            var repo = new ReviewRepository(context);
+
+            var user = new User();
+            user.Create("Guest User", "hash", "guest@example.com", "Guest");
+            await context.Users.AddAsync(user);
+
+            var host = new User();
+            host.Create("Host User", "hash", "host@example.com", "Host");
+            await context.Users.AddAsync(host);
+
+            var prop = new Property();
+            prop.Create(host.Id, 0, "Luxury Dahab Villa", "Desc", 4, 4, 2);
+            await context.Properties.AddAsync(prop);
+            await context.SaveChangesAsync();
+
+            var review = new Review();
+            review.Create(0, user.Id, prop.PropertyID, 5, "Amazing experience in South Sinai!");
+            await repo.Add(review);
+
+            var detail = await repo.GetDetailById(review.ReviewID);
+            Assert.NotNull(detail);
+            Assert.Equal("Guest User", detail.User?.Name);
+            Assert.Equal("Luxury Dahab Villa", detail.Property?.PropertyName);
+
+            var respondSuccess = await repo.RespondToReview(review.ReviewID, "Thank you so much for staying with us!");
+            Assert.True(respondSuccess);
+
+            var updated = await repo.GetById(review.ReviewID);
+            Assert.NotNull(updated);
+            Assert.Equal("Thank you so much for staying with us!", updated.HostResponse);
+        }
+
+        [Fact]
         public async Task Address_CRUD_Works()
         {
             var dbName = Guid.NewGuid().ToString();

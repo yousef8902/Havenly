@@ -17,6 +17,13 @@
                 <p class="text-sm text-muted-foreground">Sign in to your Havenly account to continue</p>
             </div>
 
+            @if (TempData["InfoMessage"] != null)
+            {
+                <div class="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4 text-xs font-medium text-blue-800 leading-relaxed">
+                    ℹ️ @TempData["InfoMessage"]
+                </div>
+            }
+
             <!-- Dynamic AJAX Error / Alert Container -->
             <div id="loginAlert" class="@(ViewData.ModelState.IsValid ? "hidden" : "") rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm font-medium text-destructive">
                 <ul id="loginErrorList" class="space-y-1 list-disc list-inside">

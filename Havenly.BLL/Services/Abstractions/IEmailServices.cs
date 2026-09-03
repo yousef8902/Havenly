@@ -64,6 +64,24 @@ namespace Havenly.BLL.Services.Abstractions
             bool isApproved,
             string? notes = null);
 
+        // Scenario 6: Stay completed -> Invite guest to review
+        Task SendReviewInvitationToGuestAsync(
+            string guestEmail,
+            string guestName,
+            string hostName,
+            string propertyName,
+            long bookingId);
+
+        // Scenario 7: Review submitted -> Notify host & allow reply
+        Task SendReviewNotificationToHostAsync(
+            string hostEmail,
+            string hostName,
+            string guestName,
+            string propertyName,
+            int rating,
+            string comment,
+            long reviewId);
+
         // Legacy helper overloads
         Task SendEmailRequestbookingToHost(string toEmail, Booking booking);
         Task ReciveEmailRequestbookingFromHost(string toEmail, Booking booking);

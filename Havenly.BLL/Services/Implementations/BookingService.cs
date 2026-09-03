@@ -16,17 +16,20 @@ namespace Havenly.BLL.Services.Implementations
         private readonly IMapper _mapper;
         private readonly IListingRepository _listingRepository;
         private readonly IPropertyRepository _propertyRepository;
+        private readonly IEmailServices _emailServices;
 
         public BookingService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IListingRepository listingRepository,
-            IPropertyRepository propertyRepository)
+            IPropertyRepository propertyRepository,
+            IEmailServices emailServices)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _listingRepository = listingRepository;
             _propertyRepository = propertyRepository;
+            _emailServices = emailServices;
         }
 
         // Checks date overlap 
@@ -148,10 +151,62 @@ namespace Havenly.BLL.Services.Implementations
             
             booking.UpdateStatus(BookingStatus.Cancelled);
 
-            
             await _unitOfWork.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<int> ProcessAutomaticCheckoutsAsync()
+        {
+            try
+            {
+                var now = DateTime.UtcNow;
+                var pastApprovedBookings = await _unitOfWork.Bookings.GetAll()
+                    .Include(b => b.Guest)
+                    .Include(b => b.Listing)
+                        .ThenInclude(l => l.Property)
+                            .ThenInclude(p => p.Owner)
+                    .Where(b => b.Status == BookingStatus.Approved && b.CheckOut <= now)
+                    .ToListAsync();
+
+                if (!pastApprovedBookings.Any())
+                    return 0;
+
+                int completedCount = 0;
+                foreach (var booking in pastApprovedBookings)
+                {
+                    booking.UpdateStatus(BookingStatus.Completed);
+                    completedCount++;
+
+                    // Send email review invitation to guest
+                    try
+                    {
+                        if (booking.Guest != null && !string.IsNullOrEmpty(booking.Guest.Email))
+                        {
+                            var hostName = booking.Listing?.Property?.Owner?.Name ?? "Your Host";
+                            var propName = booking.Listing?.Property?.PropertyName ?? "your stay";
+                            await _emailServices.SendReviewInvitationToGuestAsync(
+                                booking.Guest.Email,
+                                booking.Guest.Name ?? "Traveler",
+                                hostName,
+                                propName,
+                                booking.BookingID);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[AUTO CHECKOUT EMAIL ERROR] {ex.Message}");
+                    }
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+                return completedCount;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AUTO CHECKOUT ERROR] {ex.Message}");
+                return 0;
+            }
         }
     }
 }
