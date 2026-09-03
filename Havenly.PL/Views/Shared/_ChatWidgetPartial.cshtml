@@ -1,40 +1,71 @@
 <!-- Chatbot Widget Container -->
-<div id="chatbot-widget-container" class="fixed bottom-4 right-4 z-50">
+<div id="chatbot-widget-container" class="fixed bottom-5 right-5 z-50">
     <!-- Chat Widget Card -->
-    <div id="chatbot-widget" class="w-80 bg-white rounded-lg shadow-2xl border border-gray-200 hidden flex flex-col" style="height: 500px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);">
+    <div id="chatbot-widget" class="w-88 sm:w-[380px] bg-card rounded-2xl shadow-2xl border border-border hidden flex flex-col overflow-hidden" style="height: 540px; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);">
         <!-- Header -->
-        <div class="bg-gradient-to-r from-primary to-blue-600 text-white px-4 py-3 rounded-t-lg flex justify-between items-center">
-            <h3 class="font-semibold text-sm">Havenly Support</h3>
-            <button id="close-chat-btn" class="text-white text-xl hover:opacity-80 transition-opacity" type="button">
+        <div class="bg-primary text-primary-foreground px-4 py-3.5 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-2.5">
+                <div class="size-8 rounded-full bg-primary-foreground/15 flex items-center justify-center text-base">
+                    ✨
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm leading-none flex items-center gap-1.5">
+                        Havenly Concierge
+                        <span class="inline-block size-2 rounded-full bg-emerald-400"></span>
+                    </h3>
+                    <p class="text-[11px] text-primary-foreground/80 mt-0.5">Stays across Egypt & Instant Support</p>
+                </div>
+            </div>
+            <button id="close-chat-btn" class="text-primary-foreground/80 hover:text-primary-foreground text-2xl font-light leading-none p-1 hover:opacity-80 transition" type="button" aria-label="Close chat">
                 ×
             </button>
         </div>
 
         <!-- Messages Container -->
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-3">
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 bg-muted/20 space-y-3">
             <!-- Initial greeting message -->
-            <div class="flex justify-start">
-                <div class="bg-white text-gray-800 px-3 py-2 rounded-lg rounded-tl-none shadow-sm text-sm max-w-xs">
-                    <p>👋 Hi! How can I help you today?</p>
+            <div class="chat-message-bot">
+                <div class="message-content">
+                    <p>👋 <strong>Welcome to Havenly!</strong></p>
+                    <p class="mt-1 text-xs text-muted-foreground leading-relaxed">I'm your travel concierge for stays across Egypt. Ask me to find accommodations, compare prices in EGP, or answer questions about Havenly!</p>
                 </div>
+            </div>
+
+            <!-- Quick Suggestion Chips Container -->
+            <div id="chat-suggestion-chips" class="pt-1 pb-2 flex flex-wrap gap-1.5">
+                <button type="button" class="chat-chip" onclick="window.sendChatSuggestion('🏖️ Beachfront villa in Dahab')">
+                    🏖️ Dahab Beachfront
+                </button>
+                <button type="button" class="chat-chip" onclick="window.sendChatSuggestion('🏛️ Nile view apartment in Cairo')">
+                    🏛️ Cairo Nile Views
+                </button>
+                <button type="button" class="chat-chip" onclick="window.sendChatSuggestion('⛵ Retreat in El Gouna for 4 guests')">
+                    ⛵ El Gouna Stays
+                </button>
+                <button type="button" class="chat-chip" onclick="window.sendChatSuggestion('💰 Stays in Egypt under 500 EGP')">
+                    💰 Under 500 EGP
+                </button>
+                <button type="button" class="chat-chip" onclick="window.sendChatSuggestion('💳 How do payments work on Havenly?')">
+                    💳 Payments Info
+                </button>
             </div>
         </div>
 
         <!-- Input Area -->
-        <div class="border-t border-gray-200 p-3 bg-white rounded-b-lg">
-            <form id="chat-form" class="flex gap-2">
+        <div class="border-t border-border p-3 bg-card">
+            <form id="chat-form" class="flex items-center gap-2">
                 <input
                     type="text"
                     id="chat-input"
-                    placeholder="Type your message..."
-                    class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Ask about Egypt stays, cities, prices..."
+                    class="flex-1 px-3.5 py-2.5 bg-background border border-input rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
                     autocomplete="off"
                     maxlength="500"
                 />
                 <button
                     type="submit"
                     id="send-btn"
-                    class="bg-primary text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                    class="bg-primary text-primary-foreground px-4 py-2.5 rounded-xl hover:bg-primary/90 transition text-xs sm:text-sm font-semibold flex items-center justify-center shadow-sm"
                     aria-label="Send message"
                 >
                     Send
@@ -46,120 +77,259 @@
     <!-- Chat Toggle Button -->
     <button
         id="chatbot-toggle-btn"
-        class="w-14 h-14 bg-gradient-to-r from-primary to-blue-600 text-white rounded-full shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center text-2xl"
+        class="size-14 bg-primary text-primary-foreground rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center text-2xl relative"
         type="button"
         aria-label="Open chat"
-        title="Open Havenly Support Chat"
+        title="Open Havenly Concierge Chat"
     >
         💬
+        <span class="absolute top-0 right-0 size-3.5 bg-emerald-500 border-2 border-background rounded-full"></span>
     </button>
 </div>
 
 <!-- Styles for the chat widget -->
 <style>
     #chatbot-widget.hidden {
-        display: none;
+        display: none !important;
     }
 
     #chatbot-widget.show {
-        display: flex;
+        display: flex !important;
     }
 
     #chatbot-toggle-btn.hidden {
-        display: none;
+        display: none !important;
     }
 
     #chatbot-toggle-btn.show {
-        display: flex;
+        display: flex !important;
     }
 
     .chat-message-user {
         display: flex;
         justify-content: flex-end;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
     }
 
     .chat-message-user .message-content {
-        background-color: #0066cc;
-        color: white;
-        padding: 0.5rem 0.75rem;
-        border-radius: 0.5rem;
-        border-top-right-radius: 0;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        max-width: 80%;
+        background-color: var(--primary, #0f172a);
+        color: #ffffff;
+        padding: 0.6rem 0.85rem;
+        border-radius: 1rem;
+        border-top-right-radius: 0.25rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        max-width: 85%;
         word-wrap: break-word;
+        font-size: 0.825rem;
+        line-height: 1.4;
     }
 
     .chat-message-bot {
         display: flex;
-        justify-content: flex-start;
-        margin-bottom: 0.75rem;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+        width: 100%;
     }
 
     .chat-message-bot .message-content {
-        background-color: white;
-        color: #333;
-        padding: 0.5rem 0.75rem;
-        border-radius: 0.5rem;
-        border-top-left-radius: 0;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        max-width: 80%;
+        background-color: #ffffff;
+        color: #1e293b;
+        padding: 0.65rem 0.85rem;
+        border-radius: 1rem;
+        border-top-left-radius: 0.25rem;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        max-width: 90%;
         word-wrap: break-word;
+        font-size: 0.825rem;
+        line-height: 1.45;
+    }
+
+    .dark .chat-message-bot .message-content {
+        background-color: #1e293b;
+        color: #f1f5f9;
+        border-color: #334155;
     }
 
     .chat-message-bot .message-content.error {
-        background-color: #fee;
-        color: #c33;
-        border-color: #fcc;
+        background-color: #fef2f2;
+        color: #991b1b;
+        border-color: #fecaca;
     }
 
+    .message-timestamp {
+        font-size: 0.65rem;
+        opacity: 0.65;
+        margin-top: 0.35rem;
+        text-align: right;
+    }
+
+    /* Property Card Recommendations inside Chat */
+    .chat-cards-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+
+    .chat-property-card {
+        display: flex;
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        border-radius: 0.85rem;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .dark .chat-property-card {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    .chat-property-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .property-card-img {
+        width: 90px;
+        height: 100%;
+        min-height: 90px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .property-card-body {
+        padding: 0.5rem 0.65rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .property-card-city {
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #64748b;
+        letter-spacing: 0.025em;
+    }
+
+    .property-card-title {
+        font-size: 0.775rem;
+        font-weight: 700;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 0.1rem;
+    }
+
+    .dark .property-card-title {
+        color: #f8fafc;
+    }
+
+    .property-card-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        margin-top: 0.25rem;
+    }
+
+    .property-card-rating {
+        color: #f59e0b;
+        font-weight: 600;
+    }
+
+    .property-card-price {
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .dark .property-card-price {
+        color: #f1f5f9;
+    }
+
+    .property-card-btn {
+        margin-top: 0.4rem;
+        display: inline-block;
+        text-align: center;
+        background: var(--primary, #0f172a);
+        color: #ffffff !important;
+        font-size: 0.675rem;
+        font-weight: 600;
+        padding: 0.3rem 0.5rem;
+        border-radius: 0.4rem;
+        text-decoration: none !important;
+        transition: opacity 0.15s ease;
+    }
+
+    .property-card-btn:hover {
+        opacity: 0.9;
+    }
+
+    /* Suggestion Chips */
+    .chat-chip {
+        font-size: 0.7rem;
+        font-weight: 500;
+        padding: 0.35rem 0.6rem;
+        border-radius: 9999px;
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    .dark .chat-chip {
+        background-color: #1e293b;
+        border-color: #334155;
+        color: #cbd5e1;
+    }
+
+    .chat-chip:hover {
+        background-color: #f1f5f9;
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+    }
+
+    /* Loading dots */
     .loading-dots {
         display: flex;
         gap: 0.25rem;
         align-items: center;
+        padding: 0.25rem 0;
     }
 
     .loading-dots span {
-        width: 0.5rem;
-        height: 0.5rem;
-        background-color: #0066cc;
+        width: 0.45rem;
+        height: 0.45rem;
+        background-color: #94a3b8;
         border-radius: 50%;
-        animation: bounce 1.4s infinite;
+        animation: bounce 1.4s infinite ease-in-out both;
     }
 
-    .loading-dots span:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .loading-dots span:nth-child(3) {
-        animation-delay: 0.4s;
-    }
+    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
 
     @@keyframes bounce {
-        0%, 80%, 100% {
-            opacity: 0.6;
-            transform: translateY(0);
-        }
-        40% {
-            opacity: 1;
-            transform: translateY(-0.5rem);
-        }
-    }
-
-    .message-timestamp {
-        font-size: 0.7rem;
-        opacity: 0.7;
-        margin-top: 0.25rem;
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
     }
 </style>
 
-<!-- JavaScript for chat functionality -->
+<!-- JavaScript for the chat widget -->
 <script>
-    (function() {
-        const chatWidget = document.getElementById('chatbot-widget');
+    (function () {
         const toggleBtn = document.getElementById('chatbot-toggle-btn');
         const closeBtn = document.getElementById('close-chat-btn');
+        const chatWidget = document.getElementById('chatbot-widget');
         const chatForm = document.getElementById('chat-form');
         const chatInput = document.getElementById('chat-input');
         const sendBtn = document.getElementById('send-btn');
@@ -167,14 +337,13 @@
 
         let isOpen = false;
 
-        // Toggle chat widget visibility
         function toggleChat() {
             isOpen = !isOpen;
             if (isOpen) {
                 chatWidget.classList.remove('hidden');
                 chatWidget.classList.add('show');
                 toggleBtn.classList.add('hidden');
-                chatInput.focus();
+                setTimeout(() => chatInput.focus(), 100);
             } else {
                 chatWidget.classList.remove('show');
                 chatWidget.classList.add('hidden');
@@ -182,14 +351,37 @@
             }
         }
 
-        // Add message to chat display
-        function addMessage(text, isUser, isError = false, timestamp = null) {
+        function formatMarkdownText(text) {
+            if (!text) return '';
+            let html = text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            // Bold **text**
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Italic *text*
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            // Bullet points
+            html = html.replace(/^[•*]\s*(.+)$/gm, '<li class="ml-3 list-disc">$1</li>');
+            // Line breaks
+            html = html.replace(/\n/g, '<br/>');
+
+            return html;
+        }
+
+        function addMessage(text, isUser, isError = false, timestamp = null, properties = null) {
             const messageDiv = document.createElement('div');
             messageDiv.className = isUser ? 'chat-message-user' : 'chat-message-bot';
 
             const contentDiv = document.createElement('div');
             contentDiv.className = `message-content ${isError ? 'error' : ''}`;
-            contentDiv.textContent = text;
+            
+            if (isUser) {
+                contentDiv.textContent = text;
+            } else {
+                contentDiv.innerHTML = formatMarkdownText(text);
+            }
 
             if (timestamp) {
                 const timeSpan = document.createElement('div');
@@ -199,11 +391,41 @@
             }
 
             messageDiv.appendChild(contentDiv);
+
+            // Render property cards if provided
+            if (properties && properties.length > 0) {
+                const cardsContainer = document.createElement('div');
+                cardsContainer.className = 'chat-cards-container';
+
+                properties.forEach(prop => {
+                    const card = document.createElement('div');
+                    card.className = 'chat-property-card';
+                    card.innerHTML = `
+                        <img src="${prop.imageUrl}" alt="${prop.title}" class="property-card-img" onerror="this.src='/images/p1.jpg'" />
+                        <div class="property-card-body">
+                            <div>
+                                <div class="property-card-city">📍 ${prop.city}</div>
+                                <div class="property-card-title" title="${prop.title}">${prop.title}</div>
+                            </div>
+                            <div class="property-card-meta">
+                                <span class="property-card-rating">★ ${prop.rating.toFixed(1)} (${prop.reviewCount})</span>
+                                <span class="property-card-price">${Math.round(prop.pricePerNight).toLocaleString()} EGP</span>
+                            </div>
+                            <a href="${prop.detailUrl}" class="property-card-btn">
+                                View Stay →
+                            </a>
+                        </div>
+                    `;
+                    cardsContainer.appendChild(card);
+                });
+
+                messageDiv.appendChild(cardsContainer);
+            }
+
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Show loading indicator
         function showLoadingIndicator() {
             const messageDiv = document.createElement('div');
             messageDiv.className = 'chat-message-bot';
@@ -218,7 +440,6 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Remove loading indicator
         function removeLoadingIndicator() {
             const loader = document.getElementById('loading-indicator');
             if (loader) {
@@ -226,32 +447,24 @@
             }
         }
 
-        // Send message to server
         async function sendMessage(message) {
-            if (!message.trim()) {
-                return;
-            }
+            if (!message || !message.trim()) return;
 
-            // Add user message to display
-            addMessage(message, true, false, new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }));
+            const trimmedMsg = message.trim();
+            const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
-            // Clear input
+            addMessage(trimmedMsg, true, false, timeStr);
+
             chatInput.value = '';
             sendBtn.disabled = true;
 
-            // Show loading indicator
             showLoadingIndicator();
 
             try {
                 const response = await fetch('/api/chat/send-message', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: message,
-                        conversationContext: null
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: trimmedMsg })
                 });
 
                 removeLoadingIndicator();
@@ -263,49 +476,49 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    addMessage(data.message, false, false, new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }));
+                    addMessage(data.message, false, false, timeStr, data.recommendedProperties);
                 } else {
                     addMessage(data.error || 'An error occurred. Please try again.', false, true);
                 }
             } catch (error) {
                 removeLoadingIndicator();
                 console.error('Error sending message:', error);
-                let errorMsg = 'Sorry, I encountered an error. Please try again later.';
-                if (error.message) {
-                    errorMsg = error.message;
-                }
-                addMessage(errorMsg, false, true);
+                addMessage('Sorry, I encountered a connection issue. Please try asking again!', false, true);
             } finally {
                 sendBtn.disabled = false;
                 chatInput.focus();
             }
         }
 
-        // Event listeners
+        // Global function for chip clicks
+        window.sendChatSuggestion = function (promptText) {
+            if (!isOpen) {
+                toggleChat();
+            }
+            sendMessage(promptText);
+        };
+
         toggleBtn.addEventListener('click', toggleChat);
         closeBtn.addEventListener('click', toggleChat);
 
         chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const message = chatInput.value.trim();
-            if (message) {
-                sendMessage(message);
+            const msg = chatInput.value;
+            if (msg) {
+                sendMessage(msg);
             }
         });
 
-        // Allow sending message with Ctrl+Enter
         chatInput.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
                 chatForm.dispatchEvent(new Event('submit'));
             }
         });
 
-        // Initialize widget visibility
+        // Initialize visibility
         toggleBtn.classList.remove('hidden');
         toggleBtn.classList.add('show');
         chatWidget.classList.add('hidden');
-
-        // Optional: Log widget initialization
-        console.log('Havenly Chatbot Widget initialized successfully.');
     })();
 </script>

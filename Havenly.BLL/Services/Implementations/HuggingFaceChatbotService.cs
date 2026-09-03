@@ -17,6 +17,7 @@ namespace Havenly.BLL.Services.Implementations
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
         private readonly ILogger<HuggingFaceChatbotService> _logger;
+        private readonly IPropertyRecommendationEngine _recommendationEngine;
 
         private readonly string _apiKey;
         private readonly string _apiEndpoint;
@@ -26,19 +27,18 @@ namespace Havenly.BLL.Services.Implementations
         public HuggingFaceChatbotService(
             IHttpClientFactory httpClientFactory,
             IConfiguration configuration,
-            ILogger<HuggingFaceChatbotService> logger)
+            ILogger<HuggingFaceChatbotService> logger,
+            IPropertyRecommendationEngine recommendationEngine)
         {
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _recommendationEngine = recommendationEngine ?? throw new ArgumentNullException(nameof(recommendationEngine));
 
-            // Load configuration from appsettings.json
-            _apiKey = _configuration["HuggingFace:ApiKey"] ?? 
-                throw new InvalidOperationException("HuggingFace:ApiKey is not configured.");
-            _apiEndpoint = _configuration["HuggingFace:ApiEndpoint"] ?? 
-                throw new InvalidOperationException("HuggingFace:ApiEndpoint is not configured.");
-            _model = _configuration["HuggingFace:Model"] ?? 
-                throw new InvalidOperationException("HuggingFace:Model is not configured.");
+            // Load configuration safely from appsettings.json
+            _apiKey = _configuration["HuggingFace:ApiKey"] ?? string.Empty;
+            _apiEndpoint = _configuration["HuggingFace:ApiEndpoint"] ?? "https://router.huggingface.co/v1/chat/completions";
+            _model = _configuration["HuggingFace:Model"] ?? "meta-llama/Llama-3.2-3B-Instruct";
 
             if (!int.TryParse(_configuration["HuggingFace:TimeoutSeconds"], out _timeoutSeconds))
             {
@@ -47,10 +47,11 @@ namespace Havenly.BLL.Services.Implementations
         }
 
         /// <summary>
-        /// Sends a message to the Hugging Face API and returns the chatbot response.
+        /// Sends a message to the chatbot, using catalog intelligence and LLM enrichment when available.
         /// </summary>
         public async Task<ChatResponseDto> SendMessageAsync(ChatRequestDto request, CancellationToken cancellationToken = default)
         {
+            ChatResponseDto? localResult = null;
             try
             {
                 // Validate input
@@ -65,11 +66,36 @@ namespace Havenly.BLL.Services.Implementations
                         Message = string.Empty
                     };
 
-                // Build system prompt for customer support persona
-                var systemPrompt = @"You are a helpful and professional customer support assistant for Havenly, a property rental platform. 
-Your role is to assist users with questions about bookings, properties, payments, and platform features. 
-Keep responses concise, polite, and focused on helping the customer. 
-If you don't know something, offer to connect them with a human agent.";
+                // Run recommendation engine first to extract intent, answer FAQs, or search live database
+                localResult = await _recommendationEngine.ProcessChatQueryAsync(request.Message, cancellationToken);
+
+                // If marked as handled locally (out-of-scope question, greeting, or platform FAQ), return immediately!
+                if (localResult.Metadata != null && localResult.Metadata.ContainsKey("IsHandledLocally"))
+                {
+                    return localResult;
+                }
+
+                // If no external API key is provided, return intelligent catalog response immediately
+                if (string.IsNullOrWhiteSpace(_apiKey))
+                {
+                    return localResult;
+                }
+
+                // Build grounded prompt for customer support & Egypt property concierge persona
+                var catalogSummary = (localResult.RecommendedProperties != null && localResult.RecommendedProperties.Any())
+                    ? string.Join("; ", localResult.RecommendedProperties.Select(p => $"'{p.Title}' in {p.City} at {p.PricePerNight:N0} EGP/night (Rating {p.Rating:F1})"))
+                    : "No specific property match";
+
+                var systemPrompt = $@"You are Havenly's Egyptian Property & Travel Concierge. 
+Havenly is a trusted vacation rental platform across Egypt.
+MATCHING PROPERTIES RETRIEVED FROM HAVENLY DATABASE:
+{catalogSummary}
+
+CRITICAL RULES:
+1. ONLY answer questions about Havenly, accommodations across Egypt, booking, payments in EGP, and hosting.
+2. When properties are listed above, recommend them enthusiastically by name and highlight their price in EGP and city.
+3. NEVER claim Havenly has no listings or tell users to look elsewhere when properties are listed above!
+4. Keep answers concise, warm, helpful, and under 3 sentences.";
 
                 // Prepare the request payload for Hugging Face OpenAI-compatible API
                 var payload = new
@@ -108,14 +134,8 @@ If you don't know something, offer to connect them with a human agent.";
                     if (!response.IsSuccessStatusCode)
                     {
                         var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-                        _logger.LogError("Hugging Face API Error: {StatusCode} - {Content}", response.StatusCode, errorContent);
-
-                        return new ChatResponseDto
-                        {
-                            Success = false,
-                            Error = $"API error (Status {response.StatusCode}): {errorContent}",
-                            Message = string.Empty
-                        };
+                        _logger.LogWarning("Hugging Face API returned error ({StatusCode}), falling back to local recommendations: {Content}", response.StatusCode, errorContent);
+                        return localResult;
                     }
 
                     // Parse the response
@@ -133,67 +153,32 @@ If you don't know something, offer to connect them with a human agent.";
 
                             _logger.LogInformation("Successfully retrieved response from Hugging Face API.");
 
-                            return new ChatResponseDto
+                            // Guard against hallucinated negative claims when real properties exist
+                            if (localResult.RecommendedProperties != null && localResult.RecommendedProperties.Any())
                             {
-                                Success = true,
-                                Message = assistantMessage,
-                                Timestamp = DateTime.UtcNow,
-                                Metadata = new Dictionary<string, object>
+                                var lowerMsg = assistantMessage.ToLowerInvariant();
+                                if (lowerMsg.Contains("doesn't have") || lowerMsg.Contains("does not have") || lowerMsg.Contains("don't have") || lowerMsg.Contains("no specific listing"))
                                 {
-                                    { "model", _model },
-                                    { "provider", "HuggingFace" }
+                                    _logger.LogWarning("LLM hallucinated lack of listings; keeping accurate local recommendation text.");
+                                    return localResult;
                                 }
-                            };
+                            }
+
+                            localResult.Message = assistantMessage;
+                            return localResult;
                         }
                     }
 
-                    _logger.LogWarning("Unexpected response format from Hugging Face API.");
-                    return new ChatResponseDto
-                    {
-                        Success = false,
-                        Error = "Unexpected response format from the API.",
-                        Message = string.Empty
-                    };
+                    return localResult;
                 }
-            }
-            catch (OperationCanceledException ex)
-            {
-                _logger.LogWarning("Request to Hugging Face API was cancelled: {Message}", ex.Message);
-                return new ChatResponseDto
-                {
-                    Success = false,
-                    Error = "Request timed out. Please try again.",
-                    Message = string.Empty
-                };
-            }
-            catch (HttpRequestException ex)
-            {
-                _logger.LogError("HTTP error communicating with Hugging Face API: {Message}", ex.Message);
-                return new ChatResponseDto
-                {
-                    Success = false,
-                    Error = "Failed to connect to the chatbot service. Please try again later.",
-                    Message = string.Empty
-                };
-            }
-            catch (JsonException ex)
-            {
-                _logger.LogError("Error deserializing response from Hugging Face API: {Message}", ex.Message);
-                return new ChatResponseDto
-                {
-                    Success = false,
-                    Error = "Error processing the response. Please try again.",
-                    Message = string.Empty
-                };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error in HuggingFaceChatbotService.SendMessageAsync");
-                return new ChatResponseDto
+                _logger.LogWarning(ex, "External chatbot API call failed, falling back to local recommendation engine.");
+                return localResult ?? new ChatResponseDto
                 {
-                    Success = false,
-                    Error = "An unexpected error occurred. Please try again later.",
-                    Message = string.Empty
+                    Success = true,
+                    Message = "👋 I am Havenly's travel assistant! How can I help you discover places to stay across Egypt today?"
                 };
             }
         }

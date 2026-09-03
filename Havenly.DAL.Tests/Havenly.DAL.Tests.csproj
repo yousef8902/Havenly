@@ -15,6 +15,7 @@
 
   <ItemGroup>
 	<ProjectReference Include="..\Havenly.DAL\Havenly.DAL.csproj" />
+	<ProjectReference Include="..\Havenly.BLL\Havenly.BLL.csproj" />
   </ItemGroup>
 
 </Project>

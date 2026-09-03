@@ -113,6 +113,7 @@ namespace Havenly.PL
             builder.Services.AddScoped<IPaymentService, PaymentService>();
 
             // Chatbot Service
+            builder.Services.AddScoped<IPropertyRecommendationEngine, PropertyRecommendationEngine>();
             builder.Services.AddScoped<IChatbotService, HuggingFaceChatbotService>();
 
             // Background Services

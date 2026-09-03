@@ -29,5 +29,26 @@ namespace Havenly.BLL.ModelVMs
         /// Optional metadata about the response (e.g., model used, tokens consumed).
         /// </summary>
         public Dictionary<string, object>? Metadata { get; set; }
+
+        /// <summary>
+        /// Optional list of recommended property cards matching the user's query.
+        /// </summary>
+        public List<ChatPropertyCardDto>? RecommendedProperties { get; set; }
+    }
+
+    /// <summary>
+    /// Mini property card representation for chatbot recommendations.
+    /// </summary>
+    public class ChatPropertyCardDto
+    {
+        public long PropertyId { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
+        public decimal PricePerNight { get; set; }
+        public double Rating { get; set; }
+        public int ReviewCount { get; set; }
+        public int Capacity { get; set; }
+        public string DetailUrl { get; set; } = string.Empty;
     }
 }

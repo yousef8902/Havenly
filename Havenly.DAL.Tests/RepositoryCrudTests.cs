@@ -338,5 +338,104 @@ namespace Havenly.DAL.Tests
             var all = await paRepo.GetAll();
             Assert.NotEmpty(all);
         }
+
+        [Fact]
+        public async Task Chatbot_RecommendationEngine_ScopeGuard_And_Search_Works()
+        {
+            var dbName = Guid.NewGuid().ToString();
+            using var context = CreateContext(dbName);
+
+            // 1. Seed Property in Dahab
+            var addr = new Address();
+            addr.Create(0, "Egypt", "Dahab", "Lighthouse Road", 28.5m, 34.5m);
+            await context.Addresses.AddAsync(addr);
+            await context.SaveChangesAsync();
+
+            var prop = new Property();
+            prop.Create("host1", addr.AddressID, "Sea Breeze Dahab Villa", "Beachfront villa with stunning Red Sea views",
+                numberOfGuests: 4, capacity: 4, bathroomCount: 2, category: "Design homes");
+            prop.Rating = 4.9;
+            prop.NumberOfReviews = 10;
+            await context.Properties.AddAsync(prop);
+            await context.SaveChangesAsync();
+
+            var img = new PropertyImage();
+            img.Create(0, prop.PropertyID, "/images/dahab_villa.jpg", isPrimary: true);
+            await context.PropertyImages.AddAsync(img);
+
+            var listing = new Listing();
+            listing.Create(prop.PropertyID, "Dahab Luxury Listing", 900m, isValid: true);
+            listing.ListingStatus = Havenly.DAL.Enums.ListingStatus.Approved;
+            await context.Listings.AddAsync(listing);
+            await context.SaveChangesAsync();
+
+            var logger = Microsoft.Extensions.Logging.Abstractions.NullLogger<Havenly.BLL.Services.Implementations.PropertyRecommendationEngine>.Instance;
+            var engine = new Havenly.BLL.Services.Implementations.PropertyRecommendationEngine(context, logger);
+
+            // Test 1: Out-of-scope query guard (e.g. coding or war)
+            var outOfScopeRes = await engine.ProcessChatQueryAsync("Can you write python code to reverse a binary tree?");
+            Assert.True(outOfScopeRes.Success);
+            Assert.Contains("Havenly's Travel & Property Concierge", outOfScopeRes.Message);
+            Assert.Contains("consult external resources", outOfScopeRes.Message);
+            Assert.Null(outOfScopeRes.RecommendedProperties);
+            Assert.True(outOfScopeRes.Metadata?.ContainsKey("IsHandledLocally") == true);
+
+            var warRes = await engine.ProcessChatQueryAsync("tell me about the war");
+            Assert.True(warRes.Success);
+            Assert.Contains("Havenly's Travel & Property Concierge", warRes.Message);
+            Assert.Contains("consult external resources", warRes.Message);
+            Assert.Null(warRes.RecommendedProperties);
+            Assert.True(warRes.Metadata?.ContainsKey("IsHandledLocally") == true);
+
+            // Test 2: Platform FAQ
+            var faqRes = await engine.ProcessChatQueryAsync("How do payments work?");
+            Assert.True(faqRes.Success);
+            Assert.Contains("Paymob", faqRes.Message);
+            Assert.Contains("Egyptian Pounds", faqRes.Message);
+            Assert.True(faqRes.Metadata?.ContainsKey("IsHandledLocally") == true);
+
+            // Test 3: Recommendation Search in Dahab
+            var recRes = await engine.ProcessChatQueryAsync("Recommend a place in Dahab under 1000 EGP for 2 guests");
+            Assert.True(recRes.Success);
+            Assert.NotNull(recRes.RecommendedProperties);
+            Assert.Single(recRes.RecommendedProperties);
+
+            var card = recRes.RecommendedProperties[0];
+            Assert.Equal(prop.PropertyID, card.PropertyId);
+            Assert.Equal("Sea Breeze Dahab Villa", card.Title);
+            Assert.Equal("Dahab", card.City);
+            Assert.Equal(900m, card.PricePerNight);
+            Assert.Equal("/images/dahab_villa.jpg", card.ImageUrl);
+            Assert.Equal($"/Property/Detail/{prop.PropertyID}", card.DetailUrl);
+
+            // Test 4: Recommendation Search in Giza (verifying Giza is not lumped with Cairo)
+            var gizaAddr = new Address();
+            gizaAddr.Create(0, "Egypt", "Giza", "Pyramids View St", 29.9m, 31.1m);
+            await context.Addresses.AddAsync(gizaAddr);
+            await context.SaveChangesAsync();
+
+            var gizaProp = new Property();
+            gizaProp.Create("host2", gizaAddr.AddressID, "a nice unit", "Modern apartment close to the Pyramids",
+                numberOfGuests: 5, capacity: 5, bathroomCount: 1, category: "Design homes");
+            gizaProp.Rating = 5.0;
+            gizaProp.NumberOfReviews = 1;
+            await context.Properties.AddAsync(gizaProp);
+            await context.SaveChangesAsync();
+
+            var gizaListing = new Listing();
+            gizaListing.Create(gizaProp.PropertyID, "Giza Stay", 750m, isValid: true);
+            gizaListing.ListingStatus = Havenly.DAL.Enums.ListingStatus.Approved;
+            await context.Listings.AddAsync(gizaListing);
+            await context.SaveChangesAsync();
+
+            var gizaRes = await engine.ProcessChatQueryAsync("stays in Giza");
+            Assert.True(gizaRes.Success);
+            Assert.NotNull(gizaRes.RecommendedProperties);
+            Assert.Single(gizaRes.RecommendedProperties);
+            Assert.Equal(gizaProp.PropertyID, gizaRes.RecommendedProperties[0].PropertyId);
+            Assert.Equal("a nice unit", gizaRes.RecommendedProperties[0].Title);
+            Assert.Equal("Giza", gizaRes.RecommendedProperties[0].City);
+            Assert.Equal(750m, gizaRes.RecommendedProperties[0].PricePerNight);
+        }
     }
 }
