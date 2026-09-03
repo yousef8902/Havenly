@@ -46,7 +46,7 @@ public class PropertyController : Controller
         string? sort)
     {
         var allProperties = await _propertyRepository.GetAll();
-        var query = allProperties.Where(p => p.Listing != null && p.Listing.ListingStatus == ListingStatus.Approved);
+        var query = allProperties.Where(p => p.Listing != null && p.Listing.ListingStatus == ListingStatus.Approved && p.Listing.IsValid && !p.IsDeleted);
 
         // 1. City / Destination Filter
         if (!string.IsNullOrWhiteSpace(city))

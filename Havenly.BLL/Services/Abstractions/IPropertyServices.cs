@@ -27,5 +27,9 @@ namespace Havenly.BLL.Services.Abstractions
         Task<bool> DeleteProperty(long propertyId, string ownerUserId);
         Task<bool> AddPropertyImages(long propertyId, string ownerUserId, IEnumerable<PropertyImage> images);
         Task<bool> RemovePropertyImage(long propertyId, long imageId, string ownerUserId);
+
+        Task<bool> UpdateListingPrice(long propertyId, string ownerUserId, decimal newPrice);
+        Task<(bool Success, bool IsActive, string Message)> ToggleListingSuspension(long propertyId, string ownerUserId);
+        Task<int> GetUpcomingBookingsCount(long propertyId, string ownerUserId);
     }
 }

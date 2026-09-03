@@ -437,5 +437,97 @@ namespace Havenly.DAL.Tests
             Assert.Equal("Giza", gizaRes.RecommendedProperties[0].City);
             Assert.Equal(750m, gizaRes.RecommendedProperties[0].PricePerNight);
         }
+
+        [Fact]
+        public async Task Host_Price_Update_Suspension_Toggle_And_Safe_Delete_Works()
+        {
+            var options = new DbContextOptionsBuilder<HavenlyDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new HavenlyDbContext(options);
+
+            var host = new User { Id = "host_777", UserName = "host@havenly.com", Email = "host@havenly.com", Name = "Host 777" };
+            var guest = new User { Id = "guest_888", UserName = "guest@havenly.com", Email = "guest@havenly.com", Name = "Guest 888" };
+            await context.Users.AddRangeAsync(host, guest);
+            await context.SaveChangesAsync();
+
+            var addr = new Address();
+            addr.Create(0, "Egypt", "Alexandria", "Corniche Rd", 31.2m, 29.9m);
+            await context.Addresses.AddAsync(addr);
+            await context.SaveChangesAsync();
+
+            var prop = new Property();
+            prop.Create(host.Id, addr.AddressID, "Alex Sea View Flat", "Beautiful flat facing Mediterranean",
+                numberOfGuests: 4, capacity: 4, bathroomCount: 1, category: "Beachfront");
+            prop.Address = addr;
+            await context.Properties.AddAsync(prop);
+            await context.SaveChangesAsync();
+
+            var listing = new Listing();
+            listing.Create(prop.PropertyID, "Alex Flat Listing", 500m, isValid: true);
+            listing.ListingStatus = Havenly.DAL.Enums.ListingStatus.Approved;
+            listing.Property = prop;
+            prop.Listing = listing;
+            await context.Listings.AddAsync(listing);
+            await context.SaveChangesAsync();
+
+            var propRepo = new Havenly.DAL.Repos.Implementations.PropertyRepository(context);
+            var addrRepo = new Havenly.DAL.Repos.Implementations.AddressRepository(context);
+            var listingRepo = new Havenly.DAL.Repos.Implementations.ListingRepository(context);
+            var imgRepo = new Havenly.DAL.Repos.Implementations.PropertyImageRepository(context);
+            var amenRepo = new Havenly.DAL.Repos.Implementations.AmenityRepository(context);
+            var propAmenRepo = new Havenly.DAL.Repos.Implementations.PropertyAmenityRepository(context);
+            var bedRmRepo = new Havenly.DAL.Repos.Implementations.BedroomRepository(context);
+            var bedRepo = new Havenly.DAL.Repos.Implementations.BedRepository(context);
+            var bookingRepo = new Havenly.DAL.Repos.Implementations.BookingRepository(context);
+
+            var propService = new Havenly.BLL.Services.Implementations.PropertyServices(
+                propRepo, addrRepo, listingRepo, imgRepo, amenRepo, propAmenRepo, bedRmRepo, bedRepo, bookingRepo);
+
+            // 1. Test Price Update
+            var priceUpdated = await propService.UpdateListingPrice(prop.PropertyID, host.Id, 850m);
+            Assert.True(priceUpdated);
+            var updatedListing = await listingRepo.GetById(listing.ListingID);
+            Assert.Equal(850m, updatedListing!.Price);
+
+            // 2. Test Suspension Toggle (Active -> Suspended)
+            var (susSuccess, isNowActive, susMsg) = await propService.ToggleListingSuspension(prop.PropertyID, host.Id);
+            Assert.True(susSuccess);
+            Assert.False(isNowActive);
+            Assert.False(updatedListing.IsValid);
+            Assert.Contains("paused", susMsg, StringComparison.OrdinalIgnoreCase);
+
+            // 3. Test Suspension Toggle (Suspended -> Active)
+            var (resSuccess, isResActive, resMsg) = await propService.ToggleListingSuspension(prop.PropertyID, host.Id);
+            Assert.True(resSuccess);
+            Assert.True(isResActive);
+            Assert.True(updatedListing.IsValid);
+            Assert.Contains("resumed", resMsg, StringComparison.OrdinalIgnoreCase);
+
+            // 4. Test Active Stay Protection on Delete
+            var booking = new Booking();
+            booking.Create(guest.Id, listing.ListingID, DateTime.UtcNow.AddDays(2), DateTime.UtcNow.AddDays(5), 2550m, Havenly.DAL.Enums.BookingStatus.Approved);
+            await bookingRepo.AddBooking(booking);
+            await bookingRepo.SaveChanges();
+
+            var upcomingCount = await propService.GetUpcomingBookingsCount(prop.PropertyID, host.Id);
+            Assert.Equal(1, upcomingCount);
+
+            // 5. Delete Property (Soft-delete & Unlist)
+            var deleted = await propService.DeleteProperty(prop.PropertyID, host.Id);
+            Assert.True(deleted);
+
+            var deletedProp = await context.Properties.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.PropertyID == prop.PropertyID);
+            Assert.NotNull(deletedProp);
+            Assert.True(deletedProp!.IsDeleted);
+            Assert.False(updatedListing.IsValid);
+
+            // Crucial: Ensure existing guest booking still exists and is completely intact!
+            var existingBooking = await bookingRepo.GetById(booking.BookingID);
+            Assert.NotNull(existingBooking);
+            Assert.Equal(guest.Id, existingBooking!.GuestUserID);
+            Assert.Equal(Havenly.DAL.Enums.BookingStatus.Approved, existingBooking.Status);
+        }
     }
 }

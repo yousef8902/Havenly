@@ -52,8 +52,7 @@ namespace Havenly.DAL.Repos.Implementations
         {
             try
             {
-                // use provided entity directly
-                entity.Update(entity.Description, entity.Price);
+                context.Entry(entity).State = EntityState.Modified;
                 context.SaveChanges();
             }
             catch (Exception ex) { Console.WriteLine("Error:" + ex.Message); }
@@ -112,9 +111,8 @@ namespace Havenly.DAL.Repos.Implementations
         .Include(l => l.Property)
             .ThenInclude(p => p.Images)
         .Include(l => l.Property)
- .Where(l => l.ListingStatus == status)
-       
-        .ToListAsync(); ;
+ .Where(l => l.ListingStatus == status && l.IsValid && (l.Property == null || !l.Property.IsDeleted))
+        .ToListAsync();
                 Console.WriteLine("info:Listings fetched successfully");
                 return list;
             }

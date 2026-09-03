@@ -16,6 +16,7 @@ namespace Havenly.BLL.Services.Implementations
         private readonly IPropertyAmenityRepository propertyAmenityRepository;
         private readonly IBedroomRepository bedroomRepository;
         private readonly IBedRepository bedRepository;
+        private readonly IBookingRepository bookingRepository;
 
         public PropertyServices(
             IPropertyRepository propertyRepository,
@@ -25,7 +26,8 @@ namespace Havenly.BLL.Services.Implementations
             IAmenityRepository amenityRepository,
             IPropertyAmenityRepository propertyAmenityRepository,
             IBedroomRepository bedroomRepository,
-            IBedRepository bedRepository)
+            IBedRepository bedRepository,
+            IBookingRepository bookingRepository)
         {
             this.propertyRepository = propertyRepository;
             this.addressRepository = addressRepository;
@@ -35,6 +37,7 @@ namespace Havenly.BLL.Services.Implementations
             this.propertyAmenityRepository = propertyAmenityRepository;
             this.bedroomRepository = bedroomRepository;
             this.bedRepository = bedRepository;
+            this.bookingRepository = bookingRepository;
         }
 
         public async Task<IEnumerable<Property>> GetPropertiesByOwner(string ownerUserId)
@@ -179,9 +182,76 @@ namespace Havenly.BLL.Services.Implementations
                 return false;
             }
 
-            // PropertyRepository.Delete performs a soft delete through Property.Delete().
+            // Unlist from search and explore so no new bookings can be made
+            if (property.Listing != null)
+            {
+                property.Listing.IsValid = false;
+                listingRepository.Update(property.Listing);
+            }
+
+            // Soft-delete the property (preserves existing booking records for guests)
             propertyRepository.Delete(property);
             return property.IsDeleted;
+        }
+
+        public async Task<bool> UpdateListingPrice(long propertyId, string ownerUserId, decimal newPrice)
+        {
+            if (newPrice <= 0 || string.IsNullOrWhiteSpace(ownerUserId))
+            {
+                return false;
+            }
+
+            var property = await GetPropertyDetails(propertyId, ownerUserId);
+            if (property?.Listing is null)
+            {
+                return false;
+            }
+
+            property.Listing.Price = newPrice;
+            listingRepository.Update(property.Listing);
+            return true;
+        }
+
+        public async Task<(bool Success, bool IsActive, string Message)> ToggleListingSuspension(long propertyId, string ownerUserId)
+        {
+            if (string.IsNullOrWhiteSpace(ownerUserId))
+            {
+                return (false, false, "Unauthorized");
+            }
+
+            var property = await GetPropertyDetails(propertyId, ownerUserId);
+            if (property?.Listing is null)
+            {
+                return (false, false, "Listing not found");
+            }
+
+            // Toggle IsValid
+            property.Listing.IsValid = !property.Listing.IsValid;
+            listingRepository.Update(property.Listing);
+
+            bool isActive = property.Listing.IsValid;
+            string msg = isActive 
+                ? "Listing resumed successfully! It is now active and bookable by guests."
+                : "Listing paused successfully! It is temporarily unlisted from public search.";
+
+            return (true, isActive, msg);
+        }
+
+        public async Task<int> GetUpcomingBookingsCount(long propertyId, string ownerUserId)
+        {
+            var property = await GetPropertyDetails(propertyId, ownerUserId);
+            if (property?.Listing is null)
+            {
+                return 0;
+            }
+
+            var activeStatuses = new[] { BookingStatus.Pending, BookingStatus.Approved };
+            var bookings = await bookingRepository.Find(b => 
+                b.ListingID == property.Listing.ListingID && 
+                activeStatuses.Contains(b.Status) && 
+                b.CheckOut >= DateTime.UtcNow);
+
+            return bookings.Count();
         }
 
         public async Task<bool> AddPropertyImages(long propertyId, string ownerUserId, IEnumerable<PropertyImage> images)

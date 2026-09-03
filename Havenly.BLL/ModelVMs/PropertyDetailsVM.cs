@@ -23,6 +23,7 @@ namespace Havenly.BLL.ModelVMs
         public HostVM Host { get; set; } = new();
         public List<string> Rules { get; set; } = [];
         public string Status { get; set; } = "approved";
+        public bool IsValid { get; set; } = true;
         public string Submitted { get; set; } = "";
         public List<string> BookedDates { get; set; } = [];
         public bool IsFavorite { get; set; }

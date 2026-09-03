@@ -97,6 +97,8 @@ namespace Havenly.BLL.ModelVMs
         public decimal Price { get; set; }
         public int Guests { get; set; }
         public ListingStatus ListingStatus { get; set; }
+        public bool IsValid { get; set; } = true;
+        public int UpcomingBookingsCount { get; set; }
         public string ImageUrl { get; set; } = string.Empty;
         public double Rating { get; set; }
         public long NumberOfReviews { get; set; }

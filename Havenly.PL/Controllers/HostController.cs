@@ -112,9 +112,11 @@ namespace Havenly.PL.Controllers
             var userId = GetCurrentUserId();
             var properties = await _propertyServices.GetPropertiesByOwner(userId);
 
-            var vm = new HostPropertiesPageVM
+            var cardList = new List<HostPropertyCardVM>();
+            foreach (var p in properties)
             {
-                Properties = properties.Select(p => new HostPropertyCardVM
+                var upcomingCount = await _propertyServices.GetUpcomingBookingsCount(p.PropertyID, userId);
+                cardList.Add(new HostPropertyCardVM
                 {
                     PropertyId = p.PropertyID,
                     ListingId = p.Listing?.ListingID ?? 0,
@@ -125,12 +127,19 @@ namespace Havenly.PL.Controllers
                     Price = p.Listing?.Price ?? 0,
                     Guests = p.NumberOfGuests,
                     ListingStatus = p.Listing?.ListingStatus ?? ListingStatus.Pending,
+                    IsValid = p.Listing?.IsValid ?? false,
+                    UpcomingBookingsCount = upcomingCount,
                     ImageUrl = p.Images?.FirstOrDefault(img => img.IsPrimary == true)?.ImagePath
                                ?? p.Images?.FirstOrDefault()?.ImagePath
                                ?? "/images/p1.jpg",
                     Rating = p.Rating,
                     NumberOfReviews = p.NumberOfReviews
-                }).ToList()
+                });
+            }
+
+            var vm = new HostPropertiesPageVM
+            {
+                Properties = cardList
             };
 
             return View(vm);
@@ -389,14 +398,66 @@ namespace Havenly.PL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdatePrice(long propertyId, decimal price)
+        {
+            var userId = GetCurrentUserId();
+            if (price <= 0)
+            {
+                TempData["ErrorMessage"] = "Nightly price must be greater than 0 EGP.";
+                return RedirectToAction(nameof(ListProperties));
+            }
+
+            var success = await _propertyServices.UpdateListingPrice(propertyId, userId, price);
+            if (success)
+            {
+                TempData["SuccessMessage"] = $"Nightly price updated successfully to {price:N0} EGP.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Could not update property price.";
+            }
+
+            return RedirectToAction(nameof(ListProperties));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleListingStatus(long propertyId)
+        {
+            var userId = GetCurrentUserId();
+            var (success, isActive, message) = await _propertyServices.ToggleListingSuspension(propertyId, userId);
+
+            if (success)
+            {
+                TempData["SuccessMessage"] = message;
+            }
+            else
+            {
+                TempData["ErrorMessage"] = message;
+            }
+
+            return RedirectToAction(nameof(ListProperties));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteProperty(long id)
         {
             var userId = GetCurrentUserId();
+            var upcomingCount = await _propertyServices.GetUpcomingBookingsCount(id, userId);
+
             var success = await _propertyServices.DeleteProperty(id, userId);
 
             if (success)
             {
-                TempData["SuccessMessage"] = "Property deleted successfully.";
+                if (upcomingCount > 0)
+                {
+                    TempData["SuccessMessage"] = $"Property unlisted and removed from search. Note: You have {upcomingCount} upcoming confirmed reservation(s) which remain active and honored for your guests.";
+                }
+                else
+                {
+                    TempData["SuccessMessage"] = "Property unlisted and deleted successfully.";
+                }
             }
             else
             {

@@ -83,10 +83,28 @@ namespace Havenly.BLL.Services.Implementations
             }
 
             var listing = await _listingRepository.GetById(dto.ListingID);
-            if (listing != null)
+            if (listing == null || !listing.IsValid || listing.ListingStatus != ListingStatus.Approved)
             {
-                var property = await _propertyRepository.GetById(listing.PropertyID);
-                if (property != null && string.Equals(property.OwnerUserID, dto.GuestUserID, StringComparison.OrdinalIgnoreCase))
+                return new BookingResultVM
+                {
+                    Success = false,
+                    Message = "This listing is currently suspended by the host and not accepting new reservations."
+                };
+            }
+
+            var property = await _propertyRepository.GetById(listing.PropertyID);
+            if (property != null)
+            {
+                if (property.IsDeleted)
+                {
+                    return new BookingResultVM
+                    {
+                        Success = false,
+                        Message = "This listing is no longer available."
+                    };
+                }
+
+                if (string.Equals(property.OwnerUserID, dto.GuestUserID, StringComparison.OrdinalIgnoreCase))
                 {
                     return new BookingResultVM
                     {
@@ -96,9 +114,10 @@ namespace Havenly.BLL.Services.Implementations
                 }
             }
 
-            // calc total nights and total price
+            // calc total nights and total price from authoritative database listing price
+            decimal nightlyPrice = listing.Price > 0 ? listing.Price : dto.PricePerNight;
             int totalNights = (dto.CheckOut.Date - dto.CheckIn.Date).Days;
-            decimal subtotal = totalNights * dto.PricePerNight;
+            decimal subtotal = totalNights * nightlyPrice;
             decimal serviceFee = Math.Round(subtotal * 0.09m, 2);
             decimal totalPrice = subtotal + serviceFee;
 

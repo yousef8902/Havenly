@@ -19,6 +19,7 @@ namespace Havenly.BLL.Mappers
 
                 // Financial & Pricing details from Listing
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Listing!= null ? src.Listing.Price : 0m))
+                .ForMember(dest => dest.IsValid, opt => opt.MapFrom(src => src.Listing != null ? src.Listing.IsValid : true))
                 
               
                 //.ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Listing != null ? src.Listing. : "General"))

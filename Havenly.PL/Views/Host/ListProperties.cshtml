@@ -16,7 +16,7 @@
             <h1 class="text-3xl font-bold">My properties</h1>
             <p class="text-muted-foreground mt-1">Manage your active, pending, and draft listings.</p>
         </div>
-        <a asp-action="CreateProperty" class="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow transition hover:bg-primary/90">
+        <a asp-action="CreateProperty" class="inline-flex items-center gap-2 rounded-full bg-[#0d9488] px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#0f766e] transition" style="background-color: #0d9488 !important; color: #ffffff !important;">
             <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
@@ -50,24 +50,42 @@
                         
                         <!-- Status Badge -->
                         <div class="absolute left-3 top-3">
-                            @switch (property.ListingStatus)
+                            @if (property.ListingStatus == ListingStatus.Approved)
                             {
-                                case ListingStatus.Approved:
-                                    <span class="inline-flex items-center rounded-full bg-green-500/90 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
-                                        Approved
+                                @if (property.IsValid)
+                                {
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/95 px-3 py-1 text-xs font-semibold text-white shadow backdrop-blur">
+                                        <span class="size-1.5 rounded-full bg-white animate-pulse"></span>
+                                        Active
                                     </span>
-                                    break;
-                                case ListingStatus.Pending:
-                                    <span class="inline-flex items-center rounded-full bg-amber-500/90 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
-                                        Pending review
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-500/95 px-3 py-1 text-xs font-semibold text-white shadow backdrop-blur">
+                                        <span>⏸️</span>
+                                        Suspended
                                     </span>
-                                    break;
-                                case ListingStatus.Declined:
-                                    <span class="inline-flex items-center rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
-                                        Declined
-                                    </span>
-                                    break;
+                                }
                             }
+                            else if (property.ListingStatus == ListingStatus.Pending)
+                            {
+                                <span class="inline-flex items-center rounded-full bg-blue-500/90 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+                                    Pending review
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+                                    Declined
+                                </span>
+                            }
+                        </div>
+
+                        <!-- Public Link button -->
+                        <div class="absolute right-3 top-3">
+                            <a asp-controller="Property" asp-action="Detail" asp-route-id="@property.PropertyId" target="_blank" title="View Public Listing" class="inline-flex size-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur hover:bg-black/60 transition">
+                                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            </a>
                         </div>
                     </div>
 
@@ -84,24 +102,65 @@
                                 </div>
                             </div>
                             <p class="text-sm text-muted-foreground mt-1">@property.City, @property.Country</p>
-                            <p class="text-xs text-muted-foreground mt-1 flex items-center gap-1.5 flex-wrap">
+                            
+                            <div class="flex items-center gap-1.5 text-xs text-muted-foreground mt-1 flex-wrap">
                                 <span class="inline-block rounded bg-secondary px-2 py-0.5 text-xs font-semibold text-foreground">@property.Category</span>
                                 <span>·</span>
                                 <span>Up to @property.Guests guests</span>
                                 <span>·</span>
                                 <span>@property.NumberOfReviews reviews</span>
-                            </p>
-                            <p class="text-base font-bold text-foreground mt-2">@property.Price EGP <span class="text-xs font-normal text-muted-foreground">/ night</span></p>
+                            </div>
+
+                            @if (property.UpcomingBookingsCount > 0)
+                            {
+                                <div class="mt-2.5">
+                                    <span class="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                                        📅 @property.UpcomingBookingsCount confirmed booking@(property.UpcomingBookingsCount > 1 ? "s" : "")
+                                    </span>
+                                </div>
+                            }
+
+                            <!-- Price Row & Quick Change -->
+                            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                                <div>
+                                    <span class="text-[11px] text-gray-500 block">Nightly Price</span>
+                                    <span class="text-base font-extrabold text-gray-900">@property.Price.ToString("N0") EGP</span>
+                                </div>
+                                <button type="button" onclick="openPriceModal(@property.PropertyId, '@Html.Raw(property.PropertyName.Replace("'", "\\'"))', @property.Price)" class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0d9488] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-full transition shadow-sm">
+                                    <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    Change Price
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Actions -->
-                        <div class="flex items-center gap-2 border-t border-border pt-4">
-                            <a asp-action="EditProperty" asp-route-id="@property.PropertyId" class="flex-1 rounded-lg border border-border bg-secondary/50 py-2 text-center text-xs font-semibold hover:bg-secondary">
+                        <div class="flex items-center gap-2 border-t border-gray-100 pt-4">
+                            <a asp-action="EditProperty" asp-route-id="@property.PropertyId" class="flex-1 rounded-full border border-gray-200 bg-white py-2 text-center text-xs font-semibold text-gray-700 hover:bg-gray-50 transition shadow-sm">
                                 Edit details
                             </a>
-                            <form asp-action="DeleteProperty" asp-route-id="@property.PropertyId" method="post" onsubmit="return confirm('Are you sure you want to delete this property?');" class="inline">
+
+                            @if (property.ListingStatus == ListingStatus.Approved)
+                            {
+                                <form asp-action="ToggleListingStatus" asp-route-propertyId="@property.PropertyId" method="post" class="inline">
+                                    @Html.AntiForgeryToken()
+                                    @if (property.IsValid)
+                                    {
+                                        <button type="submit" title="Pause listing to temporarily hide from public search" class="rounded-full border border-amber-200 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-100 transition shadow-sm">
+                                            ⏸️ Pause
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" title="Resume listing to make it active and bookable" class="rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition shadow-sm">
+                                            ▶️ Resume
+                                        </button>
+                                    }
+                                </form>
+                            }
+
+                            <form asp-action="DeleteProperty" asp-route-id="@property.PropertyId" method="post" onsubmit="return confirmDelete(@property.UpcomingBookingsCount);" class="inline">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive hover:bg-destructive/20">
+                                <button type="submit" class="rounded-full border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100 transition shadow-sm">
                                     Delete
                                 </button>
                             </form>
@@ -113,19 +172,124 @@
     }
     else
     {
-        <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-16 text-center">
-            <div class="grid size-14 place-items-center rounded-full bg-secondary text-muted-foreground mb-4">
+        <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 py-16 text-center bg-white">
+            <div class="grid size-14 place-items-center rounded-full bg-emerald-50 text-[#0d9488] mb-4">
                 <svg class="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                 </svg>
             </div>
-            <h3 class="text-lg font-bold">No properties listed yet</h3>
-            <p class="text-sm text-muted-foreground mt-1 max-w-sm">
+            <h3 class="text-lg font-bold text-gray-900">No properties listed yet</h3>
+            <p class="text-sm text-gray-500 mt-1 max-w-sm">
                 Start sharing your place with guests from around the world.
             </p>
-            <a asp-action="CreateProperty" class="mt-5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90">
+            <a asp-action="CreateProperty" class="mt-5 rounded-full bg-[#0d9488] px-6 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#0f766e] transition" style="background-color: #0d9488 !important; color: #ffffff !important;">
                 Create your first listing
             </a>
         </div>
     }
 </div>
+
+<!-- Quick Price Modal (Pure White & Green Havenly Theme) -->
+<div id="priceModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <!-- Backdrop with blur -->
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closePriceModal()"></div>
+
+    <!-- Modal Card (Pure White Luxury Card) -->
+    <div class="relative w-full max-w-md rounded-3xl border border-gray-200 bg-white text-gray-900 p-6 sm:p-8 shadow-2xl z-10 space-y-5" style="background-color: #ffffff !important; color: #111827 !important;">
+        <!-- Close icon button -->
+        <button type="button" onclick="closePriceModal()" class="absolute top-5 right-5 rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition" aria-label="Close">
+            <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <!-- Header -->
+        <div class="space-y-1.5">
+            <div class="flex items-center gap-3">
+                <div class="size-10 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[#0d9488]">
+                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold tracking-tight text-gray-900">Update Nightly Price</h3>
+                    <p id="modalPropertyName" class="text-xs text-gray-500 font-medium line-clamp-1 pt-0.5"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form asp-action="UpdatePrice" method="post" class="space-y-5">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="propertyId" id="modalPropertyId" value="" />
+            
+            <div class="space-y-1.5">
+                <label for="modalPriceInput" class="block text-xs font-bold uppercase tracking-wider text-gray-500">
+                    New Nightly Rate in Egyptian Pounds (EGP)
+                </label>
+                <div class="relative">
+                    <input type="number" 
+                           name="price" 
+                           id="modalPriceInput" 
+                           min="1" 
+                           step="1" 
+                           required 
+                           class="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-base font-bold text-gray-900 pr-20 shadow-sm focus:border-[#0d9488] focus:ring-2 focus:ring-[#0d9488]/20 focus:outline-none transition" 
+                           style="background-color: #ffffff !important; color: #111827 !important;" />
+                    <span class="absolute right-4 top-3.5 text-xs font-bold text-gray-400 pointer-events-none">EGP / night</span>
+                </div>
+                <p class="text-xs text-gray-400 pt-1 flex items-center gap-1.5">
+                    <svg class="size-3.5 text-[#0d9488]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Price updates take effect immediately without needing admin re-approval.
+                </p>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                <button type="button" onclick="closePriceModal()" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition">
+                    Close
+                </button>
+                <button type="submit" 
+                        class="rounded-full bg-[#0d9488] px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-[#0f766e] transition flex items-center gap-1.5" 
+                        style="background-color: #0d9488 !important; color: #ffffff !important;">
+                    <span>Save Price</span>
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openPriceModal(propertyId, propertyName, currentPrice) {
+        document.getElementById('modalPropertyId').value = propertyId;
+        document.getElementById('modalPropertyName').textContent = propertyName;
+        document.getElementById('modalPriceInput').value = Math.round(currentPrice);
+        const modal = document.getElementById('priceModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => document.getElementById('modalPriceInput').focus(), 50);
+    }
+
+    function closePriceModal() {
+        const modal = document.getElementById('priceModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function confirmDelete(upcomingCount) {
+        if (upcomingCount > 0) {
+            return confirm('⚠️ Notice: You have ' + upcomingCount + ' upcoming confirmed reservation(s) for this property!\n\nDeleting this listing will unlist it from public search and prevent new bookings, but you are still obligated to honor your existing guests\' confirmed stays.\n\nAre you sure you want to proceed?');
+        }
+        return confirm('Are you sure you want to delete and unlist this property?');
+    }
+
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closePriceModal();
+    });
+</script>
