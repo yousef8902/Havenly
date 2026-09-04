@@ -149,8 +149,12 @@
                 Bookings vs. signups
             </h2>
 
-            <p class="mt-1 text-sm text-muted-foreground">
-                Platform activity over the last 12 months
+            <p class="mt-1 text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
+                <span>Platform activity over the last 12 months</span>
+                <span class="inline-flex items-center gap-1 text-xs font-semibold text-[#0d9488] bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 rounded-full shadow-xs">
+                    <svg class="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" /></svg>
+                    Click any bar to view details below
+                </span>
             </p>
         </div>
 
@@ -166,7 +170,7 @@
 
             <span class="flex items-center gap-2">
                 <span class="size-3 rounded-sm bg-neutral-400 dark:bg-neutral-500 block"
-                      style="width:12px;height:12px; background-color: var(--primary-foreground, #94a3b8);">
+                      style="width:12px;height:12px; background-color: #94a3b8;">
                 </span>
                 Signups
             </span>
@@ -180,6 +184,9 @@
         var monthlyStats = Model?.MonthlyStats;
 
         var months = monthlyStats?.Months ?? new List<string> { "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep" };
+        var years = monthlyStats?.Years ?? new List<int>();
+        var monthNumbers = monthlyStats?.MonthNumbers ?? new List<int>();
+        var fullMonthNames = monthlyStats?.FullMonthNames ?? new List<string>();
         var bookings = monthlyStats?.Bookings ?? new List<int>();
         var signups = monthlyStats?.Signups ?? new List<int>();
 
@@ -197,6 +204,9 @@
         {
             var bookingValue = i < bookings.Count ? bookings[i] : 0;
             var signupValue = i < signups.Count ? signups[i] : 0;
+            var year = (i < years.Count) ? years[i] : DateTime.UtcNow.Year;
+            var monthNum = (i < monthNumbers.Count) ? monthNumbers[i] : (i + 1);
+            var fullMonth = (i < fullMonthNames.Count) ? fullMonthNames[i] : months[i];
 
             var bookingHeightPct = ((double)bookingValue / maxValue * 100).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
             var signupHeightPct = ((double)signupValue / maxValue * 100).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
@@ -210,17 +220,24 @@
                     <!-- Bookings Bar -->
                     <div class="group relative flex h-full w-1/2 items-end justify-center">
 
-                        <div class="w-full rounded-t bg-neutral-900 dark:bg-neutral-100 transition-all duration-300 hover:opacity-80"
-                             style="height: @(bookingHeightPct)%; min-height: @(bookingValue > 0 ? "4px" : "0px"); background-color: var(--primary, #0f172a);">
+                        <button type="button"
+                                class="chart-bar-btn chart-bar-booking w-full rounded-t transition-all duration-200 hover:opacity-85 hover:brightness-125 focus:outline-none cursor-pointer"
+                                style="height: @(bookingHeightPct)%; min-height: @(bookingValue > 0 ? "6px" : "3px"); background-color: var(--primary, #0f172a);"
+                                data-year="@year"
+                                data-month="@monthNum"
+                                data-month-name="@fullMonth"
+                                data-type="bookings"
+                                data-count="@bookingValue"
+                                title="Click to view @bookingValue bookings in @fullMonth">
 
                             @if (bookingValue > 0)
                             {
-                                <span class="absolute bottom-full left-1/2 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-neutral-900 px-2 py-1 text-xs text-white group-hover:block z-20 shadow-md">
-                                    @bookingValue bookings
+                                <span class="absolute bottom-full left-1/2 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-neutral-900 px-2 py-1 text-xs text-white group-hover:block z-20 shadow-md pointer-events-none">
+                                    @bookingValue bookings · click to view
                                 </span>
                             }
 
-                        </div>
+                        </button>
 
                     </div>
 
@@ -228,17 +245,24 @@
                     <!-- Signups Bar -->
                     <div class="group relative flex h-full w-1/2 items-end justify-center">
 
-                        <div class="w-full rounded-t bg-neutral-400 dark:bg-neutral-500 transition-all duration-300 hover:opacity-80"
-                             style="height: @(signupHeightPct)%; min-height: @(signupValue > 0 ? "4px" : "0px"); background-color: #94a3b8;">
+                        <button type="button"
+                                class="chart-bar-btn chart-bar-signup w-full rounded-t transition-all duration-200 hover:opacity-85 hover:brightness-125 focus:outline-none cursor-pointer"
+                                style="height: @(signupHeightPct)%; min-height: @(signupValue > 0 ? "6px" : "3px"); background-color: #94a3b8;"
+                                data-year="@year"
+                                data-month="@monthNum"
+                                data-month-name="@fullMonth"
+                                data-type="signups"
+                                data-count="@signupValue"
+                                title="Click to view @signupValue signups in @fullMonth">
 
                             @if (signupValue > 0)
                             {
-                                <span class="absolute bottom-full left-1/2 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-neutral-900 px-2 py-1 text-xs text-white group-hover:block z-20 shadow-md">
-                                    @signupValue signups
+                                <span class="absolute bottom-full left-1/2 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-neutral-900 px-2 py-1 text-xs text-white group-hover:block z-20 shadow-md pointer-events-none">
+                                    @signupValue signups · click to view
                                 </span>
                             }
 
-                        </div>
+                        </button>
 
                     </div>
 
@@ -255,6 +279,59 @@
 
     </div>
 
+</section>
+
+<!-- Dynamic Monthly Activity Details Section (shown when a bar is clicked) -->
+<section id="chartDetailsSection" class="hidden mt-8 rounded-2xl border border-[#0d9488]/30 bg-card p-6 shadow-lg transition-all duration-300">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border">
+        <div class="flex items-center gap-3">
+            <div id="chartDetailsIcon" class="size-11 rounded-2xl bg-emerald-50 text-[#0d9488] border border-emerald-200 flex items-center justify-center font-bold shadow-xs">
+                <!-- Icon via JS -->
+            </div>
+            <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h3 id="chartDetailsTitle" class="text-xl font-bold text-foreground">Monthly Activity</h3>
+                    <span id="chartDetailsBadge" class="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 px-2.5 py-0.5 text-xs font-semibold">
+                        0 records
+                    </span>
+                    <span id="chartDetailsRevenueBadge" class="hidden inline-flex items-center rounded-full bg-emerald-50 text-[#0d9488] border border-emerald-200 px-2.5 py-0.5 text-xs font-semibold">
+                    </span>
+                </div>
+                <p id="chartDetailsSubtitle" class="text-xs text-muted-foreground mt-0.5">Click any bar in the chart above to switch month or metric.</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 self-end sm:self-center">
+            <a id="chartDetailsFullLink" href="#" class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0d9488] hover:text-[#0f766e] bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3.5 py-1.5 rounded-full transition">
+                <span>View in full table</span>
+                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </a>
+            <button id="chartDetailsCloseBtn" type="button" class="size-8 rounded-full border border-gray-200 bg-white hover:bg-gray-100 text-gray-500 hover:text-gray-900 flex items-center justify-center text-sm font-bold transition shadow-xs" title="Dismiss details">
+                ✕
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="chartDetailsLoading" class="py-12 flex flex-col items-center justify-center text-muted-foreground text-sm gap-3">
+        <svg class="animate-spin size-7 text-[#0d9488]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span>Loading details for selected month...</span>
+    </div>
+
+    <!-- Empty State -->
+    <div id="chartDetailsEmpty" class="hidden py-12 text-center text-muted-foreground text-sm">
+        <div class="size-12 rounded-2xl bg-muted mx-auto flex items-center justify-center text-muted-foreground mb-3">
+            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        </div>
+        <p id="chartDetailsEmptyMessage" class="font-medium">No records found for this period.</p>
+    </div>
+
+    <!-- Details Table Container -->
+    <div id="chartDetailsTableContainer" class="hidden mt-4 overflow-x-auto rounded-xl border border-border">
+    </div>
 </section>
 
 
@@ -668,6 +745,217 @@
                 });
 
             }
+
+            // Chart Bar Drill-Down
+            const chartBarBtns = document.querySelectorAll('.chart-bar-btn');
+            const detailsSection = document.getElementById('chartDetailsSection');
+            const detailsIcon = document.getElementById('chartDetailsIcon');
+            const detailsTitle = document.getElementById('chartDetailsTitle');
+            const detailsSubtitle = document.getElementById('chartDetailsSubtitle');
+            const detailsBadge = document.getElementById('chartDetailsBadge');
+            const detailsRevenueBadge = document.getElementById('chartDetailsRevenueBadge');
+            const detailsFullLink = document.getElementById('chartDetailsFullLink');
+            const detailsCloseBtn = document.getElementById('chartDetailsCloseBtn');
+            const detailsLoading = document.getElementById('chartDetailsLoading');
+            const detailsEmpty = document.getElementById('chartDetailsEmpty');
+            const detailsEmptyMessage = document.getElementById('chartDetailsEmptyMessage');
+            const detailsTableContainer = document.getElementById('chartDetailsTableContainer');
+
+            let activeBarBtn = null;
+
+            function clearActiveBar() {
+                if (activeBarBtn) {
+                    activeBarBtn.classList.remove('ring-2', 'ring-[#0d9488]', 'ring-offset-2', 'scale-y-105', 'z-10');
+                    activeBarBtn = null;
+                }
+            }
+
+            if (detailsCloseBtn) {
+                detailsCloseBtn.addEventListener('click', function() {
+                    detailsSection.classList.add('hidden');
+                    clearActiveBar();
+                });
+            }
+
+            chartBarBtns.forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const year = this.dataset.year;
+                    const month = this.dataset.month;
+                    const monthName = this.dataset.monthName;
+                    const type = this.dataset.type;
+
+                    // Highlight active bar
+                    clearActiveBar();
+                    activeBarBtn = this;
+                    this.classList.add('ring-2', 'ring-[#0d9488]', 'ring-offset-2', 'scale-y-105', 'z-10');
+
+                    // Reveal section & set loading state
+                    detailsSection.classList.remove('hidden');
+                    detailsLoading.classList.remove('hidden');
+                    detailsEmpty.classList.add('hidden');
+                    detailsTableContainer.classList.add('hidden');
+                    detailsRevenueBadge.classList.add('hidden');
+
+                    // Icon & Title setup
+                    if (type === 'bookings') {
+                        detailsIcon.innerHTML = `
+                            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>`;
+                        detailsTitle.textContent = `${monthName} · Bookings`;
+                        detailsSubtitle.textContent = `All bookings placed during ${monthName}`;
+                        detailsFullLink.href = `/Admin/Bookings`;
+                        const linkSpan = detailsFullLink.querySelector('span');
+                        if (linkSpan) linkSpan.textContent = 'View in Bookings';
+                    } else {
+                        detailsIcon.innerHTML = `
+                            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.856-3.488M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 0a2 2 0 11-4 0 2 2 0 014 0zM7 20H2v-2a3 3 0 015.856-3.488M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>`;
+                        detailsTitle.textContent = `${monthName} · Signups`;
+                        detailsSubtitle.textContent = `All members who registered during ${monthName}`;
+                        detailsFullLink.href = `/Admin/Members`;
+                        const linkSpan = detailsFullLink.querySelector('span');
+                        if (linkSpan) linkSpan.textContent = 'View in Members';
+                    }
+
+                    detailsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                    try {
+                        const response = await fetch(`/Admin/GetMonthlyActivityDetails?year=${year}&month=${month}&type=${type}`);
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        const data = await response.json();
+
+                        detailsLoading.classList.add('hidden');
+
+                        if (!data.success || !data.items || data.items.length === 0) {
+                            detailsBadge.textContent = '0 records';
+                            detailsEmptyMessage.textContent = `No ${type} recorded for ${monthName}.`;
+                            detailsEmpty.classList.remove('hidden');
+                            return;
+                        }
+
+                        detailsBadge.textContent = `${data.count} ${type}`;
+
+                        if (type === 'bookings') {
+                            if (data.totalRevenue) {
+                                detailsRevenueBadge.textContent = `Total: ${data.totalRevenue} EGP`;
+                                detailsRevenueBadge.classList.remove('hidden');
+                            }
+
+                            let rowsHtml = '';
+                            data.items.forEach(b => {
+                                rowsHtml += `
+                                    <tr class="hover:bg-muted/50 transition">
+                                        <td class="p-4 font-medium">
+                                            <div class="flex items-center gap-3">
+                                                <img src="${b.imageUrl}" alt="${b.propertyName}" class="size-10 rounded-lg object-cover border border-border flex-shrink-0" onerror="this.onerror=null; this.src='/images/hero.jpg';" />
+                                                <div>
+                                                    <a href="/Property/Detail/${b.propertyId}" class="hover:underline text-foreground font-medium line-clamp-1">
+                                                        ${b.propertyName}
+                                                    </a>
+                                                    <span class="text-xs text-muted-foreground">Booking #${b.bookingId}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="p-4 text-muted-foreground">
+                                            <div class="font-medium text-foreground">${b.guestName}</div>
+                                        </td>
+                                        <td class="p-4 text-muted-foreground">${b.hostName}</td>
+                                        <td class="p-4 text-muted-foreground text-xs whitespace-nowrap">
+                                            <div><span class="font-medium text-foreground">In:</span> ${b.checkIn}</div>
+                                            <div><span class="font-medium text-foreground">Out:</span> ${b.checkOut}</div>
+                                        </td>
+                                        <td class="p-4 text-right font-semibold text-foreground whitespace-nowrap">
+                                            ${b.total} EGP
+                                        </td>
+                                        <td class="p-4 whitespace-nowrap">
+                                            <span class="inline-flex items-center rounded-full ${b.statusColor} px-2.5 py-0.5 text-xs font-semibold">
+                                                ${b.status}
+                                            </span>
+                                        </td>
+                                        <td class="p-4 text-right whitespace-nowrap">
+                                            <a href="/Admin/BookingDetails/${b.bookingId}" class="inline-flex items-center gap-1 h-8 rounded-lg border border-border bg-background px-3 text-xs font-medium hover:bg-secondary transition">
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>`;
+                            });
+
+                            detailsTableContainer.innerHTML = `
+                                <table class="w-full text-sm text-left">
+                                    <thead class="border-b border-border bg-muted/40 text-muted-foreground">
+                                        <tr>
+                                            <th class="p-4 font-medium">Property</th>
+                                            <th class="p-4 font-medium">Guest</th>
+                                            <th class="p-4 font-medium">Host</th>
+                                            <th class="p-4 font-medium">Dates</th>
+                                            <th class="p-4 font-medium text-right">Total</th>
+                                            <th class="p-4 font-medium">Status</th>
+                                            <th class="p-4 font-medium text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border bg-card">
+                                        ${rowsHtml}
+                                    </tbody>
+                                </table>`;
+                            detailsTableContainer.classList.remove('hidden');
+
+                        } else {
+                            let rowsHtml = '';
+                            data.items.forEach(u => {
+                                const initials = (u.name || 'U').split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'U';
+                                rowsHtml += `
+                                    <tr class="hover:bg-muted/50 transition">
+                                        <td class="p-4 font-medium">
+                                            <div class="flex items-center gap-2">
+                                                <div class="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs flex-shrink-0">
+                                                    ${initials}
+                                                </div>
+                                                <span class="text-foreground font-medium">${u.name}</span>
+                                            </div>
+                                        </td>
+                                        <td class="p-4 text-muted-foreground">${u.email}</td>
+                                        <td class="p-4">
+                                            <span class="inline-flex items-center rounded-full bg-secondary text-secondary-foreground px-2.5 py-0.5 text-xs font-medium">
+                                                ${u.role}
+                                            </span>
+                                        </td>
+                                        <td class="p-4 text-muted-foreground">${u.joinedDate}</td>
+                                        <td class="p-4">
+                                            <span class="inline-flex items-center rounded-full ${u.statusColor} px-2.5 py-0.5 text-xs font-semibold">
+                                                ${u.statusDisplay}
+                                            </span>
+                                        </td>
+                                    </tr>`;
+                            });
+
+                            detailsTableContainer.innerHTML = `
+                                <table class="w-full text-sm text-left">
+                                    <thead class="border-b border-border bg-muted/40 text-muted-foreground">
+                                        <tr>
+                                            <th class="p-4 font-medium">Member</th>
+                                            <th class="p-4 font-medium">Email</th>
+                                            <th class="p-4 font-medium">Role</th>
+                                            <th class="p-4 font-medium">Joined</th>
+                                            <th class="p-4 font-medium">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border bg-card">
+                                        ${rowsHtml}
+                                    </tbody>
+                                </table>`;
+                            detailsTableContainer.classList.remove('hidden');
+                        }
+
+                    } catch (err) {
+                        console.error('Error fetching activity details:', err);
+                        detailsLoading.classList.add('hidden');
+                        detailsEmptyMessage.textContent = 'Could not load details. Please try again.';
+                        detailsEmpty.classList.remove('hidden');
+                    }
+                });
+            });
 
         });
 

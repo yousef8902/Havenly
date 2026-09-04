@@ -139,15 +139,28 @@
             <h2 class="text-xl font-semibold border-b border-border pb-3">5. Property photos</h2>
             <p class="text-sm text-muted-foreground">Upload clear photos showing different angles, bedrooms, and living spaces (Max 5MB each, JPEG/PNG/WebP).</p>
 
-            <div class="border-2 border-dashed border-border rounded-2xl p-8 text-center bg-secondary/20">
+            <div id="dropzone" class="border-2 border-dashed border-border rounded-2xl p-8 text-center bg-secondary/20 transition cursor-pointer" onclick="document.getElementById('imageFiles').click()">
                 <svg class="size-10 mx-auto text-muted-foreground mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
-                <label for="imageFiles" class="cursor-pointer font-semibold text-primary hover:underline">
+                <label for="imageFiles" class="cursor-pointer font-semibold text-primary hover:underline" onclick="event.stopPropagation()">
                     <span>Click to select multiple images</span>
                     <input type="file" id="imageFiles" name="imageFiles" multiple accept="image/jpeg,image/png,image/webp" class="sr-only" />
                 </label>
-                <p class="text-xs text-muted-foreground mt-2">PNG, JPG, JPEG or WEBP up to 5MB each</p>
+                <p class="text-xs text-muted-foreground mt-2">PNG, JPG, JPEG or WEBP up to 5MB each (or drag and drop here)</p>
+            </div>
+
+            <!-- Preview Grid with Delete Buttons -->
+            <div id="imagePreviewContainer" class="hidden space-y-3 pt-2">
+                <div class="flex items-center justify-between border-b border-border pb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        Selected Photos (<span id="photoCount">0</span>) — Click ✕ to remove any photo
+                    </span>
+                    <button type="button" onclick="clearAllImages()" class="text-xs font-medium text-destructive hover:underline">
+                        Clear all
+                    </button>
+                </div>
+                <div id="imagePreviewGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
             </div>
         </div>
 
@@ -162,3 +175,102 @@
         </div>
     </form>
 </div>
+
+@section Scripts {
+    <script>
+        let dt = new DataTransfer();
+        const fileInput = document.getElementById('imageFiles');
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        const previewGrid = document.getElementById('imagePreviewGrid');
+        const photoCount = document.getElementById('photoCount');
+        const dropzone = document.getElementById('dropzone');
+
+        fileInput.addEventListener('change', function () {
+            handleNewFiles(this.files);
+        });
+
+        // Drag & Drop support
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropzone.classList.add('border-primary', 'bg-primary/5');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('border-primary', 'bg-primary/5');
+            }, false);
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            if (e.dataTransfer && e.dataTransfer.files.length) {
+                handleNewFiles(e.dataTransfer.files);
+            }
+        });
+
+        function handleNewFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    dt.items.add(file);
+                }
+            }
+            fileInput.files = dt.files;
+            renderPreviews();
+        }
+
+        function removeImage(index) {
+            const newDt = new DataTransfer();
+            for (let i = 0; i < dt.files.length; i++) {
+                if (i !== index) {
+                    newDt.items.add(dt.files[i]);
+                }
+            }
+            dt = newDt;
+            fileInput.files = dt.files;
+            renderPreviews();
+        }
+
+        function clearAllImages() {
+            dt = new DataTransfer();
+            fileInput.files = dt.files;
+            renderPreviews();
+        }
+
+        function renderPreviews() {
+            previewGrid.innerHTML = '';
+            const files = dt.files;
+            photoCount.textContent = files.length;
+
+            if (files.length === 0) {
+                previewContainer.classList.add('hidden');
+                return;
+            }
+
+            previewContainer.classList.remove('hidden');
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const src = URL.createObjectURL(file);
+                const card = document.createElement('div');
+                card.className = 'relative group aspect-video rounded-xl overflow-hidden border border-border bg-card shadow-sm';
+
+                card.innerHTML = `
+                    <img src="${src}" alt="Preview" class="w-full h-full object-cover" />
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2">
+                        <span class="text-[11px] text-white font-medium truncate px-1 text-center">${file.name}</span>
+                    </div>
+                    <button type="button" onclick="removeImage(${i})" title="Remove photo" class="absolute top-2 right-2 size-7 rounded-full bg-red-600 text-white flex items-center justify-center text-xs font-bold shadow hover:bg-red-700 transition">
+                        ✕
+                    </button>
+                    <div class="absolute bottom-1 left-1.5 bg-black/60 backdrop-blur text-[10px] text-white px-1.5 py-0.5 rounded">
+                        ${(file.size / (1024 * 1024)).toFixed(1)} MB
+                    </div>
+                `;
+                previewGrid.appendChild(card);
+            }
+        }
+    </script>
+}

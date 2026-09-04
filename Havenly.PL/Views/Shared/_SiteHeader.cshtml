@@ -24,6 +24,8 @@
         <div class="flex items-center gap-2">
             @if (User.Identity?.IsAuthenticated == true)
             {
+                <partial name="_NotificationBell" />
+
                 @if (User.IsInRole("Host"))
                 {
                     <a asp-controller="Account" asp-action="Profile" title="My Profile" class="rounded-full bg-secondary text-foreground hover:bg-secondary/80 p-2 text-sm font-semibold inline-flex items-center justify-center">

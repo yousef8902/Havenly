@@ -114,6 +114,8 @@ namespace Havenly.PL
             builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<IPaymobService, PaymobService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<IHostCalendarService, HostCalendarService>();
 
             // Chatbot Service
             builder.Services.AddScoped<IPropertyRecommendationEngine, PropertyRecommendationEngine>();

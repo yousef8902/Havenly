@@ -1,0 +1,133 @@
+@model Havenly.BLL.ModelVMs.Account.GoogleChooseRoleVM
+
+@{
+    ViewData["Title"] = "Choose Your Role — Havenly";
+}
+
+<div class="container-page py-12">
+    <div class="max-w-lg mx-auto">
+        <div class="rounded-3xl border border-border bg-card p-8 shadow-lift space-y-6">
+            <!-- Header with Google Account Badge -->
+            <div class="text-center space-y-3">
+                <div class="inline-flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-1">
+                    @if (!string.IsNullOrEmpty(Model.PictureUrl))
+                    {
+                        <img src="@Model.PictureUrl" alt="@Model.Name" class="size-12 rounded-full object-cover border-2 border-primary" />
+                    }
+                    else
+                    {
+                        <svg class="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    }
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight">Welcome to Havenly, @Model.Name!</h1>
+                <p class="text-sm text-muted-foreground">You are connecting via Google (<span class="font-medium text-foreground">@Model.Email</span>). How would you like to use Havenly?</p>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm font-medium text-destructive">
+                    <ul class="space-y-1 list-disc list-inside">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <form asp-action="CompleteGoogleRegistration" method="post" enctype="multipart/form-data" class="space-y-5" id="roleSelectionForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Email" />
+                <input type="hidden" asp-for="Name" />
+                <input type="hidden" asp-for="PictureUrl" />
+                <input type="hidden" asp-for="ReturnUrl" />
+                <input type="hidden" asp-for="Role" id="selectedRoleInput" value="Guest" />
+
+                <!-- Role Selection Cards -->
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <!-- Guest Option -->
+                    <label id="guestCard" onclick="selectRole('Guest')" class="cursor-pointer rounded-2xl border-2 border-primary bg-primary/5 p-4 text-center space-y-2 transition hover:shadow-sm">
+                        <div class="inline-flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary text-xl">
+                            🧳
+                        </div>
+                        <h3 class="font-bold text-sm text-foreground">I am a Guest</h3>
+                        <p class="text-xs text-muted-foreground leading-relaxed">I want to explore, discover, and book unique stays across Egypt.</p>
+                        <span id="guestBadge" class="inline-block text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Selected</span>
+                    </label>
+
+                    <!-- Host Option -->
+                    <label id="hostCard" onclick="selectRole('Host')" class="cursor-pointer rounded-2xl border-2 border-border bg-background p-4 text-center space-y-2 transition hover:border-border/80 hover:shadow-sm">
+                        <div class="inline-flex size-10 items-center justify-center rounded-full bg-secondary text-foreground text-xl">
+                            🏡
+                        </div>
+                        <h3 class="font-bold text-sm text-foreground">I am a Host</h3>
+                        <p class="text-xs text-muted-foreground leading-relaxed">I want to list properties, host travelers, and earn revenue.</p>
+                        <span id="hostBadge" class="hidden text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Selected</span>
+                    </label>
+                </div>
+
+                <!-- Host Verification Section (Shown only when Host is selected) -->
+                <div id="hostVerificationSection" class="hidden rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 space-y-3 transition">
+                    <div class="flex items-center gap-2 text-xs font-bold text-amber-600 uppercase tracking-wider">
+                        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span>Host Identity Verification Required</span>
+                    </div>
+                    <p class="text-xs text-muted-foreground leading-relaxed">
+                        To maintain trust and safety on Havenly, hosts must submit a government-issued National ID, Passport, or Commercial Registration document. Your account will be under Admin review before you can publish listings.
+                    </p>
+                    <div>
+                        <label class="block text-xs font-semibold text-foreground mb-1.5">Upload Verification Document (JPEG, PNG, or PDF max 10MB)</label>
+                        <input type="file" name="VerificationDocument" id="verificationDocInput" accept=".jpg,.jpeg,.png,.pdf" class="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs focus:border-primary focus:outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer" />
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn" class="w-full rounded-full bg-[#0d9488] px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-[#0f766e] transition flex items-center justify-center gap-2" style="background-color: #0d9488 !important; color: #ffffff !important;">
+                    <span id="submitBtnText">Continue as Guest</span>
+                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function selectRole(role) {
+            const roleInput = document.getElementById('selectedRoleInput');
+            const guestCard = document.getElementById('guestCard');
+            const hostCard = document.getElementById('hostCard');
+            const guestBadge = document.getElementById('guestBadge');
+            const hostBadge = document.getElementById('hostBadge');
+            const hostSection = document.getElementById('hostVerificationSection');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const docInput = document.getElementById('verificationDocInput');
+
+            roleInput.value = role;
+
+            if (role === 'Host') {
+                hostCard.className = 'cursor-pointer rounded-2xl border-2 border-primary bg-primary/5 p-4 text-center space-y-2 transition shadow-sm';
+                guestCard.className = 'cursor-pointer rounded-2xl border-2 border-border bg-background p-4 text-center space-y-2 transition hover:border-border/80 hover:shadow-sm';
+                hostBadge.classList.remove('hidden');
+                guestBadge.classList.add('hidden');
+                hostSection.classList.remove('hidden');
+                submitBtnText.textContent = 'Submit Host Application for Review';
+                docInput.required = true;
+            } else {
+                guestCard.className = 'cursor-pointer rounded-2xl border-2 border-primary bg-primary/5 p-4 text-center space-y-2 transition shadow-sm';
+                hostCard.className = 'cursor-pointer rounded-2xl border-2 border-border bg-background p-4 text-center space-y-2 transition hover:border-border/80 hover:shadow-sm';
+                guestBadge.classList.remove('hidden');
+                hostBadge.classList.add('hidden');
+                hostSection.classList.add('hidden');
+                submitBtnText.textContent = 'Continue as Guest';
+                docInput.required = false;
+            }
+        }
+    </script>
+}

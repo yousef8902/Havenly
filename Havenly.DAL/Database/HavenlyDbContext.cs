@@ -38,20 +38,32 @@ public class HavenlyDbContext : IdentityDbContext<User>
           .HasForeignKey(r => r.PropertyID)
           .OnDelete(DeleteBehavior.NoAction);   // or DeleteBehavior.NoAction
 
+        // Notification configuration
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(n => n.NotificationID);
+            entity.HasOne(n => n.User)
+                  .WithMany()
+                  .HasForeignKey(n => n.UserID)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(n => new { n.UserID, n.IsRead, n.CreatedAt })
+                  .HasDatabaseName("IX_Notifications_User_Read_Date");
+        });
 
-        //uniquness
-        //modelBuilder.Entity<User>()
-        //.HasIndex(u => u.Email)
-        //.IsUnique();
-
-
+        // PropertyBlockedDate configuration
+        modelBuilder.Entity<PropertyBlockedDate>(entity =>
+        {
+            entity.HasKey(b => b.BlockedDateID);
+            entity.HasOne(b => b.Property)
+                  .WithMany()
+                  .HasForeignKey(b => b.PropertyID)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(b => new { b.PropertyID, b.StartDate, b.EndDate })
+                  .HasDatabaseName("IX_PropertyBlockedDates_Property_Dates");
+        });
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(HavenlyDbContext).Assembly);
-
-
-
     }
-
 
     // --- DbSets ---
     public DbSet<User> Users { get; set; }
@@ -67,6 +79,6 @@ public class HavenlyDbContext : IdentityDbContext<User>
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Amenity> Amenities { get; set; }
     public DbSet<PropertyAmenity> PropertyAmenities { get; set; }
-
-    
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<PropertyBlockedDate> PropertyBlockedDates { get; set; }
 }

@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Havenly.BLL.ModelVMs;
+using Havenly.BLL.ModelVMs.Host;
 using Havenly.BLL.ModelVMs.Payment;
 using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Entities;
@@ -24,6 +25,8 @@ namespace Havenly.PL.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly IEmailServices _emailServices;
         private readonly UserManager<User> _userManager;
+        private readonly INotificationService _notificationService;
+        private readonly IHostCalendarService _hostCalendarService;
 
         public HostController(
             IPropertyServices propertyServices,
@@ -34,7 +37,9 @@ namespace Havenly.PL.Controllers
             IPaymentService paymentService,
             IWebHostEnvironment environment,
             IEmailServices emailServices,
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            INotificationService notificationService,
+            IHostCalendarService hostCalendarService)
         {
             _propertyServices = propertyServices;
             _amenityRepository = amenityRepository;
@@ -45,6 +50,8 @@ namespace Havenly.PL.Controllers
             _environment = environment;
             _emailServices = emailServices;
             _userManager = userManager;
+            _notificationService = notificationService;
+            _hostCalendarService = hostCalendarService;
         }
 
         private string GetCurrentUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
@@ -495,13 +502,23 @@ namespace Havenly.PL.Controllers
                         .ThenInclude(p => p.Address)
                 .Include(b => b.Listing)
                     .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Images)
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
                         .ThenInclude(p => p.Reviews)
                 .ToListAsync();
 
             var hostBookings = allBookings
                 .Where(b => b.Listing != null && propertyIds.Contains(b.Listing.PropertyID))
-                .OrderByDescending(b => b.CheckIn)
+                .OrderBy(b => b.Status == BookingStatus.Pending ? 0 : 1)
+                .ThenByDescending(b => b.CheckIn)
                 .ToList();
+
+            ViewBag.HostProperties = properties;
+            ViewBag.PendingCount = hostBookings.Count(b => b.Status == BookingStatus.Pending);
+            ViewBag.ApprovedCount = hostBookings.Count(b => b.Status == BookingStatus.Approved);
+            ViewBag.CompletedCount = hostBookings.Count(b => b.Status == BookingStatus.Completed);
+            ViewBag.TotalCount = hostBookings.Count;
 
             return View(hostBookings);
         }
@@ -560,6 +577,23 @@ namespace Havenly.PL.Controllers
             }
 
             TempData["SuccessMessage"] = $"Booking #{id} has been accepted and approved.";
+
+            // Send in-app notification to Guest
+            try
+            {
+                var prop = properties.FirstOrDefault(p => p.PropertyID == booking.Listing.PropertyID) ?? booking.Listing.Property;
+                await _notificationService.CreateNotificationAsync(
+                    booking.GuestUserID,
+                    "Booking Confirmed! 🎉",
+                    $"Your reservation for {prop?.PropertyName ?? "Havenly Stay"} has been approved by the host.",
+                    "Booking",
+                    "/Booking/MyBookings");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[NOTIFICATION GUEST ACCEPT ERROR] {ex.Message}");
+            }
+
             return RedirectToAction(nameof(Bookings));
         }
 
@@ -617,6 +651,23 @@ namespace Havenly.PL.Controllers
             }
 
             TempData["SuccessMessage"] = $"Booking #{id} has been rejected.";
+
+            // Send in-app notification to Guest
+            try
+            {
+                var prop = properties.FirstOrDefault(p => p.PropertyID == booking.Listing.PropertyID) ?? booking.Listing.Property;
+                await _notificationService.CreateNotificationAsync(
+                    booking.GuestUserID,
+                    "Booking Request Declined",
+                    $"Your reservation request for {prop?.PropertyName ?? "Havenly Stay"} was declined by the host.",
+                    "Booking",
+                    "/Booking/MyBookings");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[NOTIFICATION GUEST REJECT ERROR] {ex.Message}");
+            }
+
             return RedirectToAction(nameof(Bookings));
         }
 
@@ -729,6 +780,56 @@ namespace Havenly.PL.Controllers
             }
 
             return imageEntities;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Calendar(long? propertyId, int? year, int? month)
+        {
+            var userId = GetCurrentUserId();
+            var model = await _hostCalendarService.GetCalendarDataAsync(userId, propertyId, year, month);
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BlockDates(BlockDateRequestVM model)
+        {
+            var userId = GetCurrentUserId();
+            if (!ModelState.IsValid || model.StartDate.Date > model.EndDate.Date)
+            {
+                TempData["ErrorMessage"] = "Invalid date range specified.";
+                return RedirectToAction(nameof(Calendar), new { propertyId = model.PropertyId });
+            }
+
+            var success = await _hostCalendarService.BlockDatesAsync(userId, model);
+            if (success)
+            {
+                TempData["SuccessMessage"] = $"Dates successfully blocked ({model.StartDate:MMM dd} - {model.EndDate:MMM dd}).";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Could not block dates. Ensure there are no overlapping reservations or invalid permissions.";
+            }
+
+            return RedirectToAction(nameof(Calendar), new { propertyId = model.PropertyId, year = model.StartDate.Year, month = model.StartDate.Month });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnblockDates(long blockedDateId, long propertyId, int? year, int? month)
+        {
+            var userId = GetCurrentUserId();
+            var success = await _hostCalendarService.UnblockDatesAsync(userId, blockedDateId);
+            if (success)
+            {
+                TempData["SuccessMessage"] = "Dates have been unblocked and are now available for booking.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to unblock dates.";
+            }
+
+            return RedirectToAction(nameof(Calendar), new { propertyId, year, month });
         }
     }
 }

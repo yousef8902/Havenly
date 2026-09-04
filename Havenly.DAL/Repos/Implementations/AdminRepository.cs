@@ -172,6 +172,9 @@ namespace Havenly.DAL.Repos.Implementations
                 .Include(b => b.Listing)
                     .ThenInclude(l => l.Property)
                         .ThenInclude(p => p.Images)
+                .Include(b => b.Listing)
+                    .ThenInclude(l => l.Property)
+                        .ThenInclude(p => p.Owner)
                 .Include(b => b.Guest)
                 .AsQueryable();
 

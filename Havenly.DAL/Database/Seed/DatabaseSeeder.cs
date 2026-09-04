@@ -574,6 +574,76 @@ namespace Havenly.DAL.Database.Seed
                     Email = "daniel.george@mail.com",
                     Name = "Daniel George",
                     Role = UserRoles.Guest
+                },
+
+                new
+                {
+                    Email = "hassan.elwakeel@mail.com",
+                    Name = "Hassan El Wakeel",
+                    Role = UserRoles.Guest
+                },
+
+                new
+                {
+                    Email = "reem.fawzy@mail.com",
+                    Name = "Reem Fawzy",
+                    Role = UserRoles.Guest
+                },
+
+                new
+                {
+                    Email = "mona.zaki@mail.com",
+                    Name = "Mona Zaki",
+                    Role = UserRoles.Guest
+                },
+
+                new
+                {
+                    Email = "sherif.samir@mail.com",
+                    Name = "Sherif Samir",
+                    Role = UserRoles.Guest
+                },
+
+                new
+                {
+                    Email = "hany.adel@mail.com",
+                    Name = "Hany Adel",
+                    Role = UserRoles.Guest
+                },
+
+                new
+                {
+                    Email = "nouran.essam@mail.com",
+                    Name = "Nouran Essam",
+                    Role = UserRoles.Guest
+                },
+
+                new
+                {
+                    Email = "kareem.sobhy@mail.com",
+                    Name = "Kareem Sobhy",
+                    Role = UserRoles.Guest
+                },
+
+                new
+                {
+                    Email = "zeina.moussa@mail.com",
+                    Name = "Zeina Moussa",
+                    Role = UserRoles.Guest
+                },
+
+                new
+                {
+                    Email = "tarek.allam@mail.com",
+                    Name = "Tarek Allam",
+                    Role = UserRoles.Guest
+                },
+
+                new
+                {
+                    Email = "salma.helmy@mail.com",
+                    Name = "Salma Helmy",
+                    Role = UserRoles.Guest
                 }
             };
 
@@ -585,7 +655,18 @@ namespace Havenly.DAL.Database.Seed
                     await userManager.FindByEmailAsync(item.Email);
 
                 if (existingUser != null)
+                {
+                    // Distribute existing user's JoinedDate across the 12 months for rich analytics
+                    if (existingUser.JoinedDate >= DateTime.UtcNow.AddDays(-2))
+                    {
+                        existingUser.JoinedDate = DateTime.UtcNow
+                            .AddMonths(-11 + (index % 12))
+                            .AddDays(2 + ((index * 3) % 25));
+                        await userManager.UpdateAsync(existingUser);
+                    }
+                    index++;
                     continue;
+                }
 
                 var user = new User
                 {
@@ -601,7 +682,7 @@ namespace Havenly.DAL.Database.Seed
                     AccessFailedCount = 0,
                     JoinedDate = DateTime.UtcNow
                         .AddMonths(-11 + (index % 12))
-                        .AddDays(3 + index)
+                        .AddDays(3 + ((index * 2) % 24))
                 };
 
                 var result = await userManager.CreateAsync(
@@ -630,7 +711,8 @@ namespace Havenly.DAL.Database.Seed
                 .ToListAsync();
 
             var addressMap = addresses
-                .ToDictionary(a => a.Street, a => a.AddressID);
+                .GroupBy(a => a.Street)
+                .ToDictionary(g => g.Key, g => g.First().AddressID);
 
             var hosts = await context.Users
                 .Where(u => u.Role == UserRoles.Host)
@@ -1516,23 +1598,25 @@ namespace Havenly.DAL.Database.Seed
                 if (exists)
                     continue;
 
+                int primaryImgNum = ((nextImageNumber - 1) % 7) + 1;
                 context.PropertyImages.Add(
                     new PropertyImage
                     {
                         PropertyID = property.PropertyID,
                         ImagePath =
-                            $"/images/p{nextImageNumber}.jpg",
+                            $"/images/p{primaryImgNum}.jpg",
                         IsPrimary = true
                     });
 
                 nextImageNumber++;
 
+                int secondaryImgNum = ((nextImageNumber - 1) % 7) + 1;
                 context.PropertyImages.Add(
                     new PropertyImage
                     {
                         PropertyID = property.PropertyID,
                         ImagePath =
-                            $"/images/p{nextImageNumber}.jpg",
+                            $"/images/p{secondaryImgNum}.jpg",
                         IsPrimary = false
                     });
 
@@ -1790,7 +1874,8 @@ namespace Havenly.DAL.Database.Seed
                 .ToListAsync();
 
             var amenityMap = amenities
-                .ToDictionary(a => a.Name, a => a.AmenitiesID);
+                .GroupBy(a => a.Name)
+                .ToDictionary(g => g.Key, g => g.First().AmenitiesID);
 
             foreach (var property in properties)
             {
@@ -1968,8 +2053,8 @@ namespace Havenly.DAL.Database.Seed
         private static async Task SeedBookings(
             HavenlyDbContext context)
         {
-            // Don't duplicate bookings if the database already has them.
-            if (await context.Bookings.AnyAsync())
+            // Seed a full 12-month dataset if the database has fewer than 60 bookings
+            if (await context.Bookings.CountAsync() >= 60)
                 return;
 
             var listings = await context.Listings
@@ -1988,7 +2073,7 @@ namespace Havenly.DAL.Database.Seed
 
             int bookingCounter = 0;
 
-            // Previous 11 months + current month.
+            // Previous 11 months + current month (full 12 months for chart)
             for (int monthIndex = 0;
                  monthIndex < 12;
                  monthIndex++)
@@ -2000,8 +2085,8 @@ namespace Havenly.DAL.Database.Seed
                         1)
                     .AddMonths(-11 + monthIndex);
 
-                int bookingsThisMonth =
-                    monthIndex == 11 ? 3 : 6;
+                // High season in Egypt (Winter & Summer): 5-8 bookings, low season: 3-5 bookings
+                int bookingsThisMonth = (monthIndex == 11) ? 4 : (4 + (monthIndex % 4));
 
                 for (int i = 0;
                      i < bookingsThisMonth;
@@ -2020,7 +2105,7 @@ namespace Havenly.DAL.Database.Seed
                     if (monthIndex == 11)
                     {
                         createdDate =
-                            today.AddDays(-(i + 1));
+                            today.AddDays(-(i * 2 + 1));
                     }
                     else
                     {
@@ -2029,7 +2114,7 @@ namespace Havenly.DAL.Database.Seed
                                 2 + (i * 4));
                     }
 
-                    int nights = 3 + (i % 3);
+                    int nights = 3 + (i % 4);
 
                     var checkIn =
                         createdDate.Date.AddDays(7 + i);
@@ -2041,7 +2126,7 @@ namespace Havenly.DAL.Database.Seed
 
                     if (monthIndex < 10)
                     {
-                        status = BookingStatus.Completed;
+                        status = (i % 7 == 0) ? BookingStatus.Cancelled : BookingStatus.Completed;
                     }
                     else if (i % 3 == 0)
                     {
@@ -2085,14 +2170,14 @@ namespace Havenly.DAL.Database.Seed
         private static async Task SeedPayments(
             HavenlyDbContext context)
         {
-            if (await context.Payments.AnyAsync())
-                return;
-
-            var bookings = await context.Bookings
-                .OrderBy(b => b.BookingID)
+            var bookingsWithoutPayment = await context.Bookings
+                .Where(b => !context.Payments.Any(p => p.BookingID == b.BookingID))
                 .ToListAsync();
 
-            foreach (var booking in bookings)
+            if (!bookingsWithoutPayment.Any())
+                return;
+
+            foreach (var booking in bookingsWithoutPayment)
             {
                 var payment = new Payment();
 
@@ -2118,7 +2203,7 @@ namespace Havenly.DAL.Database.Seed
                     status:
                         completed
                             ? PaymentStatus.Completed
-                            : PaymentStatus.Pending);
+                            : (booking.Status == BookingStatus.Approved ? PaymentStatus.Completed : PaymentStatus.Pending));
 
                 if (completed)
                 {

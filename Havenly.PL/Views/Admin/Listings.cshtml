@@ -72,19 +72,23 @@
     <div class="flex flex-wrap gap-2">
         <!-- Status Filter -->
         <a href="@Url.Action("Listings", new { status = "all", search = Model.Filters.SearchTerm, sort = Model.Filters.SortBy, page = 1 })"
-           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "all" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+           class="px-3.5 py-1.5 text-sm rounded-lg border transition shadow-sm font-medium @(Model.Filters.Status == "all" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50")"
+           style="@(Model.Filters.Status == "all" ? "background-color: #f59e0b !important; color: #ffffff !important; border-color: #f59e0b !important;" : "")">
             All
         </a>
         <a href="@Url.Action("Listings", new { status = "pending", search = Model.Filters.SearchTerm, sort = Model.Filters.SortBy, page = 1 })"
-           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "pending" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+           class="px-3.5 py-1.5 text-sm rounded-lg border transition shadow-sm font-medium @(Model.Filters.Status == "pending" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50")"
+           style="@(Model.Filters.Status == "pending" ? "background-color: #f59e0b !important; color: #ffffff !important; border-color: #f59e0b !important;" : "")">
             Pending
         </a>
         <a href="@Url.Action("Listings", new { status = "approved", search = Model.Filters.SearchTerm, sort = Model.Filters.SortBy, page = 1 })"
-           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "approved" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+           class="px-3.5 py-1.5 text-sm rounded-lg border transition shadow-sm font-medium @(Model.Filters.Status == "approved" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50")"
+           style="@(Model.Filters.Status == "approved" ? "background-color: #f59e0b !important; color: #ffffff !important; border-color: #f59e0b !important;" : "")">
             Approved
         </a>
         <a href="@Url.Action("Listings", new { status = "declined", search = Model.Filters.SearchTerm, sort = Model.Filters.SortBy, page = 1 })"
-           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "declined" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+           class="px-3.5 py-1.5 text-sm rounded-lg border transition shadow-sm font-medium @(Model.Filters.Status == "declined" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50")"
+           style="@(Model.Filters.Status == "declined" ? "background-color: #f59e0b !important; color: #ffffff !important; border-color: #f59e0b !important;" : "")">
             Declined
         </a>
     </div>
@@ -156,7 +160,7 @@
                             <div class="flex items-center gap-3">
                                 @if (!string.IsNullOrEmpty(listing.ImageUrl))
                                 {
-                                    <img src="@listing.ImageUrl" alt="@listing.Title" class="size-10 rounded-lg object-cover" />
+                                    <img src="@listing.ImageUrl" alt="@listing.Title" class="size-10 rounded-lg object-cover" onerror="this.onerror=null; this.src='/images/hero.jpg';" />
                                 }
                                 else
                                 {

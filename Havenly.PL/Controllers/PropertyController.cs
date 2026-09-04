@@ -19,17 +19,20 @@ public class PropertyController : Controller
     private readonly IListingServices _listingService;
     private readonly IPropertyRepository _propertyRepository;
     private readonly IFavoriteRepository _favoriteRepository;
+    private readonly IHostCalendarService _hostCalendarService;
 
     public PropertyController(
         IPropertyService propertyService,
         IListingServices listingService,
         IPropertyRepository propertyRepository,
-        IFavoriteRepository favoriteRepository)
+        IFavoriteRepository favoriteRepository,
+        IHostCalendarService hostCalendarService)
     {
         _propertyService = propertyService;
         _listingService = listingService;
         _propertyRepository = propertyRepository;
         _favoriteRepository = favoriteRepository;
+        _hostCalendarService = hostCalendarService;
     }
 
     [HttpGet]
@@ -176,6 +179,21 @@ public class PropertyController : Controller
             }
         }
 
+        // Fetch booked and blocked dates from HostCalendarService
+        long resolvedPropertyId = long.TryParse(propertyVm.Id, out var parsedId) && parsedId > 0 ? parsedId : id;
+        var availability = await _hostCalendarService.GetPropertyDisabledDatesAsync(resolvedPropertyId);
+        propertyVm.BookedDates = availability.DisabledDates;
+        ViewBag.DisabledDatesJson = System.Text.Json.JsonSerializer.Serialize(availability.DisabledDates);
+        ViewBag.BookedRanges = availability.BookedRanges;
+        ViewBag.BlockedRanges = availability.BlockedRanges;
+
         return View(propertyVm);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetDisabledDates(long id)
+    {
+        var data = await _hostCalendarService.GetPropertyDisabledDatesAsync(id);
+        return Json(new { success = true, disabledDates = data.DisabledDates, bookedRanges = data.BookedRanges, blockedRanges = data.BlockedRanges });
     }
 }

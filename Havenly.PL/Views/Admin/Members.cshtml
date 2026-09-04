@@ -80,19 +80,23 @@
     <div class="flex flex-wrap gap-2">
         <!-- Status Filter -->
         <a href="@Url.Action("Members", new { status = "all", search = Model.Filters.SearchTerm, page = 1 })"
-           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "all" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+           class="px-3.5 py-1.5 text-sm rounded-lg border transition shadow-sm font-medium @(Model.Filters.Status == "all" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50")"
+           style="@(Model.Filters.Status == "all" ? "background-color: #f59e0b !important; color: #ffffff !important; border-color: #f59e0b !important;" : "")">
             All Status
         </a>
         <a href="@Url.Action("Members", new { status = "active", search = Model.Filters.SearchTerm, page = 1 })"
-           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "active" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+           class="px-3.5 py-1.5 text-sm rounded-lg border transition shadow-sm font-medium @(Model.Filters.Status == "active" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50")"
+           style="@(Model.Filters.Status == "active" ? "background-color: #f59e0b !important; color: #ffffff !important; border-color: #f59e0b !important;" : "")">
             Active
         </a>
         <a href="@Url.Action("Members", new { status = "PendingApproval", search = Model.Filters.SearchTerm, page = 1 })"
-           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status?.ToLower() == "pendingapproval" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-amber-300 text-amber-700 bg-amber-50/50 hover:bg-amber-100")">
+           class="px-3.5 py-1.5 text-sm rounded-lg border transition shadow-sm font-medium @(Model.Filters.Status?.ToLower() == "pendingapproval" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-amber-300 text-amber-700 bg-amber-50/50 hover:bg-amber-100")"
+           style="@(Model.Filters.Status?.ToLower() == "pendingapproval" ? "background-color: #f59e0b !important; color: #ffffff !important; border-color: #f59e0b !important;" : "")">
             Pending Hosts (@Model.Stats.PendingHosts)
         </a>
         <a href="@Url.Action("Members", new { status = "suspended", search = Model.Filters.SearchTerm, page = 1 })"
-           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "suspended" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+           class="px-3.5 py-1.5 text-sm rounded-lg border transition shadow-sm font-medium @(Model.Filters.Status == "suspended" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50")"
+           style="@(Model.Filters.Status == "suspended" ? "background-color: #f59e0b !important; color: #ffffff !important; border-color: #f59e0b !important;" : "")">
             Suspended
         </a>
     </div>

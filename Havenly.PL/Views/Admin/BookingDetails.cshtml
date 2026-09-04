@@ -65,7 +65,7 @@
                 </h2>
 
                 <div class="flex gap-4 items-start">
-                    <img src="@primaryImage" alt="@(property?.PropertyName ?? "Property")" class="size-24 rounded-2xl object-cover border border-border flex-shrink-0" />
+                    <img src="@primaryImage" alt="@(property?.PropertyName ?? "Property")" class="size-24 rounded-2xl object-cover border border-border flex-shrink-0" onerror="this.onerror=null; this.src='/images/hero.jpg';" />
                     <div class="space-y-1">
                         <h3 class="font-bold text-base leading-snug">@(property?.PropertyName ?? $"Listing #{Model.ListingID}")</h3>
                         <p class="text-xs text-muted-foreground">

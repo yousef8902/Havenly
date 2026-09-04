@@ -590,33 +590,35 @@ namespace Havenly.PL.Controllers
 
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);
             var name = info.Principal.FindFirstValue(ClaimTypes.Name) ?? email?.Split('@')[0] ?? "Google User";
+            var picture = info.Principal.FindFirstValue("picture") ?? info.Principal.FindFirstValue("image");
 
             if (!string.IsNullOrEmpty(email))
             {
                 var user = await _userManager.FindByEmailAsync(email);
                 if (user == null)
                 {
-                    user = new User
-                    {
-                        UserName = email,
-                        Email = email,
-                        Name = name,
-                        Role = UserRoles.Guest,
-                        Status = UserStatus.Active,
-                        EmailConfirmed = true
-                    };
-
-                    var createResult = await _userManager.CreateAsync(user);
-                    if (createResult.Succeeded)
-                    {
-                        await _userManager.AddToRoleAsync(user, UserRoles.Guest);
-                        await _userManager.AddLoginAsync(user, info);
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return RedirectToLocal(returnUrl);
-                    }
+                    // Brand-new user: ask whether they want to join as Guest or Host
+                    TempData["GoogleEmail"] = email;
+                    TempData["GoogleName"] = name;
+                    TempData["GooglePicture"] = picture;
+                    TempData["GoogleReturnUrl"] = returnUrl ?? "/";
+                    TempData["GoogleProvider"] = info.LoginProvider;
+                    TempData["GoogleProviderKey"] = info.ProviderKey;
+                    return RedirectToAction(nameof(GoogleChooseRole));
                 }
                 else
                 {
+                    if (user.Role == UserRoles.Host && user.Status == UserStatus.PendingApproval)
+                    {
+                        return RedirectToAction(nameof(HostPendingApproval), new { email = user.Email });
+                    }
+
+                    if (user.Status == UserStatus.Suspended)
+                    {
+                        ModelState.AddModelError(string.Empty, "Your account has been suspended. Please contact support.");
+                        return View("Login");
+                    }
+
                     await _userManager.AddLoginAsync(user, info);
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToLocal(returnUrl);
@@ -624,6 +626,136 @@ namespace Havenly.PL.Controllers
             }
 
             return RedirectToAction(nameof(Login));
+        }
+
+        // GET: /Account/GoogleChooseRole
+        [HttpGet]
+        public IActionResult GoogleChooseRole()
+        {
+            var email = TempData["GoogleEmail"]?.ToString();
+            var name = TempData["GoogleName"]?.ToString();
+
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            TempData.Keep("GoogleEmail");
+            TempData.Keep("GoogleName");
+            TempData.Keep("GooglePicture");
+            TempData.Keep("GoogleReturnUrl");
+            TempData.Keep("GoogleProvider");
+            TempData.Keep("GoogleProviderKey");
+
+            var model = new GoogleChooseRoleVM
+            {
+                Email = email,
+                Name = name ?? "Traveler",
+                PictureUrl = TempData["GooglePicture"]?.ToString(),
+                ReturnUrl = TempData["GoogleReturnUrl"]?.ToString() ?? "/"
+            };
+
+            return View(model);
+        }
+
+        // POST: /Account/CompleteGoogleRegistration
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompleteGoogleRegistration(GoogleChooseRoleVM model)
+        {
+            if (string.IsNullOrEmpty(model.Email))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var isHost = string.Equals(model.Role, UserRoles.Host, StringComparison.OrdinalIgnoreCase);
+            string? docUrl = null;
+
+            if (isHost)
+            {
+                if (model.VerificationDocument == null || model.VerificationDocument.Length == 0)
+                {
+                    ModelState.AddModelError("VerificationDocument", "Please upload your verification document (National ID, Passport, or Commercial Permit).");
+                    return View("GoogleChooseRole", model);
+                }
+
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".pdf" };
+                var ext = Path.GetExtension(model.VerificationDocument.FileName).ToLowerInvariant();
+                if (!allowedExtensions.Contains(ext))
+                {
+                    ModelState.AddModelError("VerificationDocument", "Verification document must be a JPG, PNG, or PDF file.");
+                    return View("GoogleChooseRole", model);
+                }
+
+                if (model.VerificationDocument.Length > 10 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("VerificationDocument", "Verification document cannot exceed 10 MB.");
+                    return View("GoogleChooseRole", model);
+                }
+
+                try
+                {
+                    var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "verification_docs");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(model.VerificationDocument.FileName)}";
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.VerificationDocument.CopyToAsync(stream);
+                    }
+
+                    docUrl = $"/uploads/verification_docs/{uniqueFileName}";
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(string.Empty, $"Could not save verification document: {ex.Message}");
+                    return View("GoogleChooseRole", model);
+                }
+            }
+
+            var user = new User
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                Name = model.Name,
+                Role = isHost ? UserRoles.Host : UserRoles.Guest,
+                Status = isHost ? UserStatus.PendingApproval : UserStatus.Active,
+                EmailConfirmed = true,
+                ProfilePictureUrl = model.PictureUrl,
+                VerificationDocumentUrl = docUrl
+            };
+
+            var createResult = await _userManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                foreach (var err in createResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, err.Description);
+                }
+                return View("GoogleChooseRole", model);
+            }
+
+            await _userManager.AddToRoleAsync(user, user.Role);
+
+            var provider = TempData["GoogleProvider"]?.ToString() ?? "Google";
+            var providerKey = TempData["GoogleProviderKey"]?.ToString();
+            if (!string.IsNullOrEmpty(providerKey))
+            {
+                var userLoginInfo = new UserLoginInfo(provider, providerKey, "Google");
+                await _userManager.AddLoginAsync(user, userLoginInfo);
+            }
+
+            if (isHost)
+            {
+                return RedirectToAction(nameof(HostPendingApproval), new { email = user.Email });
+            }
+
+            await _signInManager.SignInAsync(user, isPersistent: false);
+            return RedirectToLocal(model.ReturnUrl);
         }
 
         // GET: /Account/Profile

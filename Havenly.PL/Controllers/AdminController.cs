@@ -24,6 +24,8 @@ namespace Havenly.PL.Controllers
         private readonly IListingRepository _listingRepository;
         private readonly IPropertyRepository _propertyRepository;
         private readonly UserManager<User> _userManager;
+        private readonly INotificationService _notificationService;
+        private readonly IPaymentRepository _paymentRepository;
 
         public AdminController(
             IListingServices listingService,
@@ -35,7 +37,9 @@ namespace Havenly.PL.Controllers
             IEmailServices emailServices,
             IListingRepository listingRepository,
             IPropertyRepository propertyRepository,
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            INotificationService notificationService,
+            IPaymentRepository paymentRepository)
         {
             _listingService = listingService;
             _reportService = reportService;
@@ -47,6 +51,8 @@ namespace Havenly.PL.Controllers
             _listingRepository = listingRepository;
             _propertyRepository = propertyRepository;
             _userManager = userManager;
+            _notificationService = notificationService;
+            _paymentRepository = paymentRepository;
         }
 
         public async Task<IActionResult> DashBoard()
@@ -92,6 +98,16 @@ namespace Havenly.PL.Controllers
                             true,
                             property?.PropertyID ?? 0);
                     }
+
+                    if (host != null)
+                    {
+                        await _notificationService.CreateNotificationAsync(
+                            host.Id,
+                            "Listing Approved! 🎉",
+                            $"Congratulations! Your listing '{property?.PropertyName ?? "Havenly Stay"}' has been approved and is now live on Havenly.",
+                            "Listing",
+                            $"/Property/Detail/{property?.PropertyID}");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -129,6 +145,16 @@ namespace Havenly.PL.Controllers
                             property?.PropertyName ?? "Havenly Stay",
                             false,
                             property?.PropertyID ?? 0);
+                    }
+
+                    if (host != null)
+                    {
+                        await _notificationService.CreateNotificationAsync(
+                            host.Id,
+                            "Listing Review Update",
+                            $"Your listing '{property?.PropertyName ?? "Havenly Stay"}' was not approved at this time. Please review guidelines or edit your listing.",
+                            "Listing",
+                            "/Host/ListProperties");
                     }
                 }
                 catch (Exception ex)
@@ -240,6 +266,12 @@ namespace Havenly.PL.Controllers
                     {
                         await _emailServices.SendHostApplicationDecisionAsync(user.Email, user.Name ?? "Host", true);
                     }
+                    await _notificationService.CreateNotificationAsync(
+                        userId,
+                        "Host Account Approved! 🌟",
+                        "Congratulations! Your host application has been approved. You can now publish listings and host guests on Havenly.",
+                        "Account",
+                        "/Host/Index");
                 }
                 catch (Exception ex)
                 {
@@ -277,6 +309,12 @@ namespace Havenly.PL.Controllers
                     {
                         await _emailServices.SendHostApplicationDecisionAsync(user.Email, user.Name ?? "Host", false, reason);
                     }
+                    await _notificationService.CreateNotificationAsync(
+                        userId,
+                        "Host Application Update",
+                        $"Your host application was declined. {(string.IsNullOrWhiteSpace(reason) ? "" : $"Reason: {reason}")}",
+                        "Account",
+                        "/Account/ViewProfile");
                 }
                 catch (Exception ex)
                 {
@@ -334,7 +372,134 @@ namespace Havenly.PL.Controllers
                 ? "Host payout marked as paid successfully."
                 : "Unable to process host payout.";
 
+            if (success)
+            {
+                try
+                {
+                    var payment = (await _paymentRepository.GetPaymentsWithDetailsAsync()).FirstOrDefault(p => p.PaymentID == paymentId);
+                    var hostId = payment?.Booking?.Listing?.Property?.OwnerUserID;
+                    if (!string.IsNullOrEmpty(hostId))
+                    {
+                        await _notificationService.CreateNotificationAsync(
+                            hostId,
+                            "Payout Disbursed 💰",
+                            $"A payout of {payment.HostPayoutAmount:N2} EGP for booking #{payment.BookingID} ({payment.Booking?.Listing?.Property?.PropertyName ?? "Listing"}) has been marked as disbursed.",
+                            "Payout",
+                            "/Host/Payouts");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[NOTIFICATION PAYOUT ERROR] {ex.Message}");
+                }
+            }
+
             return RedirectToAction(nameof(PaymentHistory));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMonthlyActivityDetails(int year, int month, string type)
+        {
+            if (year <= 2000 || month < 1 || month > 12)
+            {
+                return BadRequest(new { success = false, message = "Invalid month or year parameters." });
+            }
+
+            var startDate = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc);
+            var endDate = startDate.AddMonths(1);
+            var monthName = startDate.ToString("MMMM yyyy");
+
+            if (string.Equals(type, "signups", StringComparison.OrdinalIgnoreCase))
+            {
+                var users = await _userManager.Users
+                    .Where(u => u.JoinedDate >= startDate && u.JoinedDate < endDate)
+                    .OrderByDescending(u => u.JoinedDate)
+                    .ToListAsync();
+
+                var items = users.Select(u => new
+                {
+                    id = u.Id,
+                    name = u.Name ?? u.UserName ?? "Member",
+                    email = u.Email ?? "N/A",
+                    role = u.Role ?? "Guest",
+                    joinedDate = u.JoinedDate.ToString("MMM dd, yyyy"),
+                    status = u.Status.ToString(),
+                    statusDisplay = u.Status.ToString(),
+                    statusColor = u.Status switch
+                    {
+                        UserStatus.Active => "bg-emerald-100 text-emerald-800",
+                        UserStatus.PendingApproval => "bg-amber-100 text-amber-800",
+                        UserStatus.Suspended => "bg-red-100 text-red-800",
+                        _ => "bg-gray-100 text-gray-800"
+                    }
+                }).ToList();
+
+                return Json(new
+                {
+                    success = true,
+                    type = "signups",
+                    monthName,
+                    year,
+                    month,
+                    count = items.Count,
+                    items
+                });
+            }
+            else
+            {
+                var bookings = await _bookingRepository.GetAll()
+                    .Include(b => b.Listing)
+                        .ThenInclude(l => l.Property)
+                            .ThenInclude(p => p.Images)
+                    .Include(b => b.Listing)
+                        .ThenInclude(l => l.Property)
+                            .ThenInclude(p => p.Owner)
+                    .Include(b => b.Guest)
+                    .Where(b => b.CreatedDate >= startDate && b.CreatedDate < endDate)
+                    .OrderByDescending(b => b.CreatedDate)
+                    .ToListAsync();
+
+                var items = bookings.Select(b => new
+                {
+                    bookingId = b.BookingID,
+                    propertyId = b.Listing?.PropertyID ?? 0,
+                    propertyName = b.Listing?.Property?.PropertyName ?? ("Listing #" + b.ListingID),
+                    imageUrl = b.Listing?.Property?.Images?.FirstOrDefault(i => i.IsPrimary == true)?.ImagePath
+                               ?? b.Listing?.Property?.Images?.FirstOrDefault()?.ImagePath
+                               ?? "/images/p1.jpg",
+                    guestName = b.Guest?.Name ?? b.Guest?.UserName ?? "Guest",
+                    hostName = b.Listing?.Property?.Owner?.Name ?? "Host",
+                    checkIn = b.CheckIn.ToString("MMM dd, yyyy"),
+                    checkOut = b.CheckOut.ToString("MMM dd, yyyy"),
+                    total = b.TotalPrice.ToString("N2"),
+                    status = b.Status.ToString(),
+                    statusColor = b.Status switch
+                    {
+                        BookingStatus.Completed => "bg-emerald-100 text-emerald-800",
+                        BookingStatus.Approved => "bg-blue-100 text-blue-800",
+                        BookingStatus.Pending => "bg-amber-100 text-amber-800",
+                        BookingStatus.Cancelled => "bg-red-100 text-red-800",
+                        _ => "bg-gray-100 text-gray-800"
+                    }
+                }).ToList();
+
+                var totalRevenue = bookings
+                    .Where(b => b.Status != BookingStatus.Cancelled)
+                    .Sum(b => b.TotalPrice)
+                    .ToString("N2");
+
+                return Json(new
+                {
+                    success = true,
+                    type = "bookings",
+                    monthName,
+                    year,
+                    month,
+                    count = items.Count,
+                    totalRevenue,
+                    items
+                });
+            }
         }
     }
 }

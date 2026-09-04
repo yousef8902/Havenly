@@ -1,4 +1,4 @@
-﻿using Havenly.BLL.ModelVMs;
+using Havenly.BLL.ModelVMs;
 using Havenly.BLL.ModelVMs.Admin;
 using Havenly.BLL.Services.Abstractions;
 using Havenly.DAL.Enums;
@@ -67,6 +67,9 @@ namespace Havenly.BLL.Services.Implementations
                 var nextMonth = month.AddMonths(1);
 
                 result.Months.Add(month.ToString("MMM"));
+                result.Years.Add(month.Year);
+                result.MonthNumbers.Add(month.Month);
+                result.FullMonthNames.Add(month.ToString("MMMM yyyy"));
 
                 result.Signups.Add(
                     users.Count(u =>

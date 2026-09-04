@@ -2,55 +2,227 @@
 @using Havenly.DAL.Enums
 
 @{
-    ViewData["Title"] = "Property bookings — Havenly";
+    ViewData["Title"] = "Reservations & Booking Requests — Havenly Host";
     Layout = "~/Views/Shared/_WorkspaceLayout.cshtml";
     ViewData["Workspace"] = "Host dashboard";
     ViewData["WorkspaceNav"] = "host";
+
+    var bookingsList = Model?.ToList() ?? new List<Havenly.DAL.Entities.Booking>();
+    var pendingCount = bookingsList.Count(b => b.Status == BookingStatus.Pending);
+    var approvedCount = bookingsList.Count(b => b.Status == BookingStatus.Approved);
+    var completedCount = bookingsList.Count(b => b.Status == BookingStatus.Completed);
+    var cancelledCount = bookingsList.Count(b => b.Status == BookingStatus.Rejected || b.Status == BookingStatus.Cancelled);
+    var totalGross = bookingsList.Where(b => b.Status == BookingStatus.Approved || b.Status == BookingStatus.Completed).Sum(b => b.TotalPrice);
+    var hostProperties = ViewBag.HostProperties as IEnumerable<Havenly.DAL.Entities.Property> ?? Enumerable.Empty<Havenly.DAL.Entities.Property>();
 }
 
 <div class="space-y-6">
+    <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-bold">Booking requests</h1>
-            <p class="text-muted-foreground mt-1">Manage guest reservations for your properties.</p>
+            <h1 class="text-3xl font-bold tracking-tight text-foreground">Reservations & Requests</h1>
+            <p class="text-sm text-muted-foreground mt-1">Review guest requests, track upcoming stays, and manage reservations.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a asp-action="Calendar" class="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-secondary transition shadow-xs">
+                <svg class="size-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Availability Calendar
+            </a>
+            <a asp-action="Payouts" class="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground hover:bg-secondary transition shadow-xs">
+                <svg class="size-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Earnings & Payouts
+            </a>
         </div>
     </div>
 
+    <!-- Feedback Toasts -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm font-medium text-emerald-700">
-            @TempData["SuccessMessage"]
+        <div class="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm font-medium text-emerald-700 dark:text-emerald-400 flex items-center gap-2.5">
+            <span class="text-base">✅</span>
+            <span>@TempData["SuccessMessage"]</span>
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-700">
-            @TempData["ErrorMessage"]
+        <div class="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm font-medium text-red-700 dark:text-red-400 flex items-center gap-2.5">
+            <span class="text-base">⚠️</span>
+            <span>@TempData["ErrorMessage"]</span>
         </div>
     }
 
-    @if (Model != null && Model.Any())
+    <!-- Stat Summary Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Pending Card -->
+        <div onclick="setFilter('pending')" class="cursor-pointer rounded-2xl border @(pendingCount > 0 ? "border-amber-300 bg-amber-50/60 dark:bg-amber-950/20 ring-1 ring-amber-400/50" : "border-border bg-card") p-4 transition hover:shadow-sm">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Action Required</span>
+                @if (pendingCount > 0)
+                {
+                    <span class="size-2 rounded-full bg-amber-500 animate-ping"></span>
+                }
+            </div>
+            <div class="text-2xl font-black mt-2 text-amber-600">@pendingCount</div>
+            <p class="text-xs text-muted-foreground mt-0.5">Pending requests</p>
+        </div>
+
+        <!-- Confirmed / Active Card -->
+        <div onclick="setFilter('approved')" class="cursor-pointer rounded-2xl border border-border bg-card p-4 transition hover:shadow-sm">
+            <div class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Confirmed</div>
+            <div class="text-2xl font-black mt-2 text-emerald-600">@approvedCount</div>
+            <p class="text-xs text-muted-foreground mt-0.5">Upcoming & active stays</p>
+        </div>
+
+        <!-- Completed Card -->
+        <div onclick="setFilter('completed')" class="cursor-pointer rounded-2xl border border-border bg-card p-4 transition hover:shadow-sm">
+            <div class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Completed</div>
+            <div class="text-2xl font-black mt-2 text-blue-600">@completedCount</div>
+            <p class="text-xs text-muted-foreground mt-0.5">Past guest stays</p>
+        </div>
+
+        <!-- Confirmed Volume Card -->
+        <div onclick="setFilter('all')" class="cursor-pointer rounded-2xl border border-border bg-card p-4 transition hover:shadow-sm">
+            <div class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Revenue Booked</div>
+            <div class="text-2xl font-black mt-2 text-foreground">@totalGross.ToString("N0") <span class="text-sm font-semibold text-muted-foreground">EGP</span></div>
+            <p class="text-xs text-muted-foreground mt-0.5">Across @(approvedCount + completedCount) confirmed stays</p>
+        </div>
+    </div>
+
+    <!-- Urgent Action Banner for Pending Requests -->
+    @if (pendingCount > 0)
     {
-        <div class="rounded-2xl border border-border bg-card overflow-hidden">
+        <div class="rounded-2xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+            <div class="flex items-center gap-3">
+                <div class="size-10 rounded-2xl bg-amber-500/15 text-amber-600 text-xl flex items-center justify-center flex-shrink-0">
+                    ⚡
+                </div>
+                <div>
+                    <h3 class="font-bold text-sm text-foreground">@pendingCount Booking Request@(pendingCount != 1 ? "s" : "") Awaiting Your Response</h3>
+                    <p class="text-xs text-muted-foreground mt-0.5">Review dates and accept or decline. Fast host responses boost your listing ranking on Havenly.</p>
+                </div>
+            </div>
+            <button type="button" onclick="setFilter('pending')" class="rounded-full bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs px-4 py-2 shadow-xs transition flex-shrink-0">
+                Show Pending Only →
+            </button>
+        </div>
+    }
+
+    <!-- Toolbar: Filter Tabs & Search & Property Selector -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-2">
+        <!-- Status Filter Tabs -->
+        <div class="flex flex-wrap items-center gap-1.5 bg-muted/40 p-1 rounded-2xl border border-border">
+            <button type="button" onclick="setFilter('all')" data-tab="all" class="filter-tab active rounded-xl px-3.5 py-1.5 text-xs font-semibold transition bg-card text-foreground shadow-2xs">
+                All (@bookingsList.Count)
+            </button>
+            <button type="button" onclick="setFilter('pending')" data-tab="pending" class="filter-tab rounded-xl px-3.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition flex items-center gap-1.5">
+                Pending
+                @if (pendingCount > 0)
+                {
+                    <span class="rounded-full bg-amber-500 text-white text-[10px] px-1.5 py-0.2 font-bold">@pendingCount</span>
+                }
+            </button>
+            <button type="button" onclick="setFilter('approved')" data-tab="approved" class="filter-tab rounded-xl px-3.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition flex items-center gap-1.5">
+                Confirmed (@approvedCount)
+            </button>
+            <button type="button" onclick="setFilter('completed')" data-tab="completed" class="filter-tab rounded-xl px-3.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition flex items-center gap-1.5">
+                Completed (@completedCount)
+            </button>
+            <button type="button" onclick="setFilter('cancelled')" data-tab="cancelled" class="filter-tab rounded-xl px-3.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition flex items-center gap-1.5">
+                Declined (@cancelledCount)
+            </button>
+        </div>
+
+        <!-- Search & Property Dropdown -->
+        <div class="flex flex-wrap items-center gap-3">
+            @if (hostProperties.Any())
+            {
+                <select id="propertyFilter" onchange="applyFilters()" class="h-10 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-medium shadow-xs focus:border-primary focus:outline-none">
+                    <option value="">All Properties</option>
+                    @foreach (var p in hostProperties)
+                    {
+                        <option value="@p.PropertyID">🏡 @p.PropertyName</option>
+                    }
+                </select>
+            }
+
+            <div class="relative min-w-56">
+                <svg class="size-4 text-muted-foreground absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="text" id="bookingSearchInput" oninput="applyFilters()" placeholder="Search guest, stay, or #id..." class="h-10 w-full rounded-xl border border-border bg-card pl-9 pr-3 text-xs shadow-xs focus:border-primary focus:outline-none" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Bookings Table Container -->
+    @if (bookingsList.Any())
+    {
+        <div class="rounded-3xl border border-border bg-card overflow-hidden shadow-xs">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead class="border-b border-border bg-secondary/40 text-muted-foreground text-left">
+                <table class="w-full text-sm text-left">
+                    <thead class="border-b border-border bg-muted/40 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                         <tr>
-                            <th class="px-6 py-4 font-semibold">Guest</th>
-                            <th class="px-6 py-4 font-semibold">Property</th>
-                            <th class="px-6 py-4 font-semibold">Dates</th>
-                            <th class="px-6 py-4 font-semibold">Total payout</th>
-                            <th class="px-6 py-4 font-semibold">Status</th>
-                            <th class="px-6 py-4 font-semibold text-right">Actions</th>
+                            <th class="px-5 py-3.5">Property</th>
+                            <th class="px-5 py-3.5">Guest</th>
+                            <th class="px-5 py-3.5">Stay Dates</th>
+                            <th class="px-5 py-3.5">Total Payout</th>
+                            <th class="px-5 py-3.5">Status</th>
+                            <th class="px-5 py-3.5 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-border">
-                        @foreach (var booking in Model)
+                    <tbody class="divide-y divide-border" id="bookingsTableBody">
+                        @foreach (var booking in bookingsList)
                         {
-                            <tr class="hover:bg-secondary/20 transition">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3 cursor-pointer group" onclick="openProfileModal('@booking.GuestUserID')">
-                                        <div class="size-9 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-primary/20 flex-shrink-0 overflow-hidden group-hover:scale-105 transition">
+                            var prop = booking.Listing?.Property;
+                            var thumbnail = prop?.Images?.FirstOrDefault(i => i.IsPrimary == true)?.ImagePath
+                                            ?? prop?.Images?.FirstOrDefault()?.ImagePath
+                                            ?? "/images/hero.jpg";
+
+                            var statusKey = booking.Status switch
+                            {
+                                BookingStatus.Pending => "pending",
+                                BookingStatus.Approved => "approved",
+                                BookingStatus.Completed => "completed",
+                                BookingStatus.Rejected => "cancelled",
+                                BookingStatus.Cancelled => "cancelled",
+                                _ => "other"
+                            };
+
+                            var searchContent = $"{booking.BookingID} {booking.Guest?.Name} {booking.Guest?.Email} {prop?.PropertyName} {prop?.Address?.City}".ToLower();
+
+                            <tr class="booking-row hover:bg-muted/30 transition"
+                                data-status="@statusKey"
+                                data-property-id="@(prop?.PropertyID ?? 0)"
+                                data-search="@searchContent">
+                                
+                                <!-- Property Thumbnail & Info -->
+                                <td class="px-5 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <img src="@thumbnail"
+                                             onerror="this.onerror=null; this.src='/images/hero.jpg';"
+                                             alt="@(prop?.PropertyName ?? "Stay")"
+                                             class="size-12 rounded-xl object-cover border border-border/80 shadow-2xs flex-shrink-0" />
+                                        <div class="min-w-0">
+                                            <a asp-controller="Property" asp-action="Detail" asp-route-id="@(prop?.PropertyID ?? 0)" class="font-bold text-foreground hover:text-primary transition line-clamp-1 text-xs">
+                                                @(prop?.PropertyName ?? $"Listing #{booking.ListingID}")
+                                            </a>
+                                            <div class="text-[11px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                                                <span>📍 @(prop?.Address?.City ?? "Havenly Stay")</span>
+                                                <span>·</span>
+                                                <span class="font-mono text-[10px] text-muted-foreground/70">#@booking.BookingID</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Guest -->
+                                <td class="px-5 py-4">
+                                    <div class="flex items-center gap-2.5 cursor-pointer group" onclick="openProfileModal('@booking.GuestUserID')">
+                                        <div class="size-9 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center border border-primary/20 flex-shrink-0 overflow-hidden group-hover:scale-105 transition shadow-2xs">
                                             @if (!string.IsNullOrEmpty(booking.Guest?.ProfilePictureUrl))
                                             {
                                                 <img src="@booking.Guest.ProfilePictureUrl" alt="@(booking.Guest?.Name ?? "Guest")" class="size-full object-cover" />
@@ -60,70 +232,88 @@
                                                 <span>@(string.IsNullOrWhiteSpace(booking.Guest?.Name) ? "G" : booking.Guest.Name[0].ToString().ToUpper())</span>
                                             }
                                         </div>
-                                        <div>
-                                            <div class="font-semibold text-foreground group-hover:text-primary transition flex items-center gap-1.5">
-                                                @(booking.Guest?.Name ?? "Guest")
-                                                <span class="text-[10px] text-muted-foreground group-hover:text-primary font-normal underline">View Profile</span>
+                                        <div class="min-w-0">
+                                            <div class="font-bold text-xs text-foreground group-hover:text-primary transition flex items-center gap-1.5">
+                                                <span class="truncate">@(booking.Guest?.Name ?? "Guest")</span>
+                                                <span class="rounded-full bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 text-[9px] font-semibold text-emerald-700">Guest</span>
                                             </div>
-                                            <div class="text-xs text-muted-foreground">@(booking.Guest?.Email ?? "")</div>
+                                            <div class="text-[11px] text-muted-foreground truncate max-w-44">@(booking.Guest?.Email ?? "")</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="font-medium line-clamp-1">@(booking.Listing?.Property?.PropertyName ?? "Listing #" + booking.ListingID)</div>
-                                    <div class="text-xs text-muted-foreground">@(booking.Listing?.Property?.Address?.City ?? "")</div>
+
+                                <!-- Dates -->
+                                <td class="px-5 py-4">
+                                    <div class="text-xs font-semibold text-foreground">
+                                        @booking.CheckIn.ToString("MMM dd") — @booking.CheckOut.ToString("MMM dd, yyyy")
+                                    </div>
+                                    <div class="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                                        <span class="inline-flex items-center gap-1 rounded-md bg-muted px-1.5 py-0.5 font-medium text-[10px]">
+                                            🌙 @((booking.CheckOut - booking.CheckIn).Days) nights
+                                        </span>
+                                    </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div>@booking.CheckIn.ToString("MMM dd, yyyy") — @booking.CheckOut.ToString("MMM dd, yyyy")</div>
-                                    <div class="text-xs text-muted-foreground">@((booking.CheckOut - booking.CheckIn).Days) nights</div>
+
+                                <!-- Total Payout -->
+                                <td class="px-5 py-4">
+                                    <div class="font-black text-sm text-foreground">
+                                        @booking.TotalPrice.ToString("N0") <span class="text-xs font-bold text-muted-foreground">EGP</span>
+                                    </div>
+                                    <div class="text-[10px] text-emerald-600 font-medium">90% Host Payout</div>
                                 </td>
-                                <td class="px-6 py-4 font-bold text-foreground">
-                                    @booking.TotalPrice.ToString("N0") EGP
-                                </td>
-                                <td class="px-6 py-4">
+
+                                <!-- Status Badge -->
+                                <td class="px-5 py-4">
                                     @switch (booking.Status)
                                     {
                                         case BookingStatus.Pending:
-                                            <span class="inline-flex items-center rounded-full bg-yellow-500/10 px-2.5 py-1 text-xs font-semibold text-yellow-600">
-                                                Pending
+                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 text-xs font-bold text-amber-700 dark:text-amber-400">
+                                                <span class="size-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                                Pending Review
                                             </span>
                                             break;
                                         case BookingStatus.Approved:
-                                            <span class="inline-flex items-center rounded-full bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-600">
-                                                Approved
-                                            </span>
-                                            break;
-                                        case BookingStatus.Rejected:
-                                            <span class="inline-flex items-center rounded-full bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-600">
-                                                Rejected
-                                            </span>
-                                            break;
-                                        case BookingStatus.Cancelled:
-                                            <span class="inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">
-                                                Cancelled
+                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                                                <span class="size-1.5 rounded-full bg-emerald-500"></span>
+                                                Confirmed
                                             </span>
                                             break;
                                         case BookingStatus.Completed:
-                                            <span class="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-1 text-xs font-semibold text-blue-600">
+                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-500/15 border border-blue-500/30 px-2.5 py-1 text-xs font-bold text-blue-700 dark:text-blue-400">
+                                                <span>🏁</span>
                                                 Completed
+                                            </span>
+                                            break;
+                                        case BookingStatus.Rejected:
+                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 px-2.5 py-1 text-xs font-bold text-rose-700 dark:text-rose-400">
+                                                <span>✕</span>
+                                                Declined
+                                            </span>
+                                            break;
+                                        case BookingStatus.Cancelled:
+                                            <span class="inline-flex items-center gap-1.5 rounded-full bg-muted border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                                                <span>—</span>
+                                                Cancelled
                                             </span>
                                             break;
                                     }
                                 </td>
-                                <td class="px-6 py-4 text-right">
+
+                                <!-- Actions -->
+                                <td class="px-5 py-4 text-right">
                                     @if (booking.Status == BookingStatus.Pending)
                                     {
                                         <div class="flex items-center justify-end gap-2">
                                             <form asp-controller="Host" asp-action="AcceptBooking" asp-route-id="@booking.BookingID" method="post" class="inline">
                                                 @Html.AntiForgeryToken()
-                                                <button type="submit" class="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow hover:bg-primary/90 transition">
-                                                    Accept
+                                                <button type="submit" class="rounded-full bg-[#0d9488] hover:bg-[#0f766e] px-4 py-1.5 text-xs font-bold text-white shadow-xs transition flex items-center gap-1" style="background-color: #0d9488 !important; color: #ffffff !important;">
+                                                    <span>Accept</span>
                                                 </button>
                                             </form>
                                             <form asp-controller="Host" asp-action="RejectBooking" asp-route-id="@booking.BookingID" method="post" class="inline">
                                                 @Html.AntiForgeryToken()
-                                                <button type="submit" class="rounded-lg border border-red-300 bg-transparent px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition" onclick="return confirm('Are you sure you want to reject this booking?');">
-                                                    Reject
+                                                <button type="submit" class="rounded-full border border-rose-200 bg-white hover:bg-rose-50 px-3.5 py-1.5 text-xs font-semibold text-rose-600 transition" onclick="return confirm('Are you sure you want to decline this booking request?');">
+                                                    <span>Decline</span>
                                                 </button>
                                             </form>
                                         </div>
@@ -133,7 +323,7 @@
                                         <div class="flex items-center justify-end gap-2">
                                             <form asp-controller="Host" asp-action="CompleteStay" asp-route-id="@booking.BookingID" method="post" class="inline" onsubmit="return confirm('Mark this stay completed and send a review invitation to @(booking.Guest?.Name ?? "the guest")?');">
                                                 @Html.AntiForgeryToken()
-                                                <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-700 transition" title="Mark stay completed and send review invitation">
+                                                <button type="submit" class="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 px-3.5 py-1.5 text-xs font-semibold text-emerald-700 transition shadow-2xs">
                                                     <span>🏁 End Stay</span>
                                                 </button>
                                             </form>
@@ -141,48 +331,37 @@
                                     }
                                     else if (booking.Status == BookingStatus.Completed)
                                     {
-                                        var guestReview = booking.Listing?.Property?.Reviews?
-                                            .FirstOrDefault(r => r.UserID == booking.GuestUserID);
+                                        var guestReview = prop?.Reviews?.FirstOrDefault(r => r.UserID == booking.GuestUserID);
 
-                                        <div class="flex flex-col items-end gap-1.5">
+                                        <div class="flex flex-col items-end gap-1">
                                             @if (guestReview != null)
                                             {
-                                                <div class="flex items-center gap-1.5 text-xs">
+                                                <div class="flex items-center gap-1 text-[11px]">
                                                     <span class="text-amber-500 font-bold">★ @guestReview.Rating/5</span>
-                                                    <span class="text-muted-foreground truncate max-w-[150px]" title="@guestReview.Comment">"@guestReview.Comment"</span>
                                                 </div>
                                                 @if (string.IsNullOrEmpty(guestReview.HostResponse))
                                                 {
                                                     <a asp-controller="Reviews" asp-action="Respond" asp-route-reviewId="@guestReview.ReviewID"
-                                                       class="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow hover:bg-primary/90 transition">
-                                                        <span>💬 Reply to Review</span>
+                                                       class="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1 text-[11px] font-semibold transition">
+                                                        💬 Reply
                                                     </a>
                                                 }
                                                 else
                                                 {
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[11px] font-semibold">
-                                                            ✓ Replied
-                                                        </span>
-                                                        <a asp-controller="Reviews" asp-action="Respond" asp-route-reviewId="@guestReview.ReviewID"
-                                                           class="text-xs text-primary hover:underline">
-                                                            Edit Reply
-                                                        </a>
-                                                    </div>
+                                                    <span class="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-semibold">
+                                                        ✓ Replied
+                                                    </span>
                                                 }
                                             }
                                             else
                                             {
-                                                <span class="text-xs text-muted-foreground">Awaiting guest review</span>
-                                                <a asp-controller="Property" asp-action="Detail" asp-route-id="@booking.Listing?.PropertyID" class="text-xs font-medium text-primary hover:underline">
-                                                    View Listing
-                                                </a>
+                                                <span class="text-[11px] text-muted-foreground">Awaiting review</span>
                                             }
                                         </div>
                                     }
                                     else
                                     {
-                                        <span class="text-xs text-muted-foreground">No actions</span>
+                                        <span class="text-[11px] text-muted-foreground">—</span>
                                     }
                                 </td>
                             </tr>
@@ -190,15 +369,83 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Empty Filter Results -->
+            <div id="noFilterResults" class="hidden p-12 text-center text-muted-foreground">
+                <div class="text-3xl mb-2">🔍</div>
+                <h3 class="text-sm font-bold text-foreground">No bookings found</h3>
+                <p class="text-xs mt-0.5">Try choosing a different tab or clearing your search query.</p>
+            </div>
         </div>
     }
     else
     {
-        <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-16 text-center">
-            <h3 class="text-lg font-bold">No bookings found</h3>
-            <p class="text-sm text-muted-foreground mt-1">
-                You will see reservation requests here once guests book your places.
+        <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border py-16 text-center bg-card">
+            <div class="size-14 rounded-2xl bg-muted flex items-center justify-center text-2xl mb-3">📅</div>
+            <h3 class="text-base font-bold text-foreground">No Bookings Yet</h3>
+            <p class="text-xs text-muted-foreground mt-1 max-w-sm">
+                As guests discover and book your listings on Havenly, their reservation requests will appear here organized by status.
             </p>
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        let currentFilter = 'all';
+
+        function setFilter(filterName) {
+            currentFilter = filterName;
+
+            // Update Tab active styling
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                if (tab.getAttribute('data-tab') === filterName) {
+                    tab.className = 'filter-tab active rounded-xl px-3.5 py-1.5 text-xs font-semibold transition bg-card text-foreground shadow-2xs';
+                } else {
+                    tab.className = 'filter-tab rounded-xl px-3.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition flex items-center gap-1.5';
+                }
+            });
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const rows = document.querySelectorAll('.booking-row');
+            const searchVal = (document.getElementById('bookingSearchInput')?.value || '').toLowerCase().trim();
+            const propertyVal = document.getElementById('propertyFilter')?.value || '';
+            const emptyMsg = document.getElementById('noFilterResults');
+
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const status = row.getAttribute('data-status');
+                const propId = row.getAttribute('data-property-id');
+                const searchContent = row.getAttribute('data-search') || '';
+
+                // Status Match
+                let matchesStatus = (currentFilter === 'all') || (status === currentFilter);
+
+                // Property Match
+                let matchesProperty = !propertyVal || (propId === propertyVal);
+
+                // Search Match
+                let matchesSearch = !searchVal || searchContent.includes(searchVal);
+
+                if (matchesStatus && matchesProperty && matchesSearch) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (emptyMsg) {
+                if (visibleCount === 0 && rows.length > 0) {
+                    emptyMsg.classList.remove('hidden');
+                } else {
+                    emptyMsg.classList.add('hidden');
+                }
+            }
+        }
+    </script>
+}

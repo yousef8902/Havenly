@@ -161,12 +161,25 @@
 
             <div>
                 <h3 class="text-sm font-semibold mb-3">Add more photos</h3>
-                <div class="border-2 border-dashed border-border rounded-2xl p-6 text-center bg-secondary/20">
-                    <label for="newImageFiles" class="cursor-pointer font-semibold text-primary hover:underline">
+                <div id="newDropzone" class="border-2 border-dashed border-border rounded-2xl p-6 text-center bg-secondary/20 transition cursor-pointer" onclick="document.getElementById('newImageFiles').click()">
+                    <label for="newImageFiles" class="cursor-pointer font-semibold text-primary hover:underline" onclick="event.stopPropagation()">
                         <span>Click to select additional photos</span>
                         <input type="file" id="newImageFiles" name="newImageFiles" multiple accept="image/jpeg,image/png,image/webp" class="sr-only" />
                     </label>
-                    <p class="text-xs text-muted-foreground mt-1">PNG, JPG, JPEG or WEBP up to 5MB each</p>
+                    <p class="text-xs text-muted-foreground mt-1">PNG, JPG, JPEG or WEBP up to 5MB each (or drag and drop here)</p>
+                </div>
+
+                <!-- Newly selected photos preview grid -->
+                <div id="newImagePreviewContainer" class="hidden space-y-3 pt-4">
+                    <div class="flex items-center justify-between border-b border-border pb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                            Newly Added Photos (<span id="newPhotoCount">0</span>) — Click ✕ to remove before saving
+                        </span>
+                        <button type="button" onclick="clearAllNewImages()" class="text-xs font-medium text-destructive hover:underline">
+                            Clear all new
+                        </button>
+                    </div>
+                    <div id="newImagePreviewGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
                 </div>
             </div>
         </div>
@@ -204,6 +217,102 @@
                 if (container) container.remove();
             } else {
                 alert('Could not remove image.');
+            }
+        }
+
+        // Handle Newly Selected Images Preview & Deletion
+        let newDt = new DataTransfer();
+        const newFileInput = document.getElementById('newImageFiles');
+        const newPreviewContainer = document.getElementById('newImagePreviewContainer');
+        const newPreviewGrid = document.getElementById('newImagePreviewGrid');
+        const newPhotoCount = document.getElementById('newPhotoCount');
+        const newDropzone = document.getElementById('newDropzone');
+
+        newFileInput.addEventListener('change', function () {
+            handleNewFiles(this.files);
+        });
+
+        // Drag & Drop
+        ['dragenter', 'dragover'].forEach(eventName => {
+            newDropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                newDropzone.classList.add('border-primary', 'bg-primary/5');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            newDropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                newDropzone.classList.remove('border-primary', 'bg-primary/5');
+            }, false);
+        });
+
+        newDropzone.addEventListener('drop', (e) => {
+            if (e.dataTransfer && e.dataTransfer.files.length) {
+                handleNewFiles(e.dataTransfer.files);
+            }
+        });
+
+        function handleNewFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    newDt.items.add(file);
+                }
+            }
+            newFileInput.files = newDt.files;
+            renderNewPreviews();
+        }
+
+        function removeNewImage(index) {
+            const nextDt = new DataTransfer();
+            for (let i = 0; i < newDt.files.length; i++) {
+                if (i !== index) {
+                    nextDt.items.add(newDt.files[i]);
+                }
+            }
+            newDt = nextDt;
+            newFileInput.files = newDt.files;
+            renderNewPreviews();
+        }
+
+        function clearAllNewImages() {
+            newDt = new DataTransfer();
+            newFileInput.files = newDt.files;
+            renderNewPreviews();
+        }
+
+        function renderNewPreviews() {
+            newPreviewGrid.innerHTML = '';
+            const files = newDt.files;
+            newPhotoCount.textContent = files.length;
+
+            if (files.length === 0) {
+                newPreviewContainer.classList.add('hidden');
+                return;
+            }
+
+            newPreviewContainer.classList.remove('hidden');
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const src = URL.createObjectURL(file);
+                const card = document.createElement('div');
+                card.className = 'relative group aspect-video rounded-xl overflow-hidden border border-border bg-card shadow-sm';
+
+                card.innerHTML = `
+                    <img src="${src}" alt="Preview" class="w-full h-full object-cover" />
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2">
+                        <span class="text-[11px] text-white font-medium truncate px-1 text-center">${file.name}</span>
+                    </div>
+                    <button type="button" onclick="removeNewImage(${i})" title="Remove photo" class="absolute top-2 right-2 size-7 rounded-full bg-red-600 text-white flex items-center justify-center text-xs font-bold shadow hover:bg-red-700 transition">
+                        ✕
+                    </button>
+                    <div class="absolute bottom-1 left-1.5 bg-black/60 backdrop-blur text-[10px] text-white px-1.5 py-0.5 rounded">
+                        ${(file.size / (1024 * 1024)).toFixed(1)} MB
+                    </div>
+                `;
+                newPreviewGrid.appendChild(card);
             }
         }
     </script>

@@ -88,7 +88,8 @@
            asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")"
            asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")"
            asp-route-page="1"
-           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "all" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+           class="px-3.5 py-1.5 text-sm rounded-lg border transition shadow-sm font-medium @(Model.Filters.Status == "all" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50")"
+           style="@(Model.Filters.Status == "all" ? "background-color: #f59e0b !important; color: #ffffff !important; border-color: #f59e0b !important;" : "")">
             All
         </a>
         <a asp-controller="Admin" asp-action="Bookings"
@@ -97,7 +98,8 @@
            asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")"
            asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")"
            asp-route-page="1"
-           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "pending" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+           class="px-3.5 py-1.5 text-sm rounded-lg border transition shadow-sm font-medium @(Model.Filters.Status == "pending" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50")"
+           style="@(Model.Filters.Status == "pending" ? "background-color: #f59e0b !important; color: #ffffff !important; border-color: #f59e0b !important;" : "")">
             Pending
         </a>
         <a asp-controller="Admin" asp-action="Bookings"
@@ -106,7 +108,8 @@
            asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")"
            asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")"
            asp-route-page="1"
-           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "approved" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+           class="px-3.5 py-1.5 text-sm rounded-lg border transition shadow-sm font-medium @(Model.Filters.Status == "confirmed" || Model.Filters.Status == "approved" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50")"
+           style="@(Model.Filters.Status == "confirmed" || Model.Filters.Status == "approved" ? "background-color: #f59e0b !important; color: #ffffff !important; border-color: #f59e0b !important;" : "")">
             Confirmed
         </a>
         <a asp-controller="Admin" asp-action="Bookings"
@@ -115,7 +118,8 @@
            asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")"
            asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")"
            asp-route-page="1"
-           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "cancelled" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+           class="px-3.5 py-1.5 text-sm rounded-lg border transition shadow-sm font-medium @(Model.Filters.Status == "cancelled" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50")"
+           style="@(Model.Filters.Status == "cancelled" ? "background-color: #f59e0b !important; color: #ffffff !important; border-color: #f59e0b !important;" : "")">
             Cancelled
         </a>
         <a asp-controller="Admin" asp-action="Bookings"
@@ -124,7 +128,8 @@
            asp-route-fromDate="@Model.Filters.FromDate?.ToString("yyyy-MM-dd")"
            asp-route-toDate="@Model.Filters.ToDate?.ToString("yyyy-MM-dd")"
            asp-route-page="1"
-           class="px-3 py-1.5 text-sm rounded-lg border @(Model.Filters.Status == "completed" ? "bg-primary text-white border-primary" : "border-border hover:bg-secondary")">
+           class="px-3.5 py-1.5 text-sm rounded-lg border transition shadow-sm font-medium @(Model.Filters.Status == "completed" ? "bg-amber-500 text-white border-amber-500 font-semibold" : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50")"
+           style="@(Model.Filters.Status == "completed" ? "background-color: #f59e0b !important; color: #ffffff !important; border-color: #f59e0b !important;" : "")">
             Completed
         </a>
     </div>
@@ -201,7 +206,7 @@
                             <div class="flex items-center gap-3">
                                 @if (!string.IsNullOrEmpty(booking.ImageUrl))
                                 {
-                                    <img src="@booking.ImageUrl" alt="@booking.propertyName" class="size-10 rounded-lg object-cover" />
+                                    <img src="@booking.ImageUrl" alt="@booking.propertyName" class="size-10 rounded-lg object-cover" onerror="this.onerror=null; this.src='/images/hero.jpg';" />
                                 }
                                 else
                                 {

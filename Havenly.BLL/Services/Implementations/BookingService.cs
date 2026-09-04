@@ -1,6 +1,7 @@
 using AutoMapper;
 using Havenly.BLL.ModelVMs;
 using Havenly.BLL.Services.Abstractions;
+using Havenly.DAL.Database;
 using Havenly.DAL.Entities;
 using Havenly.DAL.Enums;
 using Havenly.DAL.Repos.Abstractions;
@@ -17,19 +18,25 @@ namespace Havenly.BLL.Services.Implementations
         private readonly IListingRepository _listingRepository;
         private readonly IPropertyRepository _propertyRepository;
         private readonly IEmailServices _emailServices;
+        private readonly INotificationService _notificationService;
+        private readonly HavenlyDbContext _context;
 
         public BookingService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IListingRepository listingRepository,
             IPropertyRepository propertyRepository,
-            IEmailServices emailServices)
+            IEmailServices emailServices,
+            INotificationService notificationService,
+            HavenlyDbContext context)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _listingRepository = listingRepository;
             _propertyRepository = propertyRepository;
             _emailServices = emailServices;
+            _notificationService = notificationService;
+            _context = context;
         }
 
         // Checks date overlap 
@@ -50,7 +57,22 @@ namespace Havenly.BLL.Services.Implementations
                             && b.CheckIn < checkOut
                             && b.CheckOut > checkIn);
 
-            return !hasOverlap;
+            if (hasOverlap) return false;
+
+            // Check if dates are blocked by the host
+            var listing = await _listingRepository.GetById(listingId);
+            if (listing != null)
+            {
+                bool hasBlockedOverlap = await _context.PropertyBlockedDates
+                    .AsNoTracking()
+                    .AnyAsync(b => b.PropertyID == listing.PropertyID
+                                && b.StartDate.Date < checkOut.Date
+                                && b.EndDate.Date >= checkIn.Date);
+
+                if (hasBlockedOverlap) return false;
+            }
+
+            return true;
         }
 
         public async Task<BookingResultVM> CreateBookingAsync(BookingCreateVM dto)
@@ -131,6 +153,24 @@ namespace Havenly.BLL.Services.Implementations
 
             await _unitOfWork.SaveChangesAsync();
 
+            // Notify Host in-app
+            try
+            {
+                if (property != null && !string.IsNullOrEmpty(property.OwnerUserID))
+                {
+                    await _notificationService.CreateNotificationAsync(
+                        property.OwnerUserID,
+                        "New Booking Request",
+                        $"New reservation request received for {property.PropertyName} ({dto.CheckIn:MMM dd} - {dto.CheckOut:MMM dd}).",
+                        "Booking",
+                        "/Host/Bookings");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[BOOKING NOTIFY ERROR] {ex.Message}");
+            }
+
             return new BookingResultVM
             {
                 Success = true,
@@ -171,6 +211,25 @@ namespace Havenly.BLL.Services.Implementations
             booking.UpdateStatus(BookingStatus.Cancelled);
 
             await _unitOfWork.SaveChangesAsync();
+
+            try
+            {
+                var listing = await _listingRepository.GetById(booking.ListingID);
+                var property = listing != null ? await _propertyRepository.GetById(listing.PropertyID) : null;
+                if (property != null && !string.IsNullOrEmpty(property.OwnerUserID))
+                {
+                    await _notificationService.CreateNotificationAsync(
+                        property.OwnerUserID,
+                        "Booking Cancelled",
+                        $"A reservation for {property.PropertyName} was cancelled by the guest.",
+                        "Booking",
+                        "/Host/Bookings");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CANCEL NOTIFY ERROR] {ex.Message}");
+            }
 
             return true;
         }

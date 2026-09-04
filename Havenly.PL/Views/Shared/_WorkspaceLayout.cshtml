@@ -35,11 +35,19 @@
             </div>
         </aside>
         <div class="flex min-h-screen flex-col">
-            <header class="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border bg-background/90 px-5 backdrop-blur lg:hidden">
-                <partial name="_Logo" />
-                <button type="button" class="inline-flex size-11 items-center justify-center rounded-md border border-input bg-background shadow-sm" data-sheet-open="workspace-sheet" aria-label="Open workspace menu">
-                    <i data-lucide="menu" class="size-5"></i>
-                </button>
+            <header class="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border bg-background/90 px-5 backdrop-blur lg:px-10">
+                <div class="lg:hidden">
+                    <partial name="_Logo" />
+                </div>
+                <div class="hidden lg:flex items-center gap-3">
+                    <span class="text-sm font-semibold text-foreground">@ViewData["Workspace"]</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <partial name="_NotificationBell" />
+                    <button type="button" class="inline-flex size-11 items-center justify-center rounded-md border border-input bg-background shadow-sm lg:hidden" data-sheet-open="workspace-sheet" aria-label="Open workspace menu">
+                        <i data-lucide="menu" class="size-5"></i>
+                    </button>
+                </div>
             </header>
             <div id="workspace-sheet" data-sheet data-side="left" hidden>
                 <div class="sheet-overlay" data-sheet-close></div>
