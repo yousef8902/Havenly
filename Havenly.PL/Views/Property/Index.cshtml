@@ -93,8 +93,8 @@
 <div class="container-page mt-8 grid gap-8 lg:grid-cols-[18rem_1fr]">
     <!-- Left Sidebar Desktop Filter Panel -->
     <aside class="hidden lg:block">
-        <div class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-2xl border border-border bg-card p-5 shadow-sm [scrollbar-width:thin] overscroll-contain">
-            <form id="filterForm" asp-controller="Property" asp-action="Index" method="get" class="space-y-6">
+        <div id="filterSidebarCard" class="sticky top-24 max-h-[calc(100vh-17rem)] overflow-y-auto rounded-2xl border border-border bg-card p-5 shadow-sm [scrollbar-width:thin] overscroll-contain">
+            <form id="filterForm" asp-controller="Property" asp-action="Index" method="get" class="space-y-5 pb-3">
                 <!-- Keep existing top search context -->
                 <input type="hidden" name="city" value="@city" />
                 <input type="hidden" name="checkIn" value="@checkIn" />
@@ -283,3 +283,23 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        (function () {
+            function adjustFilterSidebarHeight() {
+                var card = document.getElementById('filterSidebarCard');
+                if (!card) return;
+                var rect = card.getBoundingClientRect();
+                // Dynamically fit the card from its current top position down to 24px above viewport bottom
+                var availableHeight = Math.max(300, window.innerHeight - rect.top - 24);
+                card.style.maxHeight = availableHeight + 'px';
+            }
+
+            window.addEventListener('scroll', adjustFilterSidebarHeight, { passive: true });
+            window.addEventListener('resize', adjustFilterSidebarHeight, { passive: true });
+            document.addEventListener('DOMContentLoaded', adjustFilterSidebarHeight);
+            adjustFilterSidebarHeight();
+        })();
+    </script>
+}
