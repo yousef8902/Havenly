@@ -93,7 +93,7 @@
 <div class="container-page mt-8 grid gap-8 lg:grid-cols-[18rem_1fr]">
     <!-- Left Sidebar Desktop Filter Panel -->
     <aside class="hidden lg:block">
-        <div class="sticky top-24 rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-2xl border border-border bg-card p-5 shadow-sm [scrollbar-width:thin] overscroll-contain">
             <form id="filterForm" asp-controller="Property" asp-action="Index" method="get" class="space-y-6">
                 <!-- Keep existing top search context -->
                 <input type="hidden" name="city" value="@city" />
