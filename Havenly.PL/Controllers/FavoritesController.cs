@@ -28,7 +28,6 @@ namespace Havenly.PL.Controllers
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Toggle(long listingId, string? returnUrl = null)
         {
-            Console.WriteLine($"the id is {listingId}");
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
