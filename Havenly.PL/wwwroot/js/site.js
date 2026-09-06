@@ -133,5 +133,40 @@
     });
   });
 
-  if (window.lucide) window.lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
 })();
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".fav-form").forEach(form => {
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const token = this.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch('/Favorites/Toggle', {
+                method: 'POST',
+                headers: { 'RequestVerificationToken': token },
+                body: formData
+            })
+                .then(res => res.json())
+                .then(result => {
+                    console.log(result);
+
+                    // Toggle heart color
+                    const svg = this.querySelector("svg");
+                    if (result.isFavorite) {
+                        svg.classList.add("fill-red-500", "text-red-500");
+                        svg.classList.remove("text-foreground");
+                        svg.setAttribute("fill", "currentColor");
+                    } else {
+                        svg.classList.remove("fill-red-500", "text-red-500");
+                        svg.classList.add("text-foreground");
+                        svg.setAttribute("fill", "none");
+                    }
+
+                    window.havenlyToast(result.success ? "Updated favorites" : result.message, !result.success);
+                })
+                .catch(err => console.error("Network error:", err));
+        });
+    });
+});

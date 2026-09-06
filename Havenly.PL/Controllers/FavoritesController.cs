@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Havenly.BLL.Services.Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 
 namespace Havenly.PL.Controllers
 {
@@ -24,9 +25,10 @@ namespace Havenly.PL.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Toggle(long listingId, string? returnUrl = null)
         {
+            Console.WriteLine($"the id is {listingId}");
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
@@ -48,7 +50,8 @@ namespace Havenly.PL.Controllers
                 return Redirect(returnUrl);
             }
 
-            return RedirectToAction(nameof(Index));
+            return Json(new{msg = "added successfuly to fav",success=true,isFavorite});
+            
         }
 
         [HttpPost]
