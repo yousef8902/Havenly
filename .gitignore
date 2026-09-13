@@ -65,5 +65,13 @@ nunit-*.xml
 /TestHavenly
 /Havenly.DAL/Migrations
 Havenly.BLL.Tests
-
 **/appsettings.Development.json
+
+# User uploaded verification docs and avatars
+Havenly.PL/wwwroot/uploads/avatars/*
+!Havenly.PL/wwwroot/uploads/avatars/.gitkeep
+Havenly.PL/wwwroot/uploads/verification_docs/*
+!Havenly.PL/wwwroot/uploads/verification_docs/.gitkeep
+
+# IDE settings
+.idea/

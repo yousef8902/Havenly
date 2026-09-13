@@ -6,7 +6,7 @@
       <synchronize>true</synchronize>
       <configured-by-url>true</configured-by-url>
       <jdbc-driver>com.jetbrains.jdbc.sqlserver.SqlServerDriver</jdbc-driver>
-      <jdbc-url>Server=localhost,1433;Database=HavenlyDB;User Id=sa;Password=Youseif2005$;TrustServerCertificate=True</jdbc-url>
+      <jdbc-url>Server=localhost,1433;Database=HavenlyDB;User Id=sa;Password=YourStrongPassword!;TrustServerCertificate=True</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>
